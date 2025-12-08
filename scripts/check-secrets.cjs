@@ -112,6 +112,7 @@ const EXCLUDED_PATTERNS = [
   /IAC_TESTING\.md$/, // Skip IaC testing documentation
   /BACKLOG\.md$/, // Skip project backlog
   /ROADMAP\.md$/, // Skip project roadmap
+  /CONSOLIDATION_PLAN\.md$/, // Skip doc planning (has file sizes like "92L")
   /0001-minimal-infrastructure-yagni\.md$/, // Skip ADR with examples
 ];
 
