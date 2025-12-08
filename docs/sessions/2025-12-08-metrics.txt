@@ -1,0 +1,18 @@
+f438d34|Antonio Cittadino|87 seconds ago|docs(project): comprehensive README update with full overview
+9871079|Antonio Cittadino|5 minutes ago|feat(project): add session review tools and workflow docs
+3cc7b7a|Antonio Cittadino|12 minutes ago|docs: add Platformatic configuration guide
+dffd498|Antonio Cittadino|13 minutes ago|fix(watt): use envsubst templates for runtime configuration
+a39b8ec|Antonio Cittadino|40 minutes ago|fix(gateway): use env variables in watt.json for flexible deployment
+ee1e161|Antonio Cittadino|56 minutes ago|feat(infra): add multi-environment support with dedicated env files
+8f212f5|Antonio Cittadino|2 hours ago|feat(project): add backlog, roadmap, and IaC testing strategy
+294bf4a|Antonio Cittadino|2 hours ago|feat(infra): add minimal infrastructure with YAGNI
+113c8ec|Antonio Cittadino|2 hours ago|chore(config): fix prettier patterns for empty packages dir
+430a591|Antonio Cittadino|2 hours ago|fix(watt): configure service with regression test
+5932f42|Antonio Cittadino|3 hours ago|chore: initial DX setup with quality gates and Platformatic Watt foundation
+---
+SUMMARY:
+Commits: 11
+Files changed: 112
+Lines added: +29808
+Lines deleted: -0
+Net: 29808
