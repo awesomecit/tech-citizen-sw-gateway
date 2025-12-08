@@ -54,17 +54,31 @@ echo "📤 Step 3/5: Deploying application to Hetzner server..."
 docker cp "$PROJECT_ROOT/services" $TARGET_CONTAINER:/opt/gateway/
 docker cp "$PROJECT_ROOT/packages" $TARGET_CONTAINER:/opt/gateway/
 docker cp "$PROJECT_ROOT/package.json" $TARGET_CONTAINER:/opt/gateway/
-docker cp "$PROJECT_ROOT/watt.json" $TARGET_CONTAINER:/opt/gateway/
+
+# Copia templates per generazione runtime
+docker cp "$PROJECT_ROOT/watt.json.template" $TARGET_CONTAINER:/opt/gateway/
+docker cp "$PROJECT_ROOT/services/gateway/watt.json.template" $TARGET_CONTAINER:/opt/gateway/services/gateway/
 
 # Installa Node.js e dipendenze
 docker exec $TARGET_CONTAINER bash -c "
     set -e
-    echo '📦 Installing Node.js...'
+    echo '📦 Installing Node.js and required tools...'
+    apt-get update >/dev/null 2>&1
+    apt-get install -y gettext-base >/dev/null 2>&1  # Provides envsubst
     curl -fsSL https://deb.nodesource.com/setup_22.x | bash - >/dev/null 2>&1
     apt-get install -y nodejs >/dev/null 2>&1
     
-    echo '📦 Installing dependencies...'
+    echo '📝 Generating configuration files from templates...'
     cd /opt/gateway
+    export \$(cat services/gateway/.env | xargs)
+    
+    # Generate root watt.json
+    envsubst '\${PLT_SERVER_HOSTNAME} \${PORT} \${LOG_LEVEL}' < watt.json.template > watt.json
+    
+    # Generate service watt.json
+    envsubst '\${PLT_SERVER_HOSTNAME} \${PORT} \${LOG_LEVEL}' < services/gateway/watt.json.template > services/gateway/watt.json
+    
+    echo '📦 Installing dependencies...'
     npm install >/dev/null 2>&1
     
     echo '🏗️  Building application...'

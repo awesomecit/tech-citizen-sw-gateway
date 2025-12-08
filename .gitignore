@@ -10,3 +10,7 @@ dist/
 .DS_Store
 coverage/
 .watt/
+
+# Generated configuration files
+watt.json
+services/gateway/watt.json

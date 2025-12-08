@@ -18,7 +18,8 @@
 
 # Health check endpoint
 :80 {
-	handle /health {
+	@health path /health
+	handle @health {
 		respond "Cloudflare Edge OK" 200
 	}
 
