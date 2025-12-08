@@ -87,7 +87,15 @@ localhost:8443 {
 	}
 }
 
-# HTTP redirect to HTTPS
-localhost:8080 {
-	redir https://localhost:8443{uri} permanent
+# HTTP health check + redirect to HTTPS
+:8080 {
+	# Health endpoint for Docker
+	handle /health {
+		respond "OK" 200
+	}
+	
+	# Redirect all other traffic to HTTPS
+	handle {
+		redir https://localhost:8443{uri} permanent
+	}
 }

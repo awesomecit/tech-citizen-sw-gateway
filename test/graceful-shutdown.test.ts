@@ -71,9 +71,10 @@ describe('Graceful Shutdown', () => {
     const shutdownStart = Date.now();
 
     // Usa pkill per trovare il processo wattpm reale (non npm)
-    await execAsync('pkill -TERM -f wattpm');
-
-    // Aspetta che il processo termini
+    // May fail if already stopped - that's ok
+    await execAsync('pkill -TERM -f wattpm').catch(() => {
+      // Process may already be stopped
+    }); // Aspetta che il processo termini
     await new Promise<void>(resolve => {
       const checkInterval = setInterval(async () => {
         try {

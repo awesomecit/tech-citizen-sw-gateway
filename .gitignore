@@ -1,6 +1,10 @@
 node_modules/
 dist/
 .env
+.env.development
+.env.test
+.env.production
+.env.local
 *.log
 .DS_Store
 coverage/

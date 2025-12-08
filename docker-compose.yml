@@ -8,10 +8,12 @@ services:
     image: caddy:2-alpine
     container_name: gateway-caddy
     restart: unless-stopped
+    env_file:
+      - .env.development
     ports:
-      - '18080:8080' # HTTP (redirects to HTTPS) - mapped to 18080 to avoid conflicts
-      - '18443:8443' # HTTPS - mapped to 18443 to avoid conflicts
-      - '12019:2019' # Admin API (localhost only)
+      - '${CADDY_HTTP_PORT:-18080}:8080' # HTTP
+      - '${CADDY_HTTPS_PORT:-18443}:8443' # HTTPS
+      - '${CADDY_ADMIN_PORT:-12019}:2019' # Admin API
     volumes:
       - ./infrastructure/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
@@ -20,7 +22,7 @@ services:
     networks:
       - gateway-network
     healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:2019/config/']
+      test: ['CMD', 'wget', '--spider', '-q', 'http://127.0.0.1:8080/health']
       interval: 10s
       timeout: 5s
       retries: 3
@@ -30,8 +32,10 @@ services:
     image: prom/prometheus:v2.54.1
     container_name: gateway-prometheus
     restart: unless-stopped
+    env_file:
+      - .env.development
     ports:
-      - '19090:9090' # Mapped to 19090 to avoid conflicts
+      - '${PROMETHEUS_PORT:-19090}:9090'
     volumes:
       - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
@@ -54,11 +58,13 @@ services:
     image: grafana/grafana:11.3.1
     container_name: gateway-grafana
     restart: unless-stopped
+    env_file:
+      - .env.development
     ports:
-      - '3000:3000'
+      - '${GRAFANA_PORT:-3000}:3000'
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_INSTALL_PLUGINS=
     volumes:

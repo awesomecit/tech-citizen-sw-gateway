@@ -1,0 +1,25 @@
+# Docker Compose Override - Test Environment
+# Usage: docker compose -f docker-compose.yml -f docker-compose.test.yml up
+
+services:
+  caddy:
+    env_file:
+      - .env.test
+    environment:
+      - NODE_ENV=test
+      - LOG_LEVEL=error
+
+  prometheus:
+    env_file:
+      - .env.test
+    environment:
+      - NODE_ENV=test
+
+  grafana:
+    env_file:
+      - .env.test
+    environment:
+      - NODE_ENV=test
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
