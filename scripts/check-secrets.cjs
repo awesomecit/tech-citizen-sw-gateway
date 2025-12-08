@@ -106,7 +106,7 @@ const EXCLUDED_PATTERNS = [
   /\.env\.template$/,
   /check-secrets\.js$/, // Don't scan this file itself
   /check-secrets\.cjs$/, // Don't scan this file itself
-  /CONTRIBUTING\.md$/,   // Skip documentation with examples
+  /CONTRIBUTING\.md$/, // Skip documentation with examples
   /DX-IMPLEMENTATION-GUIDE\.md$/, // Skip setup guide
 ];
 
