@@ -1,46 +1,252 @@
-# API Gateway Suite
+# Tech Citizen Software Gateway
 
-API Gateway centralizzato per suite software healthcare con Platformatic Watt.
+API Gateway suite per healthcare software con Platformatic Watt, Docker multi-environment, observability stack completo.
 
-## Requisiti
+[![Tests](https://img.shields.io/badge/tests-20%2F20-success)]()
+[![Coverage](https://img.shields.io/badge/coverage-TBD-blue)]()
+[![Security](https://img.shields.io/badge/vulnerabilities-0-success)]()
+[![License](https://img.shields.io/badge/license-MIT-blue)]()
 
-- Node.js >= 22.0.0
-- npm >= 10.0.0
-
-## Quick Start
+## 🚀 Quick Start
 
 ```bash
-# 1. Install root dependencies
+# Clone & install
+git clone <repo-url>
 npm install
 
-# 2. Install gateway dependencies
-cd services/gateway && npm install && cd ../..
-
-# 3. Run development server
+# Development mode (hot reload)
 npm run dev
+
+# Production build
+npm run build && npm start
+
+# Tests
+npm test                    # Unit tests
+npm run test:integration    # Integration (requires Docker)
+npm run test:e2e           # End-to-end (BDD scenarios)
 ```
 
-Test:
+**Endpoints:**
 
-- http://localhost:3042 → Hello World
-- http://localhost:3042/health → Health check
+- 🏥 Gateway: http://localhost:3042/health
+- 📊 Prometheus: http://localhost:19090
+- 📈 Grafana: http://localhost:3000
 
-## Struttura
+## 📋 Features
+
+- ✅ **Platformatic Watt 3.x** - Service mesh orchestration
+- ✅ **Multi-environment** - Development, test, staging with .env isolation
+- ✅ **Docker Compose** - Full infrastructure (Caddy, Prometheus, Grafana, RabbitMQ, Redis)
+- ✅ **Deployment simulation** - Cloudflare + Hetzner emulation
+- ✅ **Template-based config** - envsubst for runtime configuration
+- ✅ **Quality gates** - ESLint, Prettier, Husky, Commitlint
+- ✅ **Security** - Secret scanning, npm audit, vulnerability checks
+- ✅ **Testing** - Unit (Jest), Integration, E2E (Cucumber)
+- ✅ **Observability** - Prometheus metrics, Loki logs, Tempo traces
+- ✅ **Git workflow** - Trunk-based development
+
+## 🏗️ Architecture
 
 ```
-api-gateway-suite/
-├── watt.json                 # Watt orchestrator config
+tech-citizen-sw-gateway/
 ├── services/
-│   └── gateway/              # API Gateway (Fastify + TypeScript)
-│       ├── watt.json
-│       └── src/index.ts
-├── packages/                 # Shared libraries (future)
-├── infrastructure/           # Docker/Caddy/Prometheus configs
-└── docs/                     # Documentation
+│   └── gateway/                    # Fastify API Gateway
+│       ├── watt.json.template      # Runtime config template
+│       ├── .env                    # Default values
+│       ├── src/
+│       │   └── index.ts
+│       └── test/
+│           └── routes.test.ts
+├── packages/                       # Shared libraries
+│   ├── cache/                      # async-cache-dedupe wrapper
+│   ├── events/                     # RabbitMQ + CloudEvents
+│   └── telemetry/                  # OpenTelemetry setup
+├── infrastructure/
+│   ├── caddy/                      # Reverse proxy config
+│   ├── cloudflare-sim/             # Edge simulation
+│   ├── prometheus/                 # Metrics + alerts
+│   ├── grafana/                    # Dashboards
+│   ├── loki/                       # Log aggregation
+│   └── rabbitmq/                   # Message broker
+├── scripts/
+│   ├── deploy-staging.sh           # Automated deployment
+│   ├── check-secrets.cjs           # Pre-commit security
+│   ├── analyze-complexity.js       # Code quality metrics
+│   └── auto-release.js             # Semantic versioning
+├── docs/
+│   ├── INFRASTRUCTURE.md           # Docker, deploy, IaC
+│   ├── DEVELOPMENT.md              # Testing, config, tooling
+│   ├── PLATFORMATIC_CONFIG_GUIDE.md # envsubst templates
+│   ├── GIT_WORKFLOW.md             # Trunk-based strategy
+│   ├── project/
+│   │   ├── BACKLOG.md              # Sprint tasks
+│   │   └── ROADMAP.md              # Epic planning
+│   └── sessions/
+│       └── 2025-12-08-gateway-binding.md  # Dev stories
+└── e2e/features/                   # BDD scenarios (Gherkin)
 ```
 
-## Stack
+## 🔧 Stack Tecnologico
 
-- **Orchestrator**: Platformatic Watt 3.x
-- **API Framework**: Fastify 5.x
-- **Language**: TypeScript (Node.js 22 type stripping)
+| Layer          | Technology                     | Purpose                        |
+| -------------- | ------------------------------ | ------------------------------ |
+| Orchestrator   | Platformatic Watt 3.x          | Service mesh coordination      |
+| API Gateway    | Fastify 5.x                    | HTTP routing, plugins          |
+| Message Broker | RabbitMQ 3.13+                 | Event-driven communication     |
+| Cache          | Redis 7.x + async-cache-dedupe | Response caching               |
+| Monitoring     | Prometheus + Grafana           | Metrics & dashboards           |
+| Observability  | Loki + Tempo + OpenTelemetry   | Logs & distributed traces      |
+| Reverse Proxy  | Caddy 2.x                      | SSL termination, load balancer |
+| Testing        | Jest + Cucumber                | Unit, integration, E2E         |
+| Quality        | ESLint + SonarJS + Prettier    | Code quality gates             |
+
+## 📚 Documentation
+
+### Essential
+
+- **[INFRASTRUCTURE.md](docs/INFRASTRUCTURE.md)** - Docker setup, deployment, environment config
+- **[DEVELOPMENT.md](docs/DEVELOPMENT.md)** - Testing strategies, Platformatic configuration
+- **[GIT_WORKFLOW.md](docs/GIT_WORKFLOW.md)** - Trunk-based development guide
+- **[BACKLOG.md](docs/project/BACKLOG.md)** - Current sprint tasks
+- **[ROADMAP.md](docs/project/ROADMAP.md)** - Epic planning & milestones
+
+### Guides
+
+- **[PLATFORMATIC_CONFIG_GUIDE.md](docs/PLATFORMATIC_CONFIG_GUIDE.md)** - Runtime config with envsubst
+- **[DEPLOYMENT_SIMULATION.md](docs/DEPLOYMENT_SIMULATION.md)** - Cloudflare + Hetzner emulation
+- **[ENVIRONMENT_CONFIG.md](docs/ENVIRONMENT_CONFIG.md)** - Multi-environment setup
+- **[Session Stories](docs/sessions/)** - Development journeys & lessons learned
+
+## 🎯 Commands Reference
+
+### Development
+
+```bash
+npm run dev              # Watt dev mode (hot reload)
+npm start                # Production mode
+npm run build            # TypeScript compilation + Watt build
+```
+
+### Testing
+
+```bash
+npm test                 # Unit tests
+npm run test:watch       # Watch mode
+npm run test:integration # Integration (requires .env.test + Docker)
+npm run test:e2e         # End-to-end BDD scenarios
+npm run test:cov         # Coverage report
+```
+
+### Quality & Security
+
+```bash
+npm run lint             # ESLint check
+npm run format           # Prettier check
+npm run quality:fix      # Auto-fix lint + format
+npm run analyze          # Complexity analysis
+npm run security:check   # Secrets scanning
+npm audit                # Dependency vulnerabilities
+```
+
+### Infrastructure
+
+```bash
+# Development
+docker compose up -d                    # Start infrastructure
+docker compose down                     # Stop infrastructure
+
+# Staging deployment
+npm run staging:deploy                  # Full deploy to staging sim
+npm run staging:logs                    # View logs
+
+# Testing
+KEEP_CONTAINERS=true npm run test:integration  # Debug mode
+```
+
+### Release
+
+```bash
+npm run release:suggest  # Preview version bump
+npm run release          # Semantic release (CI/CD)
+```
+
+## 🔐 Security
+
+- ✅ **0 vulnerabilities** (npm audit)
+- ✅ **Secret scanning** in pre-commit hooks
+- ✅ **Environment isolation** (.env files in .gitignore)
+- ✅ **Conventional commits** enforced
+- ✅ **Complexity limits** (cognitive < 10, cyclomatic < 10)
+
+## 🧪 Testing Strategy
+
+- **Unit Tests**: Jest with ts-jest (services/gateway/test/)
+- **Integration Tests**: Docker-based, multi-service (requires .env.test)
+- **E2E Tests**: Cucumber/Gherkin scenarios (e2e/features/)
+- **Coverage Target**: 80%+ (TBD)
+
+## 🌍 Environments
+
+| Environment | Purpose           | Config File      | Docker Compose                                  |
+| ----------- | ----------------- | ---------------- | ----------------------------------------------- |
+| Development | Local dev         | .env.development | docker-compose.yml                              |
+| Test        | CI/CD testing     | .env.test        | docker-compose.yml + docker-compose.test.yml    |
+| Staging     | Deploy simulation | .env.staging     | docker-compose.yml + docker-compose.staging.yml |
+| Production  | Live (future)     | .env.production  | TBD (Kubernetes/Docker Swarm)                   |
+
+## 🤝 Contributing
+
+1. **Workflow**: Trunk-based development (feature branches < 3 days)
+2. **Commits**: Conventional commits enforced (`feat|fix|docs|chore(scope): message`)
+3. **Quality**: Pre-commit hooks (format, lint, secrets)
+4. **Testing**: All tests must pass before merge
+5. **Docs**: Update relevant .md files with changes
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+## 📖 Learning Resources
+
+### Session Stories (Video Lessons)
+
+- **[Gateway Binding Fix](docs/sessions/2025-12-08-gateway-binding.md)** - Debugging 127.0.0.1 → 0.0.0.0 (45 min)
+  - Network debugging with netstat/ss
+  - Platformatic config hierarchy
+  - envsubst template generation
+  - Docker inter-container communication
+
+### Key Commands Learned
+
+```bash
+# Network debugging
+docker exec CONTAINER netstat -tuln | grep :PORT
+docker exec CONTAINER ss -tuln
+
+# Config templating
+envsubst '${VAR1} ${VAR2}' < template > output
+export $(cat .env | xargs)
+
+# Docker testing
+docker exec CONTAINER curl http://0.0.0.0:PORT
+docker logs -f CONTAINER
+
+# Clean rebuild
+rm -rf dist .watt && npm run build
+```
+
+## 📊 Project Status
+
+- **Sprint**: 1/8 (Epic 3 in progress)
+- **Tests**: 20/20 passing ✅
+- **Commits**: 12+ (main branch)
+- **Security**: 0 vulnerabilities ✅
+- **Methodology**: XP with TDD/BDD
+
+## 📝 License
+
+MIT - See [LICENSE](LICENSE) for details
+
+---
+
+**Maintainer**: Antonio Cittadino  
+**Created**: 2025-12-08  
+**Last Updated**: 2025-12-08
