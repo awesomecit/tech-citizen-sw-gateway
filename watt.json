@@ -1,0 +1,10 @@
+{
+  "$schema": "https://schemas.platformatic.dev/wattpm/3.0.0.json",
+  "server": {
+    "port": 3042,
+    "host": "0.0.0.0"
+  },
+  "autoload": {
+    "path": "services"
+  }
+}

@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Carica configurazione
+HUSKY_CONFIG=".husky-config.json"
+
+if [ -f "$HUSKY_CONFIG" ]; then
+  ENABLED=$(node -p "require('./$HUSKY_CONFIG').enabled")
+  PRE_COMMIT_ENABLED=$(node -p "require('./$HUSKY_CONFIG').hooks['pre-commit'].enabled")
+  RUN_LINT_STAGED=$(node -p "require('./$HUSKY_CONFIG').hooks['pre-commit'].runLintStaged")
+  
+  if [ "$ENABLED" = "false" ] || [ "$PRE_COMMIT_ENABLED" = "false" ]; then
+    echo "⏭️  Pre-commit hook disabled in .husky-config.json"
+    exit 0
+  fi
+fi
+
+echo "🔍 Running pre-commit checks..."
+
+# Lint staged files
+if [ "$RUN_LINT_STAGED" != "false" ]; then
+  echo "📝 Formatting and linting staged files..."
+  npx lint-staged
+fi
+
+# Check for secrets
+echo "🔐 Checking for hardcoded secrets..."
+node scripts/check-secrets.cjs
+
+echo "✅ Pre-commit checks passed!"
