@@ -42,6 +42,7 @@ module.exports = {
         'gateway', // Platformatic Watt gateway service
         'watt', // Platformatic Watt runtime
         'test', // Testing infrastructure
+        'infra', // Infrastructure (Docker, Caddy, monitoring)
       ],
     ],
     'subject-max-length': [2, 'always', 72],

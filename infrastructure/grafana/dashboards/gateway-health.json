@@ -1,0 +1,119 @@
+{
+  "dashboard": {
+    "title": "API Gateway - Health & Performance",
+    "uid": "gateway-health",
+    "version": 1,
+    "schemaVersion": 38,
+    "timezone": "browser",
+    "tags": ["platformatic", "gateway", "health"],
+    "refresh": "10s",
+    "time": {
+      "from": "now-15m",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "type": "stat",
+        "title": "Gateway Status",
+        "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "up{job=\"api-gateway\"}",
+            "legendFormat": "Status"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "justifyMode": "center",
+          "textMode": "value_and_name"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              { "type": "value", "value": "1", "text": "UP" },
+              { "type": "value", "value": "0", "text": "DOWN" }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 1, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "type": "graph",
+        "title": "HTTP Request Rate",
+        "gridPos": { "x": 6, "y": 0, "w": 18, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"api-gateway\"}[5m])",
+            "legendFormat": "{{method}} {{route}}"
+          }
+        ],
+        "yaxes": [
+          { "format": "reqps", "label": "Requests/sec" },
+          { "show": false }
+        ]
+      },
+      {
+        "id": 3,
+        "type": "graph",
+        "title": "Response Time (P50, P95, P99)",
+        "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_ms_bucket{job=\"api-gateway\"}[5m]))",
+            "legendFormat": "P50"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_ms_bucket{job=\"api-gateway\"}[5m]))",
+            "legendFormat": "P95"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_ms_bucket{job=\"api-gateway\"}[5m]))",
+            "legendFormat": "P99"
+          }
+        ],
+        "yaxes": [{ "format": "ms", "label": "Latency" }, { "show": false }],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": { "params": [300], "type": "gt" },
+              "query": { "params": ["P95", "5m", "now"] },
+              "type": "query"
+            }
+          ],
+          "frequency": "1m",
+          "name": "High P95 Latency",
+          "message": "P95 latency > 300ms for 5 minutes"
+        }
+      },
+      {
+        "id": 4,
+        "type": "graph",
+        "title": "Error Rate",
+        "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"api-gateway\",status_code=~\"5..\"}[5m])",
+            "legendFormat": "5xx errors"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"api-gateway\",status_code=~\"4..\"}[5m])",
+            "legendFormat": "4xx errors"
+          }
+        ],
+        "yaxes": [
+          { "format": "reqps", "label": "Errors/sec" },
+          { "show": false }
+        ]
+      }
+    ]
+  }
+}

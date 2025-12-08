@@ -108,6 +108,8 @@ const EXCLUDED_PATTERNS = [
   /check-secrets\.cjs$/, // Don't scan this file itself
   /CONTRIBUTING\.md$/, // Skip documentation with examples
   /DX-IMPLEMENTATION-GUIDE\.md$/, // Skip setup guide
+  /INFRASTRUCTURE\.md$/, // Skip infrastructure documentation
+  /0001-minimal-infrastructure-yagni\.md$/, // Skip ADR with examples
 ];
 
 // Known safe values (whitelist)

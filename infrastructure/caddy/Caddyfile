@@ -1,0 +1,93 @@
+# Caddy 2.x Reverse Proxy Configuration
+# Purpose: TLS termination + routing to Platformatic Watt
+
+# Development environment - self-signed certificates
+{
+	# Enable admin API on localhost only
+	admin localhost:2019
+
+	# Auto HTTPS disabled for dev (use manual TLS)
+	auto_https off
+
+	# Local CA for self-signed certs
+	local_certs
+
+	# Logging
+	log {
+		output file /var/log/caddy/access.log
+		format json
+		level INFO
+	}
+}
+
+# Main gateway endpoint
+localhost:8443 {
+	# TLS with self-signed cert for dev
+	tls internal
+
+	# Security headers
+	header {
+		# HSTS (1 year)
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		
+		# Prevent clickjacking
+		X-Frame-Options "SAMEORIGIN"
+		
+		# XSS protection
+		X-Content-Type-Options "nosniff"
+		
+		# Basic CSP (adjust per service needs)
+		Content-Security-Policy "default-src 'self'"
+		
+		# Remove server header
+		-Server
+	}
+
+	# Health check endpoint (direct, no buffering)
+	handle /health {
+		reverse_proxy localhost:3042
+	}
+
+	# Metrics endpoint (only from Prometheus container)
+	@metrics {
+		path /metrics
+		remote_ip 172.16.0.0/12
+	}
+	handle @metrics {
+		reverse_proxy localhost:3042
+	}
+
+	# Block /metrics from external access
+	handle /metrics {
+		respond "Forbidden" 403
+	}
+
+	# All other traffic to Platformatic Watt
+	handle /* {
+		reverse_proxy localhost:3042 {
+			# Preserve original headers (defaults are fine, removing redundant directives)
+			
+			# Health check passive mode
+			health_uri /health
+			health_interval 10s
+			health_timeout 5s
+
+			# Timeouts (transport level)
+			transport http {
+				dial_timeout 5s
+				read_timeout 30s
+				write_timeout 30s
+			}
+		}
+	}
+
+	# Error pages
+	handle_errors {
+		respond "{err.status_code} {err.status_text}"
+	}
+}
+
+# HTTP redirect to HTTPS
+localhost:8080 {
+	redir https://localhost:8443{uri} permanent
+}
