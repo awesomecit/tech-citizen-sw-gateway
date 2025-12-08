@@ -1,10 +1,10 @@
 {
   "$schema": "https://schemas.platformatic.dev/@platformatic/service/3.0.0.json",
   "server": {
-    "hostname": "127.0.0.1",
-    "port": 3042,
+    "hostname": "{PLT_SERVER_HOSTNAME}",
+    "port": "{PORT}",
     "logger": {
-      "level": "info"
+      "level": "{LOG_LEVEL}"
     }
   },
   "plugins": {

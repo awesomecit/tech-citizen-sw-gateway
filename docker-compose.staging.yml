@@ -1,0 +1,106 @@
+# Docker Compose Override - Staging Environment
+# Simula deployment su Hetzner + Cloudflare
+# Usage: docker compose -f docker-compose.yml -f docker-compose.staging.yml up
+
+services:
+  # Simula Cloudflare Edge (reverse proxy + DNS)
+  cloudflare-edge:
+    image: caddy:2-alpine
+    container_name: cloudflare-sim
+    restart: unless-stopped
+    env_file:
+      - .env.staging
+    ports:
+      - '${CLOUDFLARE_HTTP_PORT:-8080}:80'
+      - '${CLOUDFLARE_HTTPS_PORT:-8443}:443'
+    volumes:
+      - ./infrastructure/cloudflare-sim/Caddyfile:/etc/caddy/Caddyfile:ro
+      - cloudflare-data:/data
+      - cloudflare-config:/config
+    networks:
+      staging-network:
+        ipv4_address: 172.30.0.5
+    environment:
+      - DOMAIN=${STAGING_DOMAIN:-gateway.localtest.me}
+      - ACME_EMAIL=${ACME_EMAIL:-admin@example.com}
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://127.0.0.1/health']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Simula Hetzner Cloud Server (Ubuntu 22.04)
+  hetzner-server:
+    image: ubuntu:22.04
+    container_name: hetzner-sim
+    hostname: gateway-staging
+    restart: unless-stopped
+    privileged: true
+    env_file:
+      - .env.staging
+    command: >
+      bash -c "
+        apt-get update && apt-get install -y curl wget &&
+        tail -f /dev/null
+      "
+    volumes:
+      - ./:/workspace:ro
+      - hetzner-home:/root
+      - hetzner-opt:/opt
+    networks:
+      staging-network:
+        ipv4_address: 172.30.0.10
+    environment:
+      - HETZNER_REGION=nbg1
+      - ENV=staging
+      - NODE_ENV=staging
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Override servizi esistenti per staging
+  caddy:
+    env_file:
+      - .env.staging
+    environment:
+      - NODE_ENV=staging
+      - BACKEND_URL=http://hetzner-server:3042
+    networks:
+      - staging-network
+
+  prometheus:
+    env_file:
+      - .env.staging
+    networks:
+      - staging-network
+
+  grafana:
+    env_file:
+      - .env.staging
+    environment:
+      - GF_SERVER_ROOT_URL=https://grafana.${STAGING_DOMAIN:-gateway.localtest.me}
+      - GF_SECURITY_ADMIN_USER=${GF_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_ADMIN_PASSWORD:-changeme}
+    networks:
+      - staging-network
+
+networks:
+  staging-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+          gateway: 172.30.0.1
+
+volumes:
+  cloudflare-data:
+    driver: local
+  cloudflare-config:
+    driver: local
+  hetzner-home:
+    driver: local
+  hetzner-opt:
+    driver: local

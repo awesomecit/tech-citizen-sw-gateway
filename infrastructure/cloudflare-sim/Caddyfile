@@ -1,0 +1,105 @@
+# Cloudflare Edge Simulation
+# Simula Cloudflare proxy + SSL termination
+
+{
+	# Admin API
+	admin 0.0.0.0:2019
+
+	# Auto HTTPS
+	auto_https off  # Usa HTTP locale per testing
+
+	# Logging
+	log {
+		output file /var/log/caddy/cloudflare-sim.log
+		format json
+		level INFO
+	}
+}
+
+# Health check endpoint
+:80 {
+	handle /health {
+		respond "Cloudflare Edge OK" 200
+	}
+
+	# Simula Cloudflare Always Use HTTPS
+	handle {
+		redir https://{host}{uri} permanent
+	}
+}
+
+# Main gateway (simula Cloudflare Full SSL)
+gateway.localtest.me:443 {
+	# TLS self-signed per testing locale
+	tls internal
+
+	# Simula Cloudflare Security Headers
+	header {
+		# HSTS
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		
+		# Security
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		X-XSS-Protection "1; mode=block"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		
+		# Cloudflare identification
+		CF-Ray "simulation-{random}"
+		Server "cloudflare"
+	}
+
+	# Proxy to backend (Hetzner server)
+	reverse_proxy hetzner-sim:3042 {
+		# Health check passivo
+		health_uri /health
+		health_interval 10s
+		health_timeout 5s
+
+		# Cloudflare-like headers
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Real-IP {remote_host}
+		header_up CF-Connecting-IP {remote_host}
+		
+		# Timeouts
+		transport http {
+			dial_timeout 5s
+			read_timeout 30s
+			write_timeout 30s
+		}
+	}
+
+	# Error handling
+	handle_errors {
+		respond "{err.status_code} {err.status_text}" {err.status_code}
+	}
+}
+
+# Grafana subdomain
+grafana.localtest.me:443 {
+	tls internal
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Frame-Options "SAMEORIGIN"
+	}
+
+	reverse_proxy gateway-grafana:3000 {
+		health_uri /api/health
+		health_interval 10s
+	}
+}
+
+# Prometheus subdomain
+prometheus.localtest.me:443 {
+	tls internal
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+	}
+
+	reverse_proxy gateway-prometheus:9090 {
+		health_uri /-/healthy
+		health_interval 10s
+	}
+}
