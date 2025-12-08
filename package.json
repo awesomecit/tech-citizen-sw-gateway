@@ -52,7 +52,7 @@
     "@commitlint/config-conventional": "^19.8.1",
     "@eslint/js": "^9.39.1",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.0.0",
+    "@types/node": "^22.19.1",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
@@ -65,6 +65,7 @@
     "ts-jest": "^29.4.6",
     "typescript": "^5.7.0",
     "typescript-eslint": "^8.48.1",
-    "wattpm": "^3.0.0"
+    "wattpm": "^3.0.0",
+    "yaml": "^2.8.2"
   }
 }

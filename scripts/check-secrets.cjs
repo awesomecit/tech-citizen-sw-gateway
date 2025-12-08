@@ -109,6 +109,9 @@ const EXCLUDED_PATTERNS = [
   /CONTRIBUTING\.md$/, // Skip documentation with examples
   /DX-IMPLEMENTATION-GUIDE\.md$/, // Skip setup guide
   /INFRASTRUCTURE\.md$/, // Skip infrastructure documentation
+  /IAC_TESTING\.md$/, // Skip IaC testing documentation
+  /BACKLOG\.md$/, // Skip project backlog
+  /ROADMAP\.md$/, // Skip project roadmap
   /0001-minimal-infrastructure-yagni\.md$/, // Skip ADR with examples
 ];
 
