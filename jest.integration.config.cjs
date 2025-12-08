@@ -16,18 +16,19 @@ module.exports = {
   // Pattern dei file di test di integrazione
   testMatch: [
     '<rootDir>/test/**/*.integration.spec.ts',
+    '<rootDir>/test/**/*.test.ts',
     '<rootDir>/src/**/*.integration.spec.ts',
   ],
 
   // Moduli da trasformare con TypeScript
   preset: 'ts-jest',
 
-  // Setup files per test integration
-  setupFilesAfterEnv: ['<rootDir>/test/setup.integration.ts'],
+  // Setup files commented out - create later if needed
+  // setupFilesAfterEnv: ['<rootDir>/test/setup.integration.ts'],
 
-  // Global setup e teardown per database container
-  globalSetup: '<rootDir>/test/globalSetup.integration.ts',
-  globalTeardown: '<rootDir>/test/globalTeardown.integration.ts',
+  // Global setup e teardown commented out - create later if needed
+  // globalSetup: '<rootDir>/test/globalSetup.integration.ts',
+  // globalTeardown: '<rootDir>/test/globalTeardown.integration.ts',
 
   // Mapping dei moduli per import relativi
   moduleNameMapper: {

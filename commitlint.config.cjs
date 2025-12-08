@@ -39,6 +39,9 @@ module.exports = {
         'websocket',
         'release',
         'deps',
+        'gateway', // Platformatic Watt gateway service
+        'watt', // Platformatic Watt runtime
+        'test', // Testing infrastructure
       ],
     ],
     'subject-max-length': [2, 'always', 72],

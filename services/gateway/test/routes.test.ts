@@ -1,12 +1,14 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
-import { type FastifyInstance } from 'fastify';
-import { buildApp } from '../src/index.js';
+import Fastify, { type FastifyInstance } from 'fastify';
+import { plugin } from '../src/index.js';
 
 describe('Gateway Routes', () => {
   let app: FastifyInstance;
 
   beforeAll(async () => {
-    app = await buildApp();
+    app = Fastify();
+    await app.register(plugin);
+    await app.ready();
   });
 
   afterAll(async () => {
@@ -34,7 +36,7 @@ describe('Gateway Routes', () => {
     });
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
-      message: expect.any(String),
+      message: 'API Gateway Suite - Hello World',
     });
   });
 });

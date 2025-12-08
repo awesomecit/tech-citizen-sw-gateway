@@ -1,10 +1,13 @@
 {
-  "$schema": "https://schemas.platformatic.dev/wattpm/3.0.0.json",
-  "server": {
-    "port": 3042,
-    "host": "0.0.0.0"
-  },
+  "$schema": "https://schemas.platformatic.dev/@platformatic/runtime/3.0.0.json",
+  "entrypoint": "gateway",
   "autoload": {
-    "path": "services"
-  }
+    "path": "services",
+    "exclude": []
+  },
+  "server": {
+    "hostname": "127.0.0.1",
+    "port": 3042
+  },
+  "watch": true
 }
