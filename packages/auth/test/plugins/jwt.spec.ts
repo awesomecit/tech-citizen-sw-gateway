@@ -103,4 +103,158 @@ FQIDAQAB
     expect(body.user.sub).toBe('user-123');
     expect(body.user.email).toBe('test@example.com');
   });
+
+  it('Given an expired JWT, When I call fastify.authenticate, Then authentication fails with 401', async () => {
+    await fastify.register(authPlugin, {
+      keycloakUrl: 'http://localhost:8080',
+      realm: 'techcitizen',
+      clientId: 'test-client',
+      jwtPublicKey: PUBLIC_KEY,
+    });
+
+    // Create expired token (exp in the past)
+    const signSync = createSigner({ key: PRIVATE_KEY, algorithm: 'RS256' });
+    const expiredToken = signSync({
+      sub: 'user-123',
+      exp: Math.floor(new Date('2025-12-08T00:00:00Z').getTime() / 1000), // Past date
+      iss: 'http://localhost:8080/realms/techcitizen',
+    });
+
+    fastify.get(
+      '/protected',
+      {
+        onRequest: [fastify.authenticate],
+      },
+      async (request: FastifyRequest) => {
+        return { user: request.user };
+      },
+    );
+
+    await fastify.ready();
+
+    const response = await fastify.inject({
+      method: 'GET',
+      url: '/protected',
+      headers: {
+        authorization: `Bearer ${expiredToken}`,
+      },
+    });
+
+    expect(response.statusCode).toBe(401);
+    const body = JSON.parse(response.body);
+    expect(body.error).toBe('Unauthorized');
+    expect(body.message).toContain('expired');
+  });
+
+  it('Given a JWT with tampered signature, When I call fastify.authenticate, Then authentication fails with 401', async () => {
+    await fastify.register(authPlugin, {
+      keycloakUrl: 'http://localhost:8080',
+      realm: 'techcitizen',
+      clientId: 'test-client',
+      jwtPublicKey: PUBLIC_KEY,
+    });
+
+    // Create valid token, then tamper with signature
+    const signSync = createSigner({ key: PRIVATE_KEY, algorithm: 'RS256' });
+    const validToken = signSync({
+      sub: 'user-123',
+      exp: Math.floor(new Date('2025-12-10T00:00:00Z').getTime() / 1000),
+      iss: 'http://localhost:8080/realms/techcitizen',
+    });
+
+    // Tamper with signature (replace entire signature part with invalid data)
+    const parts = validToken.split('.');
+    const tamperedToken = `${parts[0]}.${parts[1]}.invalidSignatureData`;
+
+    fastify.get(
+      '/protected',
+      {
+        onRequest: [fastify.authenticate],
+      },
+      async (request: FastifyRequest) => {
+        return { user: request.user };
+      },
+    );
+
+    await fastify.ready();
+
+    const response = await fastify.inject({
+      method: 'GET',
+      url: '/protected',
+      headers: {
+        authorization: `Bearer ${tamperedToken}`,
+      },
+    });
+
+    expect(response.statusCode).toBe(401);
+    const body = JSON.parse(response.body);
+    expect(body.error).toBe('Unauthorized');
+    expect(body.message).toContain('invalid');
+  });
+
+  it('Given Authorization header "Bearer not-a-valid-jwt", When I call fastify.authenticate, Then authentication fails with 401', async () => {
+    await fastify.register(authPlugin, {
+      keycloakUrl: 'http://localhost:8080',
+      realm: 'techcitizen',
+      clientId: 'test-client',
+      jwtPublicKey: PUBLIC_KEY,
+    });
+
+    fastify.get(
+      '/protected',
+      {
+        onRequest: [fastify.authenticate],
+      },
+      async (request: FastifyRequest) => {
+        return { user: request.user };
+      },
+    );
+
+    await fastify.ready();
+
+    const response = await fastify.inject({
+      method: 'GET',
+      url: '/protected',
+      headers: {
+        authorization: 'Bearer not-a-valid-jwt',
+      },
+    });
+
+    expect(response.statusCode).toBe(401);
+    const body = JSON.parse(response.body);
+    expect(body.error).toBe('Unauthorized');
+    expect(body.message).toContain('malformed');
+  });
+
+  it('Given no Authorization header, When I call fastify.authenticate, Then authentication fails with 401', async () => {
+    await fastify.register(authPlugin, {
+      keycloakUrl: 'http://localhost:8080',
+      realm: 'techcitizen',
+      clientId: 'test-client',
+      jwtPublicKey: PUBLIC_KEY,
+    });
+
+    fastify.get(
+      '/protected',
+      {
+        onRequest: [fastify.authenticate],
+      },
+      async (request: FastifyRequest) => {
+        return { user: request.user };
+      },
+    );
+
+    await fastify.ready();
+
+    const response = await fastify.inject({
+      method: 'GET',
+      url: '/protected',
+      // No authorization header
+    });
+
+    expect(response.statusCode).toBe(401);
+    const body = JSON.parse(response.body);
+    expect(body.error).toBe('Unauthorized');
+    expect(body.message).toContain('No Authorization was found');
+  });
 });
