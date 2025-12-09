@@ -12,6 +12,16 @@ import authPlugin from '../src/index';
 import type { AuthPluginOptions } from '../src/index';
 
 describe('US-037: Auth Package Structure', () => {
+  const VALID_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAthHhTTyNpneD5lSC908q
+rtQ+DynEQJhf0XdLByESCroJqnnyYUd1XmxYE1HCDP2b7fN9juBgJcv29mvoqF99
+++iL/TjYbxfUhYqUYfk1901fvynS/Ny5eLAY6H283b5bSzcavzwkRGfW6TU0c4WV
+kxobYgHNLH3/0k2Y6c1HUNvHCfq/45xCuJ2YQvKKf3AruzI/gTPjDnJKP6C6aQ7l
+fXC9Gu9L2H4ZQBqfA65g6bweONWUwy/3sa4o27qJhkuSMucCDo+/2rh8V15rIcd+
+LOH4Gf5b6dOPkwIdxv40Wg00kwwwInfYeBvUhdTeLpLef5l8xSmlQ7yK4IJCA2OL
+FQIDAQAB
+-----END PUBLIC KEY-----`;
+
   describe('Given mono-repo workspace configured', () => {
     it('Then TypeScript resolves import from @tech-citizen/auth', () => {
       expect(authPlugin).toBeDefined();
@@ -89,6 +99,7 @@ describe('US-037: Auth Package Structure', () => {
           keycloakUrl: 'http://kc:8080',
           realm: 'test',
           clientId: 'test',
+          jwtPublicKey: VALID_PUBLIC_KEY,
         }),
       ).resolves.not.toThrow();
 

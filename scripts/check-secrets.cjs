@@ -108,6 +108,8 @@ const EXCLUDED_PATTERNS = [
   /check-secrets\.cjs$/, // Don't scan this file itself
   /CONTRIBUTING\.md$/, // Skip documentation with examples
   /DX-IMPLEMENTATION-GUIDE\.md$/, // Skip setup guide
+  /\.feature$/,  // Skip BDD feature files
+  /\/test\/.*\.(spec|test)\.(ts|js)$/,  // Skip test files (may contain test RSA keys)
   /INFRASTRUCTURE\.md$/, // Skip infrastructure documentation
   /IAC_TESTING\.md$/, // Skip IaC testing documentation
   /BACKLOG\.md$/, // Skip project backlog

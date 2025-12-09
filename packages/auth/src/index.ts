@@ -9,6 +9,8 @@
 
 import fp from 'fastify-plugin';
 import type { FastifyPluginAsync } from 'fastify';
+import jwtPlugin from './plugins/jwt.js';
+import './types.js';
 
 /**
  * Authentication plugin options
@@ -26,6 +28,8 @@ export interface AuthPluginOptions {
   redisUrl?: string;
   /** Enable /auth/* routes (true for auth-api, false for gateway) */
   enableRoutes?: boolean;
+  /** JWT public key for validation (optional, fetched from Keycloak if not provided) */
+  jwtPublicKey?: string;
 }
 
 /**
@@ -71,6 +75,9 @@ const authPlugin: FastifyPluginAsync<AuthPluginOptions> = async (
   // TODO: Register plugins (jwt, keycloak, session)
   // TODO: Register routes if enableRoutes === true
 
+  // Register JWT plugin - US-038
+  await fastify.register(jwtPlugin, opts);
+
   fastify.log.info(
     { realm: opts.realm, clientId: opts.clientId },
     'Auth plugin registered',
@@ -83,8 +90,5 @@ export default fp(authPlugin, {
 });
 
 // Export sub-plugins and schemas for advanced usage
-export * from './plugins/jwt';
-export * from './plugins/keycloak';
-export * from './plugins/session';
-export * from './schemas/user';
-export * from './schemas/token';
+export * from './plugins/jwt.js';
+// TODO: Export keycloak, session, user, token after US-039/040/041 implementation
