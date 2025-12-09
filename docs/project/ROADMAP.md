@@ -109,7 +109,7 @@
 
 **Goal**: Centralized authentication and first microservices
 
-### Epic 5: Centralized Authentication (Keycloak + NestJS)
+### Epic 5: Centralized Authentication (Keycloak + Platformatic)
 
 **Duration**: Sprint 3-5 (3 weeks)  
 **Status**: Not started
@@ -117,7 +117,8 @@
 **Deliverables**:
 
 - Keycloak deployed and realm configured (techcitizen.it)
-- Auth microservice (NestJS) with user registration/login/logout
+- Auth microservice (Platformatic Service) with user registration/login/logout
+- TypeBox schemas for validation + auto OpenAPI generation
 - Sign-up and sign-in pages (vanilla JS, PKCE flow)
 - JWT validation middleware in gateway (@fastify/jwt)
 - Session management with refresh token rotation
@@ -131,15 +132,17 @@
 - Protected routes return 401 without valid token
 - Refresh token rotation invalidates old tokens
 - All auth pages load in < 500ms (P95)
+- OpenAPI docs auto-generated at /documentation
 
 **Tech Stack**:
 
 - Keycloak (OIDC provider)
-- NestJS (auth microservice)
+- Platformatic Service (auth microservice)
+- TypeBox (validation + OpenAPI)
 - Redis (token blacklist)
 - Vanilla JS (auth pages)
 
-**Reference**: BACKLOG.md EPIC-005 (US-022 to US-028, 23h estimate)
+**Reference**: BACKLOG.md EPIC-005 (US-022 to US-028, 22h estimate)
 
 ---
 

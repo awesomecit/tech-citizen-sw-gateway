@@ -280,12 +280,13 @@
   - Estimate: 3h
   - Files: infrastructure/keycloak/realm-export.json, docker-compose.yml
 
-- [ ] US-023: As a Developer, I want auth microservice (NestJS) so I can manage user lifecycle
-  - Task: Create services/auth-api with NestJS + Keycloak adapter, register in watt.json
+- [ ] US-023: As a Developer, I want auth microservice (Platformatic) so I can manage user lifecycle
+  - Task: Create services/auth-api with Platformatic Service + Keycloak adapter, register in watt.json
   - Acceptance: POST /auth/register creates user in Keycloak, returns JWT
-  - Estimate: 5h
-  - Tech Stack: NestJS, @nestjs/platform-fastify, keycloak-connect
+  - Estimate: 4h
+  - Tech Stack: Platformatic Service, @fastify/jwt, keycloak-admin-client, @sinclair/typebox
   - Routes: POST /auth/register, POST /auth/login, POST /auth/logout, GET /auth/me
+  - Schemas: TypeBox for request/response validation + auto OpenAPI generation
 
 - [ ] US-024: As a User, I want sign-up page so I can create account
   - Task: Create public/signup.html with form (email, password, confirm), integrate with /auth/register
@@ -321,15 +322,23 @@
   - Estimate: 4h
   - Dependencies: Email service (defer if no SMTP - use Keycloak admin reset for MVP)
 
-**Epic Estimate**: 23h (20h MVP without email, 3h email integration deferred)
+**Epic Estimate**: 22h (19h MVP without email, 3h email integration deferred)
 
 **Tech Stack**:
 
 - **Keycloak**: Identity provider (OIDC/OAuth2)
-- **NestJS**: Auth microservice (services/auth-api)
-- **Fastify**: JWT validation plugin in gateway
+- **Platformatic Service**: Auth microservice (services/auth-api)
+- **TypeBox**: Schema validation + OpenAPI auto-generation (@sinclair/typebox)
+- **Fastify Plugins**: @fastify/jwt, @fastify/cors, @fastify/rate-limit
 - **Redis**: Token blacklist for logout/revocation
 - **Vanilla JS**: Sign-up/sign-in pages (no framework overhead)
+
+**Platformatic Benefits**:
+
+- Auto OpenAPI docs from TypeBox schemas
+- Built-in Fastify optimization (10x faster than Express)
+- Watt service mesh auto-discovery
+- Zero config TypeScript compilation
 
 ---
 
