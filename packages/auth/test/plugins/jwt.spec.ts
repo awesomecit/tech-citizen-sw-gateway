@@ -257,4 +257,88 @@ FQIDAQAB
     expect(body.error).toBe('Unauthorized');
     expect(body.message).toContain('No Authorization was found');
   });
+
+  it('Given a JWT with wrong issuer, When I call fastify.authenticate, Then authentication fails with 401', async () => {
+    await fastify.register(authPlugin, {
+      keycloakUrl: 'http://localhost:8080',
+      realm: 'techcitizen',
+      clientId: 'test-client',
+      jwtPublicKey: PUBLIC_KEY,
+    });
+
+    // Create token with wrong issuer
+    const signSync = createSigner({ key: PRIVATE_KEY, algorithm: 'RS256' });
+    const wrongIssuerToken = signSync({
+      sub: 'user-123',
+      exp: Math.floor(new Date('2025-12-10T00:00:00Z').getTime() / 1000),
+      iss: 'http://evil.com/realms/fake', // Wrong issuer
+    });
+
+    fastify.get(
+      '/protected',
+      {
+        onRequest: [fastify.authenticate],
+      },
+      async (request: FastifyRequest) => {
+        return { user: request.user };
+      },
+    );
+
+    await fastify.ready();
+
+    const response = await fastify.inject({
+      method: 'GET',
+      url: '/protected',
+      headers: {
+        authorization: `Bearer ${wrongIssuerToken}`,
+      },
+    });
+
+    expect(response.statusCode).toBe(401);
+    const body = JSON.parse(response.body);
+    expect(body.error).toBe('Unauthorized');
+    expect(body.message).toContain('iss claim');
+  });
+
+  it('Given a JWT missing the "sub" claim, When I call fastify.authenticate, Then authentication fails with 401', async () => {
+    await fastify.register(authPlugin, {
+      keycloakUrl: 'http://localhost:8080',
+      realm: 'techcitizen',
+      clientId: 'test-client',
+      jwtPublicKey: PUBLIC_KEY,
+    });
+
+    // Create token without 'sub' claim
+    const signSync = createSigner({ key: PRIVATE_KEY, algorithm: 'RS256' });
+    const missingSubToken = signSync({
+      // sub missing!
+      exp: Math.floor(new Date('2025-12-10T00:00:00Z').getTime() / 1000),
+      iss: 'http://localhost:8080/realms/techcitizen',
+    });
+
+    fastify.get(
+      '/protected',
+      {
+        onRequest: [fastify.authenticate],
+      },
+      async (request: FastifyRequest) => {
+        return { user: request.user };
+      },
+    );
+
+    await fastify.ready();
+
+    const response = await fastify.inject({
+      method: 'GET',
+      url: '/protected',
+      headers: {
+        authorization: `Bearer ${missingSubToken}`,
+      },
+    });
+
+    expect(response.statusCode).toBe(401);
+    const body = JSON.parse(response.body);
+    expect(body.error).toBe('Unauthorized');
+    expect(body.message).toContain('sub');
+  });
 });

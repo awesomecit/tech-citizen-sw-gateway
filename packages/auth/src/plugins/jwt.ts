@@ -19,6 +19,10 @@ const jwtPlugin: FastifyPluginAsync<AuthPluginOptions> = async (
     },
     verify: {
       algorithms: ['RS256'],
+      // Validate issuer matches Keycloak realm URL (allowedIss for fast-jwt compatibility)
+      allowedIss: `${opts.keycloakUrl}/realms/${opts.realm}`,
+      // Require 'sub' claim (subject/user ID)
+      requiredClaims: ['sub'],
     },
   });
 
