@@ -10,6 +10,7 @@
 import fp from 'fastify-plugin';
 import type { FastifyPluginAsync } from 'fastify';
 import jwtPlugin from './plugins/jwt.js';
+import keycloakPlugin from './keycloak.js';
 import './types.js';
 
 /**
@@ -72,14 +73,33 @@ const authPlugin: FastifyPluginAsync<AuthPluginOptions> = async (
     throw new Error('Missing required option: clientId');
   }
 
-  // TODO: Register plugins (jwt, keycloak, session)
-  // TODO: Register routes if enableRoutes === true
-
-  // Register JWT plugin - US-038
-  await fastify.register(jwtPlugin, opts);
+  // Register Keycloak OIDC plugin if routes enabled (US-039)
+  if (opts.enableRoutes) {
+    await fastify.register(keycloakPlugin, {
+      keycloakUrl: opts.keycloakUrl,
+      realm: opts.realm,
+      clientId: opts.clientId,
+      clientSecret: opts.clientSecret || '',
+      callbackUrl:
+        process.env.CALLBACK_URL || 'http://localhost:3042/auth/callback',
+      redis: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6380', 10),
+        password: process.env.REDIS_PASSWORD || 'dev-redis-password',
+      },
+      sessionTTL: 3600,
+    });
+  } else {
+    // Register JWT plugin only - US-038
+    await fastify.register(jwtPlugin, opts);
+  }
 
   fastify.log.info(
-    { realm: opts.realm, clientId: opts.clientId },
+    {
+      realm: opts.realm,
+      clientId: opts.clientId,
+      enableRoutes: opts.enableRoutes,
+    },
     'Auth plugin registered',
   );
 };

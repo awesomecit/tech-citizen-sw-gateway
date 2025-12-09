@@ -12,14 +12,4 @@ declare module 'fastify' {
       reply: FastifyReply,
     ) => Promise<void>;
   }
-
-  interface FastifyRequest {
-    user?: {
-      sub: string;
-      email?: string;
-      exp?: number;
-      iss?: string;
-      [key: string]: any;
-    };
-  }
 }

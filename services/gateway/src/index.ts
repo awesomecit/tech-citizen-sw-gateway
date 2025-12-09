@@ -1,7 +1,13 @@
 import { type FastifyInstance } from 'fastify';
 import sensible from '@fastify/sensible';
-import { register, collectDefaultMetrics, Counter, Histogram } from 'prom-client';
+import {
+  register,
+  collectDefaultMetrics,
+  Counter,
+  Histogram,
+} from 'prom-client';
 import { randomUUID } from 'crypto';
+import authPlugin from '@tech-citizen/auth/plugin';
 
 interface HealthResponse {
   status: 'ok' | 'degraded' | 'error';
@@ -33,7 +39,10 @@ const httpRequestsTotal = new Counter({
 });
 
 // Graceful shutdown handler
-async function gracefulShutdown(app: FastifyInstance, signal: string): Promise<void> {
+async function gracefulShutdown(
+  app: FastifyInstance,
+  signal: string,
+): Promise<void> {
   app.log.info(`Received ${signal}, starting graceful shutdown...`);
   await app.close();
   app.log.info('Graceful shutdown completed');
@@ -44,7 +53,8 @@ async function gracefulShutdown(app: FastifyInstance, signal: string): Promise<v
 function setupHooks(app: FastifyInstance): void {
   // Correlation ID + start timer
   app.addHook('onRequest', async (request, reply) => {
-    const requestId = (request.headers['x-request-id'] as string) || randomUUID();
+    const requestId =
+      (request.headers['x-request-id'] as string) || randomUUID();
     request.log = request.log.child({ requestId });
     reply.header('X-Request-ID', requestId);
     (request as unknown as { startTime: number }).startTime = Date.now();
@@ -52,7 +62,8 @@ function setupHooks(app: FastifyInstance): void {
 
   // Record metrics
   app.addHook('onResponse', async (request, reply) => {
-    const duration = Date.now() - (request as unknown as { startTime: number }).startTime;
+    const duration =
+      Date.now() - (request as unknown as { startTime: number }).startTime;
     const route = request.routeOptions?.url || request.url;
     const status = reply.statusCode.toString();
     httpRequestDuration.labels(request.method, route, status).observe(duration);
@@ -69,17 +80,44 @@ export async function plugin(app: FastifyInstance): Promise<void> {
   await app.register(sensible);
   setupHooks(app);
 
+  // Register authentication plugin (Keycloak OIDC + JWT)
+  await app.register(authPlugin, {
+    keycloakUrl: process.env.KEYCLOAK_URL || 'http://localhost:8090',
+    realm: process.env.KEYCLOAK_REALM || 'healthcare-domain',
+    clientId: process.env.KEYCLOAK_CLIENT_ID || 'gateway-client',
+    clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
+    redisUrl: process.env.REDIS_URL || 'redis://localhost:6380',
+    enableRoutes: true,
+  });
+
+  // Validazione precoce delle variabili critiche
+  if (
+    !process.env.KEYCLOAK_CLIENT_SECRET &&
+    process.env.NODE_ENV === 'production'
+  ) {
+    throw new Error('KEYCLOAK_CLIENT_SECRET is required in production');
+  }
+
   // Register signal handlers
   process.once('SIGTERM', () => gracefulShutdown(app, 'SIGTERM'));
   process.once('SIGINT', () => gracefulShutdown(app, 'SIGINT'));
 
   // Force exit if graceful shutdown timeout
   const shutdownTimer = setTimeout(() => {
-    app.log.error(`Graceful shutdown timeout after ${GRACEFUL_SHUTDOWN_TIMEOUT}ms`);
+    app.log.error(
+      `Graceful shutdown timeout after ${GRACEFUL_SHUTDOWN_TIMEOUT}ms`,
+    );
     process.exit(1);
   }, GRACEFUL_SHUTDOWN_TIMEOUT);
   shutdownTimer.unref();
 
+  // Routes
+  registerHealthRoute(app);
+  registerProtectedRoute(app);
+  registerMetricsRoute(app);
+}
+
+function registerHealthRoute(app: FastifyInstance): void {
   app.get<{ Reply: HealthResponse }>('/health', async () => {
     return {
       status: 'ok',
@@ -92,8 +130,22 @@ export async function plugin(app: FastifyInstance): Promise<void> {
   app.get<{ Reply: HelloResponse }>('/', async () => {
     return { message: 'API Gateway Suite - Hello World' };
   });
+}
 
-  // Prometheus metrics endpoint (no auth required for scraping)
+function registerProtectedRoute(app: FastifyInstance): void {
+  app.get(
+    '/api/protected',
+    { onRequest: [app.authenticate] },
+    async request => {
+      return {
+        message: 'You are authenticated!',
+        user: request.user,
+      };
+    },
+  );
+}
+
+function registerMetricsRoute(app: FastifyInstance): void {
   app.get('/metrics', async (_request, reply) => {
     reply.header('Content-Type', register.contentType);
     return register.metrics();

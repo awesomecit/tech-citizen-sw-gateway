@@ -1,7 +1,7 @@
 {
   "$schema": "./features.schema.json",
   "version": "1.0.0",
-  "lastUpdated": "2025-12-09T23:10:06.438Z",
+  "lastUpdated": "2025-12-09T23:27:43.117Z",
   "project": {
     "name": "tech-citizen-sw-gateway",
     "repository": "github.com/awesomecit/tech-citizen-sw-gateway"
@@ -9,7 +9,7 @@
   "release": {
     "current": "1.0.0",
     "nextSuggested": "1.1.0",
-    "lastCommit": "5f78d04",
+    "lastCommit": "32d38ba",
     "unreleased": {
       "feat": 16,
       "fix": 3,

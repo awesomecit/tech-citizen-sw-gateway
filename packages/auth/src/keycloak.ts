@@ -124,6 +124,66 @@ async function setupOAuth2(
   });
 }
 
+// Helper: Validate CSRF state
+async function validateCsrfState(
+  app: FastifyInstance,
+  state: string,
+  reply: FastifyReply,
+): Promise<boolean> {
+  try {
+    const oauth2 = app as any;
+    if (oauth2.keycloakOAuth2?.validateState) {
+      const isValid = await oauth2.keycloakOAuth2.validateState(state);
+      if (!isValid) {
+        reply
+          .code(403)
+          .send({ error: 'Invalid state parameter (CSRF check failed)' });
+        return false;
+      }
+    }
+    return true;
+  } catch (err) {
+    app.log.warn({ err }, 'State validation failed');
+    reply
+      .code(403)
+      .send({ error: 'Invalid state parameter (CSRF check failed)' });
+    return false;
+  }
+}
+
+// Helper: Exchange code for tokens
+async function exchangeCodeForTokens(
+  app: FastifyInstance,
+  request: FastifyRequest,
+  sessionTTL: number,
+): Promise<SessionData | null> {
+  try {
+    const token = await (
+      app as any
+    ).keycloakOAuth2.getAccessTokenUsingAuthorizationCodeFlow(request);
+    const userInfo = token.id_token_claims || {};
+
+    return {
+      userId: userInfo.sub || randomUUID(),
+      userType: 'domain',
+      email: userInfo.email || 'unknown@example.com',
+      accessToken: token.access_token,
+      refreshToken: token.refresh_token || '',
+      expiresAt: Date.now() + (token.expires_in || sessionTTL) * 1000,
+    };
+  } catch (error) {
+    app.log.error(
+      {
+        errorCode: (error as any).code,
+        errorMessage: (error as any).message,
+        statusCode: (error as any).statusCode,
+      },
+      'OIDC token exchange failed',
+    );
+    return null;
+  }
+}
+
 // Helper: OIDC callback handler
 function registerCallbackRoute(app: FastifyInstance, sessionTTL: number): void {
   app.get(
@@ -139,45 +199,16 @@ function registerCallbackRoute(app: FastifyInstance, sessionTTL: number): void {
       if (!state)
         return reply.code(400).send({ error: 'Missing state parameter' });
 
-      // @ts-expect-error - OAuth2 plugin adds state validation
-      const isValidState = await app.keycloakOAuth2.validateState(state);
-      if (!isValidState) {
-        return reply
-          .code(403)
-          .send({ error: 'Invalid state parameter (CSRF check failed)' });
-      }
+      const isValidState = await validateCsrfState(app, state, reply);
+      if (!isValidState) return;
 
-      try {
-        // @ts-expect-error - OAuth2 plugin type definitions incomplete
-        const token =
-          await app.keycloakOAuth2.getAccessTokenUsingAuthorizationCodeFlow(
-            request,
-          );
-        const userInfo = token.id_token_claims || {};
-
-        const sessionData: SessionData = {
-          userId: userInfo.sub || randomUUID(),
-          userType: 'domain',
-          email: userInfo.email || 'unknown@example.com',
-          accessToken: token.access_token,
-          refreshToken: token.refresh_token || '',
-          expiresAt: Date.now() + (token.expires_in || sessionTTL) * 1000,
-        };
-
-        (request.session as any).user = sessionData;
-        return reply.redirect('/');
-      } catch (error) {
-        // Sanitize error: never log full error object (may contain tokens/secrets)
-        app.log.error(
-          {
-            errorCode: (error as any).code,
-            errorMessage: (error as any).message,
-            statusCode: (error as any).statusCode,
-          },
-          'OIDC token exchange failed',
-        );
+      const sessionData = await exchangeCodeForTokens(app, request, sessionTTL);
+      if (!sessionData) {
         return reply.code(401).send({ error: 'Authentication failed' });
       }
+
+      (request.session as any).user = sessionData;
+      return reply.redirect('/');
     },
   );
 }

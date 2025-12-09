@@ -1,0 +1,56 @@
+version: '3.9'
+
+services:
+  keycloak-test:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: tech-citizen-keycloak-test
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_DB: dev-mem
+      KC_HTTP_PORT: ${KEYCLOAK_HTTP_PORT:-8080}
+      KC_METRICS_ENABLED: 'true'
+      KC_HEALTH_ENABLED: 'true'
+    ports:
+      - '${KEYCLOAK_PORT:-8091}:${KEYCLOAK_HTTP_PORT:-8080}'
+    volumes:
+      - ./realm-export.json:/opt/keycloak/data/import/realm-healthcare-domain.json:ro
+    command:
+      - start-dev
+      - --import-realm
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'exec 3<>/dev/tcp/127.0.0.1/8080 && echo -e "GET /health/ready HTTP/1.1\nhost: 127.0.0.1:8080\n" >&3 && timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    networks:
+      - test-network
+
+  redis-session-test:
+    image: redis:7-alpine
+    container_name: tech-citizen-redis-session-test
+    command:
+      - redis-server
+      - --appendonly
+      - 'yes'
+      - --requirepass
+      - ${REDIS_PASSWORD:-test-redis-password}
+    ports:
+      - '${REDIS_PORT:-6381}:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    name: tech-citizen-test
+    driver: bridge

@@ -590,3 +590,28 @@ Documentare in `docs/course/IMPLEMENTATION_STATUS.md`:
 **Maintainer**: Antonio Cittadino  
 **Review Frequency**: Monthly  
 **Next Review**: 2026-01-10
+
+---
+
+## 8. Cache Deduplication (async-cache-dedupe)
+
+**Context**: Gateway riceve richieste duplicate con identici parametri → evitare query ripetute.
+
+**Solution**: `@fastify/caching` + `async-cache-dedupe` (EPIC-005)
+
+**Strategy**:
+
+- **Deduplication**: Single in-flight request per cache key
+- **TTL**: 30-120s (configurabile per route)
+- **Storage**: Redis (prod), in-memory (dev)
+- **Invalidation**: Event-driven (RabbitMQ) + manual
+
+**Cache Keys**:
+
+- `GET /api/patients/:id` → `patient:${id}` (60s TTL)
+- `GET /api/appointments?date=X` → `appointments:${date}` (30s TTL)
+- `GET /health` → `health:check` (5s TTL, high dedupe)
+
+**Monitoring**: Prometheus metrics (cache_hits, cache_misses, deduplication_savings)
+
+**Next**: Implementare in `packages/cache`, integrare in gateway routes.
