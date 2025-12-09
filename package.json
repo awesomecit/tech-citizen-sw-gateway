@@ -59,6 +59,9 @@
     "release:suggest": "node scripts/auto-release.cjs --type=\"auto\" --dry-run",
     "release:minor": "node scripts/auto-release.cjs --type=\"minor\"",
     "release:major": "node scripts/auto-release.cjs --type=\"major\"",
+    "features:update": "node scripts/update-features.js",
+    "features:preview": "node scripts/update-features.js --dry-run",
+    "features:validate": "npx ajv-cli validate -s features.schema.json -d features.json",
     "prepare": "husky",
     "pre-commit": "lint-staged"
   },

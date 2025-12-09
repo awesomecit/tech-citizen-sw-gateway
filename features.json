@@ -1,0 +1,351 @@
+{
+  "$schema": "./features.schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-09T21:30:00Z",
+  "project": {
+    "name": "tech-citizen-sw-gateway",
+    "repository": "github.com/awesomecit/tech-citizen-sw-gateway"
+  },
+  "release": {
+    "current": "1.0.0",
+    "nextSuggested": "1.1.0",
+    "lastCommit": "333b490",
+    "unreleased": {
+      "feat": 4,
+      "fix": 0,
+      "breaking": 0
+    }
+  },
+  "features": {
+    "auth-package": {
+      "id": "EPIC-009",
+      "name": "Reusable Auth Package",
+      "description": "Modular authentication package for mono-repo services",
+      "status": "in-progress",
+      "enabled": true,
+      "maturity": "alpha",
+      "progress": {
+        "percentage": 40,
+        "userStories": {
+          "total": 5,
+          "completed": 2,
+          "inProgress": 0,
+          "todo": 3
+        }
+      },
+      "environment": {
+        "development": true,
+        "test": true,
+        "staging": false,
+        "production": false
+      },
+      "dependencies": [],
+      "blockers": [],
+      "commits": [
+        {
+          "hash": "ab73b71",
+          "type": "feat",
+          "scope": "auth",
+          "subject": "add US-037 package structure with TDD",
+          "timestamp": "2025-12-09T14:00:00Z",
+          "userStory": "US-037"
+        },
+        {
+          "hash": "f4e80d5",
+          "type": "feat",
+          "scope": "auth",
+          "subject": "add US-038 Scenario 1 - JWT valid token validation",
+          "timestamp": "2025-12-09T17:18:00Z",
+          "userStory": "US-038"
+        },
+        {
+          "hash": "ecb791e",
+          "type": "feat",
+          "scope": "auth",
+          "subject": "add US-038 Scenarios 2-5 - JWT error validation",
+          "timestamp": "2025-12-09T20:45:00Z",
+          "userStory": "US-038"
+        },
+        {
+          "hash": "cfa3c6a",
+          "type": "feat",
+          "scope": "auth",
+          "subject": "add US-038 Scenarios 6-7 - issuer and claims validation",
+          "timestamp": "2025-12-09T21:15:00Z",
+          "userStory": "US-038"
+        }
+      ],
+      "userStories": {
+        "US-037": {
+          "name": "Auth package structure",
+          "status": "done",
+          "estimate": "1h",
+          "actual": "1h",
+          "coverage": 100,
+          "tests": {
+            "total": 7,
+            "passing": 7,
+            "failing": 0
+          },
+          "completedAt": "2025-12-09T14:00:00Z",
+          "commits": ["ab73b71"]
+        },
+        "US-038": {
+          "name": "JWT validation plugin",
+          "status": "done",
+          "estimate": "3h",
+          "actual": "3h",
+          "coverage": 100,
+          "tests": {
+            "total": 7,
+            "passing": 7,
+            "failing": 0
+          },
+          "scenarios": {
+            "total": 7,
+            "implemented": 7,
+            "passing": 7
+          },
+          "bddFeature": "e2e/features/auth-jwt-validation.feature",
+          "completedAt": "2025-12-09T21:15:00Z",
+          "commits": ["f4e80d5", "ecb791e", "cfa3c6a"]
+        },
+        "US-039": {
+          "name": "Keycloak integration plugin",
+          "status": "todo",
+          "estimate": "4h",
+          "bddFeature": "e2e/features/auth-keycloak-integration.feature"
+        },
+        "US-040": {
+          "name": "Session management plugin",
+          "status": "todo",
+          "estimate": "3h",
+          "bddFeature": "e2e/features/auth-session-management.feature"
+        },
+        "US-041": {
+          "name": "TypeBox schemas",
+          "status": "todo",
+          "estimate": "2h",
+          "bddFeature": "e2e/features/auth-schema-validation.feature"
+        },
+        "US-042": {
+          "name": "Main auth plugin composition",
+          "status": "todo",
+          "estimate": "2h",
+          "bddFeature": "e2e/features/auth-plugin-registration.feature"
+        }
+      },
+      "metrics": {
+        "estimatedHours": 15,
+        "actualHours": 4,
+        "remainingHours": 11,
+        "velocity": 1.0,
+        "testCoverage": 100,
+        "totalTests": 14,
+        "passingTests": 14
+      },
+      "releaseTarget": "1.1.0",
+      "releaseNotes": "Foundation for centralized authentication - JWT validation complete"
+    },
+    "infrastructure-foundation": {
+      "id": "EPIC-001",
+      "name": "Infrastructure Foundation",
+      "description": "Minimal production-ready infrastructure with Docker Compose, monitoring, and graceful shutdown",
+      "status": "in-progress",
+      "enabled": true,
+      "maturity": "beta",
+      "progress": {
+        "percentage": 60,
+        "userStories": {
+          "total": 7,
+          "completed": 5,
+          "inProgress": 0,
+          "todo": 2
+        }
+      },
+      "environment": {
+        "development": true,
+        "test": true,
+        "staging": true,
+        "production": false
+      },
+      "dependencies": [],
+      "blockers": [],
+      "metrics": {
+        "estimatedHours": 13,
+        "actualHours": 10,
+        "remainingHours": 3
+      },
+      "releaseTarget": "1.0.0",
+      "releaseNotes": "Core infrastructure setup with monitoring and graceful shutdown"
+    },
+    "production-deployment": {
+      "id": "EPIC-008",
+      "name": "Production Server Setup",
+      "description": "Ansible-based production deployment with security hardening",
+      "status": "blocked",
+      "enabled": false,
+      "maturity": "experimental",
+      "progress": {
+        "percentage": 0,
+        "userStories": {
+          "total": 6,
+          "completed": 0,
+          "inProgress": 0,
+          "todo": 6
+        }
+      },
+      "environment": {
+        "development": false,
+        "test": false,
+        "staging": false,
+        "production": false
+      },
+      "dependencies": [],
+      "blockers": [
+        "Awaiting Hetzner server credentials",
+        "Cloudflare Zone ID required"
+      ],
+      "commits": [
+        {
+          "hash": "696ddc4",
+          "type": "feat",
+          "scope": "infra",
+          "subject": "add multi-environment Ansible automation with security hardening",
+          "timestamp": "2025-12-07T10:00:00Z",
+          "userStory": "US-032"
+        }
+      ],
+      "metrics": {
+        "estimatedHours": 18,
+        "actualHours": 0,
+        "remainingHours": 18
+      },
+      "releaseTarget": "1.2.0",
+      "releaseNotes": "Production deployment automation ready"
+    },
+    "centralized-auth": {
+      "id": "EPIC-005",
+      "name": "Centralized Authentication",
+      "description": "Keycloak-based authentication with auth microservice",
+      "status": "blocked",
+      "enabled": false,
+      "maturity": "experimental",
+      "progress": {
+        "percentage": 0,
+        "userStories": {
+          "total": 7,
+          "completed": 0,
+          "inProgress": 0,
+          "todo": 7
+        }
+      },
+      "environment": {
+        "development": false,
+        "test": false,
+        "staging": false,
+        "production": false
+      },
+      "dependencies": ["auth-package"],
+      "blockers": ["EPIC-009 must complete first (auth package foundation)"],
+      "metrics": {
+        "estimatedHours": 15,
+        "actualHours": 0,
+        "remainingHours": 15
+      },
+      "releaseTarget": "1.3.0",
+      "releaseNotes": "Full authentication service with Keycloak integration"
+    }
+  },
+  "toggles": {
+    "auth.jwt.validation": {
+      "enabled": true,
+      "description": "JWT token validation with @fastify/jwt",
+      "environments": {
+        "development": true,
+        "test": true,
+        "staging": false,
+        "production": false
+      },
+      "rolloutPercentage": 100,
+      "feature": "auth-package",
+      "since": "1.0.0",
+      "validations": {
+        "signature": true,
+        "expiration": true,
+        "issuer": true,
+        "requiredClaims": ["sub"]
+      }
+    },
+    "auth.jwt.issuerValidation": {
+      "enabled": true,
+      "description": "Validate JWT issuer matches Keycloak realm",
+      "environments": {
+        "development": true,
+        "test": true,
+        "staging": false,
+        "production": false
+      },
+      "rolloutPercentage": 100,
+      "feature": "auth-package",
+      "since": "1.0.0",
+      "config": {
+        "allowedIss": "${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}"
+      }
+    },
+    "infra.gracefulShutdown": {
+      "enabled": true,
+      "description": "Graceful shutdown on SIGTERM/SIGINT",
+      "environments": {
+        "development": true,
+        "test": true,
+        "staging": true,
+        "production": false
+      },
+      "rolloutPercentage": 100,
+      "feature": "infrastructure-foundation",
+      "since": "1.0.0",
+      "config": {
+        "timeout": 30000
+      }
+    },
+    "monitoring.prometheus": {
+      "enabled": true,
+      "description": "Prometheus metrics collection",
+      "environments": {
+        "development": true,
+        "test": true,
+        "staging": true,
+        "production": false
+      },
+      "rolloutPercentage": 100,
+      "feature": "infrastructure-foundation",
+      "since": "1.0.0",
+      "endpoints": ["/metrics"]
+    }
+  },
+  "changelog": {
+    "1.0.0": {
+      "released": false,
+      "targetDate": "2025-12-15",
+      "features": [
+        "EPIC-001: Infrastructure Foundation (60% complete)",
+        "EPIC-009: Auth Package - JWT validation (US-037, US-038)"
+      ],
+      "fixes": [],
+      "breaking": [],
+      "commits": {
+        "feat": 4,
+        "fix": 0,
+        "docs": 1,
+        "refactor": 2
+      },
+      "highlights": [
+        "JWT validation plugin with 100% test coverage",
+        "7 BDD scenarios implemented (auth-jwt-validation.feature)",
+        "Docker Compose infrastructure with Prometheus + Grafana",
+        "Graceful shutdown handling"
+      ]
+    }
+  }
+}

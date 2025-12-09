@@ -1,0 +1,501 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://techcitizen.it/schemas/features.json",
+  "title": "Feature Flags and Release Tracking",
+  "description": "Schema for tracking features, user stories, commits, and release planning",
+  "type": "object",
+  "required": ["version", "lastUpdated", "project", "release", "features"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Schema version (Semantic Versioning)"
+    },
+    "lastUpdated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp (ISO 8601)"
+    },
+    "project": {
+      "type": "object",
+      "required": ["name", "repository"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Project name"
+        },
+        "repository": {
+          "type": "string",
+          "description": "Git repository URL"
+        }
+      }
+    },
+    "release": {
+      "type": "object",
+      "required": ["current", "lastCommit"],
+      "properties": {
+        "current": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-z0-9.-]+)?(\\+[a-z0-9.-]+)?$",
+          "description": "Current version (Semantic Versioning with optional pre-release and metadata)"
+        },
+        "nextSuggested": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-z0-9.-]+)?(\\+[a-z0-9.-]+)?$",
+          "description": "Suggested next version based on commit analysis"
+        },
+        "lastCommit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{7,40}$",
+          "description": "Git commit hash"
+        },
+        "unreleased": {
+          "type": "object",
+          "properties": {
+            "feat": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of unreleased feat commits"
+            },
+            "fix": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of unreleased fix commits"
+            },
+            "breaking": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of unreleased BREAKING CHANGE commits"
+            }
+          }
+        }
+      }
+    },
+    "features": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/feature"
+      }
+    },
+    "toggles": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/toggle"
+      }
+    },
+    "changelog": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/release"
+      }
+    }
+  },
+  "definitions": {
+    "feature": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "status",
+        "enabled",
+        "progress",
+        "environment"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^EPIC-\\d{3,}$",
+          "description": "Epic ID from backlog"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 100,
+          "description": "Feature name"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Feature description"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["todo", "in-progress", "done", "blocked", "deprecated"],
+          "description": "Current status"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Global feature toggle"
+        },
+        "maturity": {
+          "type": "string",
+          "enum": ["experimental", "alpha", "beta", "stable", "deprecated"],
+          "description": "Feature maturity level"
+        },
+        "progress": {
+          "type": "object",
+          "required": ["percentage", "userStories"],
+          "properties": {
+            "percentage": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "userStories": {
+              "type": "object",
+              "required": ["total", "completed"],
+              "properties": {
+                "total": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "completed": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "inProgress": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "todo": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        },
+        "environment": {
+          "type": "object",
+          "required": ["development", "test", "staging", "production"],
+          "properties": {
+            "development": {
+              "type": "boolean"
+            },
+            "test": {
+              "type": "boolean"
+            },
+            "staging": {
+              "type": "boolean"
+            },
+            "production": {
+              "type": "boolean"
+            }
+          }
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Feature IDs this feature depends on"
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Blocking issues or requirements"
+        },
+        "commits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/commit"
+          }
+        },
+        "userStories": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/userStory"
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "estimatedHours": {
+              "type": "number",
+              "minimum": 0
+            },
+            "actualHours": {
+              "type": "number",
+              "minimum": 0
+            },
+            "remainingHours": {
+              "type": "number",
+              "minimum": 0
+            },
+            "velocity": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Story points per hour"
+            },
+            "testCoverage": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "totalTests": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "passingTests": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "releaseTarget": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Target release version"
+        },
+        "releaseNotes": {
+          "type": "string",
+          "description": "Release notes summary"
+        }
+      }
+    },
+    "toggle": {
+      "type": "object",
+      "required": ["enabled", "description", "environments"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Global toggle state"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "environments": {
+          "type": "object",
+          "required": ["development", "test", "staging", "production"],
+          "properties": {
+            "development": {
+              "type": "boolean"
+            },
+            "test": {
+              "type": "boolean"
+            },
+            "staging": {
+              "type": "boolean"
+            },
+            "production": {
+              "type": "boolean"
+            }
+          }
+        },
+        "rolloutPercentage": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Percentage of users with feature enabled"
+        },
+        "feature": {
+          "type": "string",
+          "description": "Parent feature ID"
+        },
+        "since": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Version when toggle was introduced"
+        },
+        "config": {
+          "type": "object",
+          "description": "Feature-specific configuration"
+        },
+        "validations": {
+          "type": "object",
+          "description": "Validation rules"
+        },
+        "endpoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "API endpoints affected by this toggle"
+        }
+      }
+    },
+    "commit": {
+      "type": "object",
+      "required": ["hash", "type", "subject"],
+      "properties": {
+        "hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{7,40}$"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "feat",
+            "fix",
+            "docs",
+            "style",
+            "refactor",
+            "perf",
+            "test",
+            "build",
+            "ci",
+            "chore"
+          ]
+        },
+        "scope": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "userStory": {
+          "type": "string",
+          "pattern": "^US-\\d{3,}$"
+        }
+      }
+    },
+    "userStory": {
+      "type": "object",
+      "required": ["name", "status"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["todo", "in-progress", "done", "blocked"]
+        },
+        "estimate": {
+          "type": "string",
+          "pattern": "^\\d+h$"
+        },
+        "actual": {
+          "type": "string",
+          "pattern": "^\\d+h$"
+        },
+        "coverage": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "tests": {
+          "type": "object",
+          "properties": {
+            "total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "passing": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "failing": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "scenarios": {
+          "type": "object",
+          "properties": {
+            "total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "implemented": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "passing": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "bddFeature": {
+          "type": "string",
+          "description": "Path to BDD feature file"
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "commits": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{7,40}$"
+          }
+        }
+      }
+    },
+    "release": {
+      "type": "object",
+      "required": ["released"],
+      "properties": {
+        "released": {
+          "type": "boolean"
+        },
+        "releasedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "targetDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "fixes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "breaking": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "commits": {
+          "type": "object",
+          "properties": {
+            "feat": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "fix": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "docs": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "refactor": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "highlights": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
