@@ -8,13 +8,13 @@
 
 ## Informazioni Corso
 
-| | |
-|---|---|
-| **Livello** | Da principiante a professionista |
-| **Durata** | ~100 ore di contenuti |
-| **Metodologia** | Project-based learning |
-| **Progetto** | Tech Citizen SW Gateway |
-| **Lingua** | Italiano |
+|                 |                                  |
+| --------------- | -------------------------------- |
+| **Livello**     | Da principiante a professionista |
+| **Durata**      | ~100 ore di contenuti            |
+| **Metodologia** | Project-based learning           |
+| **Progetto**    | Tech Citizen SW Gateway          |
+| **Lingua**      | Italiano                         |
 
 ---
 
@@ -26,33 +26,33 @@ Costruirai un **API Gateway production-ready** per il settore healthcare, impara
 
 ## Sommario
 
-| # | Sezione | Argomento principale |
-|---|---------|---------------------|
-| 1 | API Gateway Patterns | Pattern architetturali, Circuit Breaker, Rate Limiting |
-| 2 | Gateway vs Proxy | Differenze tra componenti infrastrutturali |
-| 3 | Node.js & TypeScript | Runtime, Event Loop, Undici, TS avanzato |
-| 4 | Protocolli | REST, SOAP, HL7, FHIR, MLLP |
-| 5 | AI-Assisted Development | Claude, Copilot, NotebookLM, n8n, Devil's Advocate |
-| 6 | Architettura Software | Microservices, DDD, Sistemi distribuiti |
-| 7 | Monitoring & Observability | Prometheus, Grafana, Loki, Tempo, Y.js |
-| 8 | Code Patterns | Clean Code, SOLID, Design Patterns |
-| 9 | Redis & RabbitMQ | Cache, Eventi, Lock, Pub/Sub, Topics |
-| 10 | MinIO/S3 | Document storage, HL7 documents |
-| 11 | Autenticazione | Keycloak, OAuth, LDAP, SSO, RBAC |
-| 12 | UI Login | OAuth flow, Token storage, PKCE |
-| 13 | UI Dettaglio Utente | CRUD, Forms, Validation |
-| 14 | UI Lista Utenti | Pagination, Filtering, Search |
-| 15 | Permessi e Routing | Guards, Feature flags, Capabilities |
-| 16 | Stato Applicazione | State management, Sync, Offline |
-| 17 | Networking | DNS, Hetzner, Server management, Cloudflare |
-| 18 | Deploy e Ambienti | Docker, CI/CD, Multi-environment |
-| 19 | Git & Trunk-Based | Branching, Conventional Commits, Hooks |
-| 20 | Agile & XP | Epic/Stories/Tasks, Poker Planning, ADR |
-| 21 | Testing | BDD + TDD, Jest, Smoke tests, Flaky tests |
-| 22 | Deploy & Go-Live | Checklist, Rollback, Post-launch |
-| 23 | Aspetti Legali | Licenze, GDPR, Freelancing, Colloqui |
-| 24 | Contribuire | Open source, Plugin ideas, Workflow |
-| 25 | AI Locale & Enterprise | Stregatto, LLM, Agenti, Reti neurali, n8n |
+| #   | Sezione                    | Argomento principale                                   |
+| --- | -------------------------- | ------------------------------------------------------ |
+| 1   | API Gateway Patterns       | Pattern architetturali, Circuit Breaker, Rate Limiting |
+| 2   | Gateway vs Proxy           | Differenze tra componenti infrastrutturali             |
+| 3   | Node.js & TypeScript       | Runtime, Event Loop, Undici, TS avanzato               |
+| 4   | Protocolli                 | REST, SOAP, HL7, FHIR, MLLP                            |
+| 5   | AI-Assisted Development    | Claude, Copilot, NotebookLM, n8n, Devil's Advocate     |
+| 6   | Architettura Software      | Microservices, DDD, Sistemi distribuiti                |
+| 7   | Monitoring & Observability | Prometheus, Grafana, Loki, Tempo, Y.js                 |
+| 8   | Code Patterns              | Clean Code, SOLID, Design Patterns                     |
+| 9   | Redis & RabbitMQ           | Cache, Eventi, Lock, Pub/Sub, Topics                   |
+| 10  | MinIO/S3                   | Document storage, HL7 documents                        |
+| 11  | Autenticazione             | Keycloak, OAuth, LDAP, SSO, RBAC                       |
+| 12  | UI Login                   | OAuth flow, Token storage, PKCE                        |
+| 13  | UI Dettaglio Utente        | CRUD, Forms, Validation                                |
+| 14  | UI Lista Utenti            | Pagination, Filtering, Search                          |
+| 15  | Permessi e Routing         | Guards, Feature flags, Capabilities                    |
+| 16  | Stato Applicazione         | State management, Sync, Offline                        |
+| 17  | Networking                 | DNS, Hetzner, Server management, Cloudflare            |
+| 18  | Deploy e Ambienti          | Docker, CI/CD, Multi-environment                       |
+| 19  | Git & Trunk-Based          | Branching, Conventional Commits, Hooks                 |
+| 20  | Agile & XP                 | Epic/Stories/Tasks, Poker Planning, ADR                |
+| 21  | Testing                    | BDD + TDD, Jest, Smoke tests, Flaky tests              |
+| 22  | Deploy & Go-Live           | Checklist, Rollback, Post-launch                       |
+| 23  | Aspetti Legali             | Licenze, GDPR, Freelancing, Colloqui                   |
+| 24  | Contribuire                | Open source, Plugin ideas, Workflow                    |
+| 25  | AI Locale & Enterprise     | Stregatto, LLM, Agenti, Reti neurali, n8n              |
 
 ---
 
@@ -82,11 +82,11 @@ Costruirai un **API Gateway production-ready** per il settore healthcare, impara
 
 **Contenuti**:
 
-| Componente | Responsabilità | Layer |
-|------------|----------------|-------|
-| **Reverse Proxy** | Forwarding, TLS termination | L7 |
-| **Load Balancer** | Distribuzione carico | L4/L7 |
-| **API Gateway** | Routing, Auth, Transform | L7 |
+| Componente        | Responsabilità              | Layer |
+| ----------------- | --------------------------- | ----- |
+| **Reverse Proxy** | Forwarding, TLS termination | L7    |
+| **Load Balancer** | Distribuzione carico        | L4/L7 |
+| **API Gateway**   | Routing, Auth, Transform    | L7    |
 
 - Quando usare cosa
 - Caddy come reverse proxy moderno
@@ -102,6 +102,7 @@ Costruirai un **API Gateway production-ready** per il settore healthcare, impara
 **Contenuti**:
 
 **Node.js Core**:
+
 - Event Loop: fasi, microtasks, macrotasks
 - libuv e thread pool
 - Streams e backpressure
@@ -110,12 +111,14 @@ Costruirai un **API Gateway production-ready** per il settore healthcare, impara
 - Memory management e GC
 
 **Edge Cases Critici**:
+
 - Blocking dell'event loop
 - Memory leaks con EventEmitter
 - Gestione SIGTERM/SIGINT
 - Connection pooling
 
 **Undici HTTP Client**:
+
 - Perché sostituisce http/https nativi
 - Connection pooling avanzato
 - Pipelining HTTP/1.1
@@ -123,12 +126,14 @@ Costruirai un **API Gateway production-ready** per il settore healthcare, impara
 - Interceptors e hooks
 
 **TypeScript Avanzato**:
+
 - Strict mode e type safety
 - Generics e Utility Types
 - Type Guards e Narrowing
 - Declaration files
 
 **Pseudocodice e Algoritmi**:
+
 - Pensare prima di codificare
 - Complessità computazionale basics
 - Strutture dati fondamentali
@@ -142,6 +147,7 @@ Costruirai un **API Gateway production-ready** per il settore healthcare, impara
 **Contenuti**:
 
 **REST API**:
+
 - Principi RESTful e Richardson Maturity Model
 - HTTP methods e status codes
 - HATEOAS
@@ -149,18 +155,19 @@ Costruirai un **API Gateway production-ready** per il settore healthcare, impara
 - OpenAPI/Swagger specification
 
 **SOAP**:
+
 - XML, WSDL, XSD
 - Quando si usa ancora (legacy, enterprise, PA)
 - Integrazione con sistemi esistenti
 
 **Healthcare Protocols**:
 
-| Protocollo | Uso | Formato |
-|------------|-----|---------|
+| Protocollo   | Uso                       | Formato        |
+| ------------ | ------------------------- | -------------- |
 | **HL7 v2.x** | Messaggistica ospedaliera | Pipe-delimited |
-| **HL7 FHIR** | API moderne healthcare | JSON/XML |
-| **MLLP** | Trasporto HL7 v2 | TCP wrapper |
-| **CDA** | Documenti clinici | XML |
+| **HL7 FHIR** | API moderne healthcare    | JSON/XML       |
+| **MLLP**     | Trasporto HL7 v2          | TCP wrapper    |
+| **CDA**      | Documenti clinici         | XML            |
 
 - Struttura messaggi HL7 (MSH, PID, OBX)
 - FHIR Resources e RESTful API
@@ -176,6 +183,7 @@ Costruirai un **API Gateway production-ready** per il settore healthcare, impara
 **Contenuti**:
 
 **Strumenti**:
+
 - **NotebookLM**: generazione contenuti educativi
 - **Claude**: code review, architettura, debugging
 - **GitHub Copilot**: autocompletamento intelligente
@@ -183,16 +191,19 @@ Costruirai un **API Gateway production-ready** per il settore healthcare, impara
 - **n8n**: automazioni workflow AI
 
 **Pattern Devil's Advocate**:
+
 - Chiedere critiche, non conferme
 - Template: Soluzione → Critiche → Alternative → Decisione
 - Quando usarlo: prima di merge, architectural decisions
 
 **Prompt Engineering per Codice**:
+
 - Context preparation efficace
 - Specificità: linguaggio, framework, versione
 - Limiti degli LLM e come aggirarli
 
 **Ethical AI Development**:
+
 - Responsabilità del codice generato
 - Review obbligatoria
 - Licensing del codice AI-generated
@@ -207,12 +218,14 @@ Costruirai un **API Gateway production-ready** per il settore healthcare, impara
 **Contenuti**:
 
 **Principi Architetturali**:
+
 - Microservices vs Monolith vs Modular Monolith
 - Domain-Driven Design basics
 - Event-Driven Architecture
 - CQRS e Event Sourcing
 
 **Sistemi Distribuiti**:
+
 - CAP Theorem e trade-offs
 - Consistency models
 - Fallacies of distributed computing
@@ -220,6 +233,7 @@ Costruirai un **API Gateway production-ready** per il settore healthcare, impara
 - Saga pattern per transazioni
 
 **Pattern di Resilienza**:
+
 - Circuit Breaker
 - Bulkhead Isolation
 - Timeout Cascading
@@ -247,34 +261,40 @@ Prometheus  Loki    Tempo
 ```
 
 **Metriche (APM)**:
+
 - Four Golden Signals
 - Prometheus e PromQL
 - Custom metrics per business KPIs
 - Response time targets (P50, P95, P99)
 
 **Logging Centralizzato**:
+
 - Structured logging con Pino
 - Log levels e quando usarli
 - Correlation IDs
 - Loki per aggregazione
 
 **Distributed Tracing**:
+
 - OpenTelemetry
 - Spans e context propagation
 - Tempo per storage
 
 **Audit e Compliance**:
+
 - Audit logging per healthcare
 - Retention policies (GDPR, HIPAA)
 - Immutabilità dei log
 
 **Revisioni e Conflict Resolution**:
+
 - Y.js per collaborazione real-time
 - CRDT (Conflict-free Replicated Data Types)
 - Operational Transform
 - Merge strategies
 
 **Grafana**:
+
 - Dashboards e visualizzazioni
 - Alerting e runbooks
 - Unified observability
@@ -288,12 +308,14 @@ Prometheus  Loki    Tempo
 **Contenuti**:
 
 **Clean Code**:
+
 - Naming conventions
 - Functions: piccole, single responsibility
 - Early returns vs nested conditionals
 - Named constants vs magic numbers
 
 **SOLID Principles**:
+
 - Single Responsibility
 - Open/Closed
 - Liskov Substitution
@@ -301,6 +323,7 @@ Prometheus  Loki    Tempo
 - Dependency Inversion
 
 **Design Patterns per Backend**:
+
 - Repository Pattern
 - Factory Pattern
 - Strategy Pattern
@@ -308,12 +331,14 @@ Prometheus  Loki    Tempo
 - Observer Pattern
 
 **Error Handling**:
+
 - Never return null
 - Custom error types
 - Error boundaries
 - Graceful degradation
 
 **Paradigmi di Programmazione**:
+
 - Imperativo vs Dichiarativo
 - Functional Programming basics
 - OOP quando serve
@@ -328,26 +353,27 @@ Prometheus  Loki    Tempo
 
 **Redis - Use Cases**:
 
-| Use Case | Struttura Dati | Pattern |
-|----------|----------------|---------|
-| **Cache** | String/Hash | Cache-aside |
-| **Session** | String | TTL-based |
-| **Rate Limit** | Sorted Set | Sliding window |
-| **Lock** | String | Redlock |
-| **Pub/Sub** | Channels | Broadcasting |
-| **Queue** | List | LPUSH/BRPOP |
+| Use Case       | Struttura Dati | Pattern        |
+| -------------- | -------------- | -------------- |
+| **Cache**      | String/Hash    | Cache-aside    |
+| **Session**    | String         | TTL-based      |
+| **Rate Limit** | Sorted Set     | Sliding window |
+| **Lock**       | String         | Redlock        |
+| **Pub/Sub**    | Channels       | Broadcasting   |
+| **Queue**      | List           | LPUSH/BRPOP    |
 
 **RabbitMQ - Use Cases**:
 
-| Use Case | Exchange | Pattern |
-|----------|----------|---------|
-| **Work Queue** | Default | Round-robin |
-| **Pub/Sub** | Fanout | Broadcast |
-| **Routing** | Direct | Selective |
-| **Topics** | Topic | Pattern matching |
-| **RPC** | Default | Reply queue |
+| Use Case       | Exchange | Pattern          |
+| -------------- | -------- | ---------------- |
+| **Work Queue** | Default  | Round-robin      |
+| **Pub/Sub**    | Fanout   | Broadcast        |
+| **Routing**    | Direct   | Selective        |
+| **Topics**     | Topic    | Pattern matching |
+| **RPC**        | Default  | Reply queue      |
 
 **Implementazioni**:
+
 - async-cache-dedupe per deduplica
 - CloudEvents standard
 - Dead Letter Queues
@@ -363,6 +389,7 @@ Prometheus  Loki    Tempo
 **Contenuti**:
 
 **S3 API**:
+
 - Buckets, objects, prefixes
 - Pre-signed URLs
 - Multipart upload
@@ -370,11 +397,13 @@ Prometheus  Loki    Tempo
 - Versioning
 
 **MinIO**:
+
 - S3-compatible self-hosted
 - Setup e configurazione
 - High availability
 
 **Healthcare Documents**:
+
 - HL7 CDA (Clinical Document Architecture)
 - PDF/A per archiviazione
 - DICOM per imaging (basics)
@@ -390,12 +419,14 @@ Prometheus  Loki    Tempo
 **Contenuti**:
 
 **Protocolli**:
+
 - OAuth 2.0 (flows: Authorization Code, PKCE, Client Credentials)
 - OpenID Connect (OIDC)
 - SAML 2.0 (enterprise SSO)
 - JWT structure e validation
 
 **Keycloak**:
+
 - Realms e isolation
 - Clients e scopes
 - Identity Providers
@@ -404,16 +435,19 @@ Prometheus  Loki    Tempo
 - Themes e branding
 
 **LDAP Integration**:
+
 - Directory structure (DN, CN, OU)
 - Bind e search operations
 - Active Directory integration
 
 **SSO/SLO**:
+
 - Single Sign-On flow
 - Single Logout challenges
 - Session management
 
 **RBAC**:
+
 - Roles e permissions
 - Role hierarchy
 - Custom capabilities
@@ -426,6 +460,7 @@ Prometheus  Loki    Tempo
 **Obiettivo**: Implementare autenticazione lato frontend
 
 **Contenuti**:
+
 - OAuth/OIDC flow da browser
 - PKCE per SPA
 - Token storage (httpOnly cookies vs localStorage)
@@ -441,6 +476,7 @@ Prometheus  Loki    Tempo
 **Obiettivo**: Creare interfacce per gestione dati
 
 **Contenuti**:
+
 - Form validation patterns
 - Optimistic updates
 - Error states
@@ -455,6 +491,7 @@ Prometheus  Loki    Tempo
 **Obiettivo**: Implementare liste e ricerche performanti
 
 **Contenuti**:
+
 - Pagination (offset vs cursor)
 - Sorting multi-column
 - Filtering avanzato
@@ -469,6 +506,7 @@ Prometheus  Loki    Tempo
 **Obiettivo**: Controllare accesso e navigazione
 
 **Contenuti**:
+
 - Route guards
 - Permission-based rendering
 - Feature flags
@@ -483,6 +521,7 @@ Prometheus  Loki    Tempo
 **Obiettivo**: Gestire stato in applicazioni complesse
 
 **Contenuti**:
+
 - Local vs Global state
 - Server state vs Client state
 - State machines (XState basics)
@@ -499,6 +538,7 @@ Prometheus  Loki    Tempo
 **Contenuti**:
 
 **Networking Fundamentals**:
+
 - TCP/IP stack
 - DNS resolution
 - TLS/SSL handshake
@@ -506,12 +546,14 @@ Prometheus  Loki    Tempo
 - NAT e port forwarding
 
 **DNS e Domini**:
+
 - Record types (A, AAAA, CNAME, MX, TXT)
 - TTL e propagazione
 - Registrar e WHOIS
 - Subdomini e wildcard
 
 **Cloudflare**:
+
 - Proxy mode vs DNS-only
 - SSL modes
 - WAF e rate limiting
@@ -519,6 +561,7 @@ Prometheus  Loki    Tempo
 - Workers basics
 
 **Hetzner Cloud**:
+
 - Server types e pricing
 - hcloud CLI
 - SSH keys management
@@ -528,6 +571,7 @@ Prometheus  Loki    Tempo
 - Snapshots e backups
 
 **Server Management**:
+
 - Initial setup e hardening
 - UFW firewall
 - Fail2Ban
@@ -536,6 +580,7 @@ Prometheus  Loki    Tempo
 - SSH best practices
 
 **Hetzner Simulation**:
+
 - Emulare produzione in locale
 - Cloudflare simulator
 - Docker network isolation
@@ -560,6 +605,7 @@ local   CI/CD    Hetzner      Hetzner
 ```
 
 **Docker**:
+
 - Dockerfile best practices
 - Multi-stage builds
 - Compose per environment
@@ -567,6 +613,7 @@ local   CI/CD    Hetzner      Hetzner
 - Resource limits
 
 **Automazioni**:
+
 - n8n workflows
 - Jenkins pipelines
 - GitHub Actions
@@ -574,6 +621,7 @@ local   CI/CD    Hetzner      Hetzner
 - Bash scripts
 
 **CI/CD Pipeline**:
+
 - Lint → Test → Build → Security → Deploy
 - Quality gates
 - Rollback strategies
@@ -589,6 +637,7 @@ local   CI/CD    Hetzner      Hetzner
 **Contenuti**:
 
 **Git Fundamentals**:
+
 - Branching e merging
 - Rebase vs merge
 - Cherry-pick
@@ -610,12 +659,14 @@ main ─────●─────●─────●─────●─
 - Release branches quando serve
 
 **Conventional Commits**:
+
 - feat, fix, docs, style, refactor, test, chore
 - Scope e breaking changes
 - Auto-changelog generation
 - Semantic versioning
 
 **Hooks e Automazioni**:
+
 - Pre-commit (lint, format)
 - Commit-msg (validation)
 - Pre-push (tests)
@@ -645,23 +696,27 @@ EPIC (settimane/mesi)
 ```
 
 **User Stories**:
+
 - Template: As a [role], I want [feature], so that [benefit]
 - Acceptance Criteria (Given/When/Then)
 - Definition of Done
 - INVEST criteria
 
 **Planning Poker**:
+
 - Fibonacci sequence (1, 2, 3, 5, 8, 13, 21)
 - Story Points vs ore
 - Velocità del team
 - Capacity planning
 
 **Extreme Programming (XP)**:
+
 - Values: Communication, Simplicity, Feedback, Courage, Respect
 - Practices: TDD, Pair Programming, CI, Small Releases
 - YAGNI principle
 
 **Architecture Decision Records (ADR)**:
+
 - Documentare decisioni
 - Template: Context → Decision → Consequences
 - Lifecycle: Proposed → Accepted → Deprecated
@@ -771,6 +826,7 @@ Deploy ──▶ Smoke Tests ──▶ [PASS] ──▶ Traffic ON
 ```
 
 Cosa verificano:
+
 - Health endpoint risponde
 - Database connection attiva
 - Redis raggiungibile
@@ -778,6 +834,7 @@ Cosa verificano:
 - Critical API paths operativi
 
 Caratteristiche:
+
 - Veloci (< 30 secondi totali)
 - Non invasivi (no side effects)
 - Eseguiti ad ogni deploy
@@ -799,6 +856,7 @@ Test flaky = test che a volte passa, a volte fallisce
 ```
 
 Cause comuni:
+
 - Timing issues (race conditions)
 - Shared state tra test
 - External dependencies
@@ -807,14 +865,15 @@ Cause comuni:
 
 Strategie di gestione:
 
-| Strategia | Quando usarla |
-|-----------|---------------|
-| **Quarantine** | Isolare e marcare come skip temporaneo |
-| **Retry** | jest.retryTimes(3) per CI |
-| **Fix root cause** | Sempre preferibile |
-| **Delete** | Se non porta valore |
+| Strategia          | Quando usarla                          |
+| ------------------ | -------------------------------------- |
+| **Quarantine**     | Isolare e marcare come skip temporaneo |
+| **Retry**          | jest.retryTimes(3) per CI              |
+| **Fix root cause** | Sempre preferibile                     |
+| **Delete**         | Se non porta valore                    |
 
 Best practices:
+
 - CI monitora flaky rate
 - Dashboard con storico fallimenti
 - Ownership: chi rompe, sistema
@@ -841,13 +900,13 @@ Best practices:
 
 **Jest Configuration**:
 
-| Config | Valore | Motivo |
-|--------|--------|--------|
-| testTimeout | 5000ms | Fail fast |
-| maxWorkers | 50% | Parallelismo controllato |
-| clearMocks | true | Isolation |
-| collectCoverage | CI only | Performance locale |
-| bail | 1 (CI) | Stop al primo fail |
+| Config          | Valore  | Motivo                   |
+| --------------- | ------- | ------------------------ |
+| testTimeout     | 5000ms  | Fail fast                |
+| maxWorkers      | 50%     | Parallelismo controllato |
+| clearMocks      | true    | Isolation                |
+| collectCoverage | CI only | Performance locale       |
+| bail            | 1 (CI)  | Stop al primo fail       |
 
 ---
 
@@ -858,6 +917,7 @@ Best practices:
 **Contenuti**:
 
 **Pre-Launch Checklist**:
+
 - [ ] Tutti i test passano
 - [ ] Security scan completato
 - [ ] Performance testing
@@ -868,6 +928,7 @@ Best practices:
 - [ ] Rollback testato
 
 **Go-Live Steps**:
+
 1. Final staging verification
 2. Database migrations
 3. DNS switch / Load balancer update
@@ -876,6 +937,7 @@ Best practices:
 6. Gradual traffic increase
 
 **Post-Launch**:
+
 - Monitoring intensivo (24-48h)
 - Hotfix process
 - Retrospettiva
@@ -891,12 +953,12 @@ Best practices:
 
 **Licenze Software**:
 
-| Licenza | Permissiva | Copyleft | Commerciale |
-|---------|------------|----------|-------------|
-| MIT | ✅ | ❌ | ✅ |
-| Apache 2.0 | ✅ | ❌ | ✅ |
-| GPL-3.0 | ❌ | ✅ Strong | ✅ |
-| AGPL-3.0 | ❌ | ✅ Strong | ✅ |
+| Licenza    | Permissiva | Copyleft  | Commerciale |
+| ---------- | ---------- | --------- | ----------- |
+| MIT        | ✅         | ❌        | ✅          |
+| Apache 2.0 | ✅         | ❌        | ✅          |
+| GPL-3.0    | ❌         | ✅ Strong | ✅          |
+| AGPL-3.0   | ❌         | ✅ Strong | ✅          |
 
 - Gestione licenze nel progetto
 - SBOM (Software Bill of Materials)
@@ -904,18 +966,21 @@ Best practices:
 - Dual licensing
 
 **Open Source Business**:
+
 - Modelli: Open Core, Support, SaaS, Dual Licensing
 - Come contribuire efficacemente
 - Building reputation
 - Maintainer responsibilities
 
 **Mercato del Lavoro**:
+
 - Tipologie: dipendente, freelancer, contractor, consulente
 - CV tech efficace
 - Portfolio e GitHub profile
 - Networking
 
 **Colloqui Tecnici**:
+
 - Fasi tipiche del processo
 - System design interviews
 - Behavioral interviews (STAR method)
@@ -923,24 +988,28 @@ Best practices:
 - Red flags aziendali
 
 **Freelancing e P.IVA**:
+
 - Regime forfettario vs ordinario
 - INPS Gestione Separata
 - Fatturazione elettronica
 - Contratti tipo (NDA, SLA)
 
 **Assicurazioni per Freelancer**:
+
 - RC Professionale
 - Tutela legale
 - Infortuni
 - Cyber Risk
 
 **AI e Privacy**:
+
 - Responsabilità codice AI-generated
 - Copyright e licensing
 - Disclosure requirements
 - AI Act (EU) overview
 
 **GDPR Compliance**:
+
 - Principi fondamentali
 - Basi legali per trattamento
 - Diritti degli interessati
@@ -949,11 +1018,13 @@ Best practices:
 - DPIA
 
 **Healthcare Compliance**:
+
 - HIPAA basics (clienti USA)
 - MDR per software medicale
 - Certificazione CE
 
 **Checklist App EU**:
+
 - [ ] Privacy Policy
 - [ ] Cookie Policy con consenso granulare
 - [ ] Terms of Service
@@ -972,17 +1043,18 @@ Best practices:
 
 **Aree di Contribuzione**:
 
-| Area | Skill | Esempi |
-|------|-------|--------|
-| Core Gateway | TypeScript, Fastify | Routing, Circuit Breaker |
-| Infrastructure | Docker, Caddy | Compose, TLS config |
-| Observability | Prometheus, Grafana | Dashboards, alerts |
-| Documentation | Markdown, Mermaid | API docs, tutorials |
-| Testing | Jest, Cucumber | Coverage, E2E |
-| Security | DevSecOps | Audit, hardening |
-| Healthcare | HL7, FHIR | Protocol adapters |
+| Area           | Skill               | Esempi                   |
+| -------------- | ------------------- | ------------------------ |
+| Core Gateway   | TypeScript, Fastify | Routing, Circuit Breaker |
+| Infrastructure | Docker, Caddy       | Compose, TLS config      |
+| Observability  | Prometheus, Grafana | Dashboards, alerts       |
+| Documentation  | Markdown, Mermaid   | API docs, tutorials      |
+| Testing        | Jest, Cucumber      | Coverage, E2E            |
+| Security       | DevSecOps           | Audit, hardening         |
+| Healthcare     | HL7, FHIR           | Protocol adapters        |
 
 **Good First Issues**:
+
 - Migliorare error messages
 - Aggiungere test cases
 - Documentare configurazioni
@@ -990,6 +1062,7 @@ Best practices:
 - Creare dashboards Grafana
 
 **Plugin Ideas**:
+
 - Audit logging plugin
 - Request transformation
 - HL7 MLLP adapter
@@ -997,6 +1070,7 @@ Best practices:
 - Rate limiting avanzato
 
 **Workflow**:
+
 1. Fork repository
 2. Create branch (feature/, fix/, docs/)
 3. Develop with tests
@@ -1014,18 +1088,19 @@ Best practices:
 
 **Perché AI Locale**:
 
-| Aspetto | Cloud AI | Local AI |
-|---------|----------|----------|
-| Privacy | Dati escono | Dati restano on-premise |
-| Latenza | Network dependent | Milliseconds |
-| Costi | Pay per token | Hardware una tantum |
-| Compliance | Complesso (GDPR) | Semplificato |
-| Customization | Limitato | Fine-tuning possibile |
-| Offline | No | Sì |
+| Aspetto       | Cloud AI          | Local AI                |
+| ------------- | ----------------- | ----------------------- |
+| Privacy       | Dati escono       | Dati restano on-premise |
+| Latenza       | Network dependent | Milliseconds            |
+| Costi         | Pay per token     | Hardware una tantum     |
+| Compliance    | Complesso (GDPR)  | Semplificato            |
+| Customization | Limitato          | Fine-tuning possibile   |
+| Offline       | No                | Sì                      |
 
 **Stregatto (StreLLM)**:
 
 Framework italiano per LLM locali:
+
 - Orchestrazione modelli locali
 - Plugin architecture
 - Memory management
@@ -1074,6 +1149,7 @@ Inputs         Weights        Activation
 ```
 
 Concetti chiave:
+
 - Layers (input, hidden, output)
 - Forward propagation
 - Backpropagation
@@ -1108,6 +1184,7 @@ Architettura Transformer semplificata:
 ```
 
 Parametri chiave:
+
 - Context window (quanti token in input)
 - Parameters (7B, 13B, 70B, etc.)
 - Temperature (creatività)
@@ -1115,13 +1192,13 @@ Parametri chiave:
 
 Modelli locali popolari:
 
-| Modello | Parametri | VRAM | Use Case |
-|---------|-----------|------|----------|
-| Phi-3 Mini | 3.8B | 4GB | Edge, mobile |
-| Llama 3 8B | 8B | 8GB | General purpose |
-| Mistral 7B | 7B | 8GB | Code, reasoning |
-| Llama 3 70B | 70B | 48GB | Enterprise |
-| CodeLlama | 34B | 24GB | Code generation |
+| Modello     | Parametri | VRAM | Use Case        |
+| ----------- | --------- | ---- | --------------- |
+| Phi-3 Mini  | 3.8B      | 4GB  | Edge, mobile    |
+| Llama 3 8B  | 8B        | 8GB  | General purpose |
+| Mistral 7B  | 7B        | 8GB  | Code, reasoning |
+| Llama 3 70B | 70B       | 48GB | Enterprise      |
+| CodeLlama   | 34B       | 24GB | Code generation |
 
 **AI Agents**:
 
@@ -1161,6 +1238,7 @@ Architettura di un agente:
 ```
 
 Pattern agentici:
+
 - ReAct (Reasoning + Acting)
 - Plan-and-Execute
 - Self-Reflection
@@ -1169,6 +1247,7 @@ Pattern agentici:
 **AI Generativa**:
 
 Applicazioni:
+
 - Text generation (documenti, report)
 - Code generation (assistenza sviluppo)
 - Image generation (Stable Diffusion locale)
@@ -1176,6 +1255,7 @@ Applicazioni:
 - Synthetic test data
 
 Healthcare use cases:
+
 - Report generation da dati strutturati
 - Summarization cartelle cliniche
 - Assistente per coding HL7/FHIR
@@ -1204,6 +1284,7 @@ Architettura n8n + AI:
 ```
 
 Use cases enterprise:
+
 - Document processing pipeline
 - Automated code review
 - Ticket classification e routing
@@ -1229,14 +1310,15 @@ HL7 Message ──▶ Parse ──▶ Validate ──▶ AI Enrich ──▶ FHI
 
 Hardware consigliato:
 
-| Livello | GPU | VRAM | Modelli supportati |
-|---------|-----|------|-------------------|
-| Entry | RTX 3060 | 12GB | 7B quantizzati |
-| Mid | RTX 4080 | 16GB | 13B, 7B full |
-| Pro | RTX 4090 | 24GB | 34B quantizzati |
-| Enterprise | A100 | 80GB | 70B+ full |
+| Livello    | GPU      | VRAM | Modelli supportati |
+| ---------- | -------- | ---- | ------------------ |
+| Entry      | RTX 3060 | 12GB | 7B quantizzati     |
+| Mid        | RTX 4080 | 16GB | 13B, 7B full       |
+| Pro        | RTX 4090 | 24GB | 34B quantizzati    |
+| Enterprise | A100     | 80GB | 70B+ full          |
 
 Software stack:
+
 - Ollama (gestione modelli)
 - LangChain / LlamaIndex (orchestrazione)
 - ChromaDB / Qdrant (vector store)
@@ -1245,14 +1327,14 @@ Software stack:
 
 **Considerazioni Enterprise**:
 
-| Aspetto | Soluzione |
-|---------|-----------|
-| Scalabilità | Kubernetes + GPU nodes |
-| High Availability | Model replicas |
-| Monitoring | Prometheus + custom metrics |
-| Security | Network isolation, audit |
-| Compliance | On-premise, data residency |
-| Cost | TCO analysis vs cloud |
+| Aspetto           | Soluzione                   |
+| ----------------- | --------------------------- |
+| Scalabilità       | Kubernetes + GPU nodes      |
+| High Availability | Model replicas              |
+| Monitoring        | Prometheus + custom metrics |
+| Security          | Network isolation, audit    |
+| Compliance        | On-premise, data residency  |
+| Cost              | TCO analysis vs cloud       |
 
 ---
 
@@ -1549,16 +1631,19 @@ main ────●────●────●────●────●
 ## Prerequisiti
 
 **Minimi**:
+
 - Saper usare un editor di testo
 - Capire cos'è una variabile e un loop
 - Aver visto un terminale
 
 **Consigliati**:
+
 - Aver scritto almeno 1 script
 - Sapere cos'è JSON
 - Conoscenza base di HTML
 
 **Hardware**:
+
 - 8GB RAM (16GB consigliato)
 - 50GB spazio disco
 - Connessione internet
@@ -1567,26 +1652,26 @@ main ────●────●────●────●────●
 
 ## Tecnologie del Corso
 
-| Layer | Tecnologia | Versione |
-|-------|------------|----------|
-| Runtime | Node.js | 22+ |
-| Language | TypeScript | 5.7+ |
-| Framework | Fastify | 5.x |
-| Orchestrator | Platformatic Watt | 3.x |
-| Reverse Proxy | Caddy | 2.x |
-| Cache | Redis | 7.x |
-| Message Broker | RabbitMQ | 3.13+ |
-| Storage | MinIO | latest |
-| Auth | Keycloak | 24+ |
-| Monitoring | Prometheus + Grafana | latest |
-| Logging | Loki | latest |
-| Tracing | Tempo | latest |
-| Containers | Docker + Compose | latest |
-| Testing | Jest + Cucumber | latest |
-| AI Cloud | Claude API | latest |
-| AI Local | Ollama + Stregatto | latest |
-| Automation | n8n | latest |
-| Vector DB | ChromaDB | latest |
+| Layer          | Tecnologia           | Versione |
+| -------------- | -------------------- | -------- |
+| Runtime        | Node.js              | 22+      |
+| Language       | TypeScript           | 5.7+     |
+| Framework      | Fastify              | 5.x      |
+| Orchestrator   | Platformatic Watt    | 3.x      |
+| Reverse Proxy  | Caddy                | 2.x      |
+| Cache          | Redis                | 7.x      |
+| Message Broker | RabbitMQ             | 3.13+    |
+| Storage        | MinIO                | latest   |
+| Auth           | Keycloak             | 24+      |
+| Monitoring     | Prometheus + Grafana | latest   |
+| Logging        | Loki                 | latest   |
+| Tracing        | Tempo                | latest   |
+| Containers     | Docker + Compose     | latest   |
+| Testing        | Jest + Cucumber      | latest   |
+| AI Cloud       | Claude API           | latest   |
+| AI Local       | Ollama + Stregatto   | latest   |
+| Automation     | n8n                  | latest   |
+| Vector DB      | ChromaDB             | latest   |
 
 ---
 
@@ -1638,6 +1723,7 @@ Applicazione di editing collaborativo real-time con focus su interoperabilità e
 **Tecnologie**: Y.js, CRDT, WebSocket, IndexedDB, Service Workers
 
 **Funzionalità**:
+
 - Real-time collaboration multi-utente
 - Conflict resolution automatica (CRDT)
 - Offline-first con sync automatico
@@ -1651,6 +1737,7 @@ Sistema di calendario intelligente con AI per riprogrammazione automatica e gest
 **Tecnologie**: Tree structures, Constraint Satisfaction, LLM integration, Event Sourcing
 
 **Funzionalità**:
+
 - Strutture ad albero per eventi gerarchici
 - Pattern di risoluzione conflitti (priority-based, constraint-based)
 - AI live rescheduling con considerazione di:
@@ -1667,6 +1754,7 @@ Sistema di calendario intelligente con AI per riprogrammazione automatica e gest
 ## Risorse (Licenze Permissive)
 
 **Documentazione Ufficiale**:
+
 - [Node.js Docs](https://nodejs.org/docs/) (MIT)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/) (Apache 2.0)
 - [Fastify Docs](https://fastify.dev/docs/) (MIT)
@@ -1674,10 +1762,12 @@ Sistema di calendario intelligente con AI per riprogrammazione automatica e gest
 - [Docker Docs](https://docs.docker.com/) (Apache 2.0)
 
 **Healthcare**:
+
 - [HL7 FHIR](https://hl7.org/fhir/) (CC0)
 - [HL7 v2 Spec](https://www.hl7.org/implement/standards/) (HL7 License)
 
 **Tools**:
+
 - [Prometheus](https://prometheus.io/docs/) (Apache 2.0)
 - [Grafana](https://grafana.com/docs/) (AGPL-3.0)
 - [Keycloak](https://www.keycloak.org/documentation) (Apache 2.0)
@@ -1700,15 +1790,15 @@ Il codice del progetto Tech Citizen SW Gateway è rilasciato sotto licenza MIT.
 
 ---
 
-*Documento versione 4.0.0 - Dicembre 2025*
+_Documento versione 4.0.0 - Dicembre 2025_
 
 ---
 
 ## Changelog
 
-| Versione | Data | Modifiche |
-|----------|------|-----------|
-| 4.0.0 | Dec 2025 | Testing BDD+TDD, AI Locale, Stregatto, Flaky tests |
-| 3.0.0 | Dec 2025 | Protocolli HL7/FHIR, Aspetti legali, Git workflow |
-| 2.0.0 | Dec 2025 | Networking, Hetzner, Server management |
-| 1.0.0 | Dec 2025 | Prima versione corso
+| Versione | Data     | Modifiche                                          |
+| -------- | -------- | -------------------------------------------------- |
+| 4.0.0    | Dec 2025 | Testing BDD+TDD, AI Locale, Stregatto, Flaky tests |
+| 3.0.0    | Dec 2025 | Protocolli HL7/FHIR, Aspetti legali, Git workflow  |
+| 2.0.0    | Dec 2025 | Networking, Hetzner, Server management             |
+| 1.0.0    | Dec 2025 | Prima versione corso                               |

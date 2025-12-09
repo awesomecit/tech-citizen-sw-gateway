@@ -116,6 +116,9 @@ const EXCLUDED_PATTERNS = [
   /0001-minimal-infrastructure-yagni\.md$/, // Skip ADR with examples
   /COURSE\.md$/, // Skip course materials (has markdown table separators)
   /COURSE_LINK\.md$/, // Skip course reference
+  /COURSE_REFERENCES\.md$/, // Skip course references (has markdown tables)
+  /docs\/README\.md$/, // Skip docs index (has markdown tables)
+  /DOCUMENTATION_ANALYSIS\.md$/, // Skip analysis report (has markdown tables)
 ];
 
 // Known safe values (whitelist)
@@ -134,6 +137,9 @@ const SAFE_VALUES = [
   '----------------------------------------', // Separator lines
   '| --------------- | -------------------------------- |', // Markdown table separators
   '| ------------------ | -------------------------------------- |', // Markdown table separators (longer)
+  '| --------------------------------- | ------------------------------------------', // Longer table separator
+  '- [0001: Minimal Infrastructure](./architecture/decisions/0001-minimal-infrastru', // ADR link
+  '| ------------ | -------------------------------- | ----------------------------', // 3-column table
 ];
 
 function shouldExcludeFile(filePath) {
