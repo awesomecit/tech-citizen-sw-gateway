@@ -7,7 +7,7 @@ import {
   Histogram,
 } from 'prom-client';
 import { randomUUID } from 'crypto';
-import authPlugin from '@tech-citizen/auth/plugin';
+import authPlugin from '@tech-citizen/auth/dist/index.js';
 
 interface HealthResponse {
   status: 'ok' | 'degraded' | 'error';
@@ -85,18 +85,12 @@ export async function plugin(app: FastifyInstance): Promise<void> {
     keycloakUrl: process.env.KEYCLOAK_URL || 'http://localhost:8090',
     realm: process.env.KEYCLOAK_REALM || 'healthcare-domain',
     clientId: process.env.KEYCLOAK_CLIENT_ID || 'gateway-client',
-    clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
+    clientSecret:
+      process.env.KEYCLOAK_CLIENT_SECRET ||
+      'gateway-client-secret-change-in-production',
     redisUrl: process.env.REDIS_URL || 'redis://localhost:6380',
     enableRoutes: true,
   });
-
-  // Validazione precoce delle variabili critiche
-  if (
-    !process.env.KEYCLOAK_CLIENT_SECRET &&
-    process.env.NODE_ENV === 'production'
-  ) {
-    throw new Error('KEYCLOAK_CLIENT_SECRET is required in production');
-  }
 
   // Register signal handlers
   process.once('SIGTERM', () => gracefulShutdown(app, 'SIGTERM'));
