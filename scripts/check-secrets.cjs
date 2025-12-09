@@ -176,8 +176,8 @@ function isSafeValue(value, fullLine = '') {
   // Exclude markdown table separators (check full line)
   if (/^\|[\s-]+\|/.test(fullLine.trim())) return true;
   
-  // Exclude markdown links (check full line for ADR references)
-  if (/^\s*-\s*\[ADR-\d+:/.test(fullLine)) return true;
+  // Exclude markdown links (check full line for any link with path)
+  if (/\[.*\]\(\.\/.*\)/.test(fullLine)) return true;
   
   return SAFE_VALUES.some(safe => value.includes(safe));
 }

@@ -1,7 +1,7 @@
 {
   "$schema": "./features.schema.json",
   "version": "1.0.0",
-  "lastUpdated": "2025-12-09T22:50:44.060Z",
+  "lastUpdated": "2025-12-09T22:57:36.943Z",
   "project": {
     "name": "tech-citizen-sw-gateway",
     "repository": "github.com/awesomecit/tech-citizen-sw-gateway"
@@ -9,7 +9,7 @@
   "release": {
     "current": "1.0.0",
     "nextSuggested": "1.1.0",
-    "lastCommit": "169680d",
+    "lastCommit": "12a4095",
     "unreleased": {
       "feat": 15,
       "fix": 3,
@@ -89,6 +89,14 @@
           "subject": "implement Keycloak OIDC integration (US-039)",
           "timestamp": "2025-12-09T22:36:39.000Z",
           "userStory": "US-039"
+        },
+        {
+          "hash": "12a4095",
+          "type": "test",
+          "scope": "auth",
+          "subject": "add Keycloak integration tests with real instance (US-039.1)",
+          "timestamp": "2025-12-09T22:51:39.000Z",
+          "userStory": "US-039"
         }
       ],
       "userStories": {
@@ -131,7 +139,7 @@
           "status": "in-progress",
           "estimate": "4h",
           "bddFeature": "e2e/features/auth-keycloak-integration.feature",
-          "commits": ["169680d"]
+          "commits": ["169680d", "12a4095"]
         },
         "US-040": {
           "name": "Session management plugin",
@@ -369,6 +377,14 @@
           "scope": "auth",
           "subject": "implement Keycloak OIDC integration (US-039)",
           "timestamp": "2025-12-09T22:36:39.000Z",
+          "userStory": "US-039"
+        },
+        {
+          "hash": "12a4095",
+          "type": "test",
+          "scope": "auth",
+          "subject": "add Keycloak integration tests with real instance (US-039.1)",
+          "timestamp": "2025-12-09T22:51:39.000Z",
           "userStory": "US-039"
         }
       ]

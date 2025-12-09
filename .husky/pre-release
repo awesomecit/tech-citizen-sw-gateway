@@ -1,0 +1,81 @@
+#!/bin/bash
+
+# Pre-release security audit
+# Runs before semantic-release to catch vulnerabilities
+
+echo "🔒 Pre-Release Security Audit..."
+echo ""
+
+# Exit on first error
+set -e
+
+# 1. Dependency vulnerability scan
+echo "📦 Checking dependencies for vulnerabilities (npm audit)..."
+npm audit --audit-level=moderate || {
+  echo "❌ npm audit found vulnerabilities at moderate level or higher"
+  echo "   Run 'npm audit fix' to attempt automatic fixes"
+  exit 1
+}
+echo "✅ No moderate+ vulnerabilities found"
+echo ""
+
+# 2. Secret scanning (already in pre-commit, but double-check)
+echo "🔐 Scanning for hardcoded secrets..."
+node scripts/check-secrets.cjs || {
+  echo "❌ Secrets detected in codebase"
+  exit 1
+}
+echo "✅ No secrets detected"
+echo ""
+
+# 3. SAST (Static Application Security Testing) with Semgrep
+echo "🛡️  Running SAST analysis (Semgrep)..."
+if command -v semgrep &> /dev/null; then
+  # Use auto config (community rules)
+  semgrep --config=auto --error --quiet || {
+    echo "⚠️  Semgrep found security issues"
+    echo "   Review output above and fix before release"
+    exit 1
+  }
+  echo "✅ SAST analysis passed"
+else
+  echo "⚠️  Semgrep not installed - skipping SAST"
+  echo "   Install: pip install semgrep"
+fi
+echo ""
+
+# 4. Snyk test (optional - requires auth)
+echo "🔍 Checking for known vulnerabilities (Snyk - optional)..."
+if command -v snyk &> /dev/null; then
+  snyk test --severity-threshold=high || {
+    echo "⚠️  Snyk found high-severity vulnerabilities"
+    echo "   Review and fix before release (or acknowledge risk)"
+    # Don't exit - Snyk is informational
+  }
+else
+  echo "ℹ️  Snyk not installed - skipping"
+  echo "   Install: npm install -g snyk && snyk auth"
+fi
+echo ""
+
+# 5. Verify all tests pass
+echo "🧪 Running full test suite..."
+npm test > /dev/null 2>&1 || {
+  echo "❌ Tests failing - cannot release"
+  exit 1
+}
+echo "✅ All tests passing"
+echo ""
+
+# 6. Check for TODO/FIXME in production code
+echo "📝 Checking for unresolved TODOs in source code..."
+if grep -r "TODO\|FIXME" packages/*/src services/*/src 2>/dev/null | grep -v ".test.ts" | grep -v ".spec.ts"; then
+  echo "⚠️  Found TODO/FIXME comments - review before release"
+  # Don't exit - just warn
+else
+  echo "✅ No unresolved TODOs"
+fi
+echo ""
+
+echo "✅ Pre-release security audit completed successfully"
+echo "   Safe to proceed with release"

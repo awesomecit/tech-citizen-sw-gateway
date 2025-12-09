@@ -1,0 +1,77 @@
+# Docker
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build artifacts
+dist/
+build/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Git
+.git/
+.gitignore
+.github/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+coverage/
+.nyc_output/
+*.test.ts
+*.spec.ts
+__tests__/
+__mocks__/
+test/
+e2e/
+
+# Documentation (exclude from production images)
+docs/
+*.md
+!README.md
+
+# CI/CD
+.husky/
+.lintstagedrc.json
+.commitlintrc.json
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+.cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secrets and keys
+.keys/
+*.key
+*.pem
+*.p12
+*.pfx
+secrets.json
+
+# Package manager files (reduce image size)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Watt temporary files
+.watt/
+watt.lock

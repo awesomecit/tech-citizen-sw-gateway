@@ -167,7 +167,15 @@ function registerCallbackRoute(app: FastifyInstance, sessionTTL: number): void {
         (request.session as any).user = sessionData;
         return reply.redirect('/');
       } catch (error) {
-        app.log.error({ error }, 'OIDC token exchange failed');
+        // Sanitize error: never log full error object (may contain tokens/secrets)
+        app.log.error(
+          {
+            errorCode: (error as any).code,
+            errorMessage: (error as any).message,
+            statusCode: (error as any).statusCode,
+          },
+          'OIDC token exchange failed',
+        );
         return reply.code(401).send({ error: 'Authentication failed' });
       }
     },

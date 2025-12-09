@@ -727,6 +727,66 @@ npm audit --audit-level=moderate
 npm run security:check
 ```
 
+### Pre-Release Security Checklist (MANDATORY)
+
+**Before every release**, run `.husky/pre-release` hook or manual checks:
+
+1. **Dependency Vulnerabilities**:
+
+   ```bash
+   npm audit --audit-level=moderate
+   # Must pass with 0 moderate+ vulnerabilities
+   ```
+
+2. **Secret Scanning**:
+
+   ```bash
+   npm run security:check
+   # Must pass with 0 secrets detected
+   ```
+
+3. **SAST (Static Analysis)**:
+
+   ```bash
+   # Install: pip install semgrep
+   semgrep --config=auto --error
+   # Review and fix security issues
+   ```
+
+4. **Known Vulnerabilities** (Optional):
+
+   ```bash
+   # Install: npm install -g snyk && snyk auth
+   snyk test --severity-threshold=high
+   # Informational - review high-severity issues
+   ```
+
+5. **Test Suite**:
+
+   ```bash
+   npm test
+   # All tests must pass (unit + integration)
+   ```
+
+6. **Unresolved TODOs**:
+   ```bash
+   grep -r "TODO\|FIXME" packages/*/src services/*/src
+   # Review and resolve or document
+   ```
+
+**Automated Hook**:
+
+```bash
+# Runs automatically before semantic-release
+.husky/pre-release
+```
+
+**Update Copilot Instructions** after each release audit to document:
+
+- New security patterns discovered
+- False positives to whitelist
+- Tools added/removed
+
 ---
 
 ## Performance Considerations
