@@ -4,6 +4,10 @@
   "description": "API Gateway centralizzato per suite software healthcare",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
   "engines": {
     "node": ">=22.0.0"
   },
