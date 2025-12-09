@@ -258,32 +258,78 @@
 
 ---
 
-### Priority 3: Core Gateway Features (Sprint 3-4)
+### Priority 3: User Management & Authentication (Sprint 3-5)
 
-#### EPIC-005: Service Routing & Discovery
+#### EPIC-005: Centralized Authentication with Keycloak
 
-**Goal**: Dynamic routing to microservices
+**Goal**: Implement user registration, authentication, and centralized session management
 
 **Status**: Not started
 
+**Prerequisites**:
+
+- Keycloak instance deployed (Docker or Hetzner)
+- Realm configured for techcitizen.it
+- Client credentials for gateway integration
+
 **User Stories**:
 
-- [ ] US-022: As a Developer, I want service registry so new services auto-register
-  - Task: Platformatic Watt service discovery configuration
-  - Acceptance: New service in `services/` is auto-discovered
-  - Estimate: 4h
-
-- [ ] US-023: As a Developer, I want request routing so /api/patients goes to patient-service
-  - Task: Configure Platformatic routing rules
-  - Acceptance: Request to /api/patients proxied correctly
+- [ ] US-022: As a DevOps, I want Keycloak deployed so user auth is centralized
+  - Task: Add Keycloak container to docker-compose.yml, configure realm + client
+  - Acceptance: Keycloak admin UI accessible, realm `techcitizen` created with OIDC client
   - Estimate: 3h
+  - Files: infrastructure/keycloak/realm-export.json, docker-compose.yml
 
-- [ ] US-024: As a Developer, I want circuit breaker so cascading failures are prevented
-  - Task: Implement circuit breaker pattern with @platformatic/circuit-breaker
-  - Acceptance: Test shows open circuit after 50% error rate
+- [ ] US-023: As a Developer, I want auth microservice (NestJS) so I can manage user lifecycle
+  - Task: Create services/auth-api with NestJS + Keycloak adapter, register in watt.json
+  - Acceptance: POST /auth/register creates user in Keycloak, returns JWT
   - Estimate: 5h
+  - Tech Stack: NestJS, @nestjs/platform-fastify, keycloak-connect
+  - Routes: POST /auth/register, POST /auth/login, POST /auth/logout, GET /auth/me
 
-**Epic Estimate**: 12h
+- [ ] US-024: As a User, I want sign-up page so I can create account
+  - Task: Create public/signup.html with form (email, password, confirm), integrate with /auth/register
+  - Acceptance: Form submission creates Keycloak user, redirects to login with success message
+  - Estimate: 3h
+  - Files: public/signup.html, public/js/auth.js
+  - Validation: Email format, password strength (min 8 chars, 1 upper, 1 number), CSRF protection
+
+- [ ] US-025: As a User, I want sign-in page so I can access protected resources
+  - Task: Create public/signin.html with OAuth2 PKCE flow, exchange code for JWT
+  - Acceptance: Successful login sets httpOnly cookie with refresh token, stores access token in sessionStorage
+  - Estimate: 3h
+  - Files: public/signin.html, public/js/auth.js
+  - Security: PKCE flow, secure cookie flags (httpOnly, secure, sameSite=strict)
+
+- [ ] US-026: As a Developer, I want JWT validation middleware so only authenticated requests access protected routes
+  - Task: Add @fastify/jwt plugin to gateway, verify Keycloak public key, attach user to request
+  - Acceptance: GET /api/profile returns 401 without valid JWT, 200 with user data when authenticated
+  - Estimate: 2h
+  - Files: services/gateway/src/plugins/auth.ts
+  - Validation: Verify signature, check exp claim, validate issuer (Keycloak URL)
+
+- [ ] US-027: As a Security Engineer, I want session management so refresh tokens rotate and revoke
+  - Task: Implement refresh token rotation in auth-api, add logout endpoint to revoke tokens
+  - Acceptance: POST /auth/refresh returns new access token, old refresh token invalidated
+  - Estimate: 3h
+  - Files: services/auth-api/src/modules/session/
+  - Storage: Redis for revoked tokens (blacklist with TTL = token exp)
+
+- [ ] US-028: As a User, I want password reset flow so I can recover account access
+  - Task: Add /auth/reset-password endpoint, send email with reset link (integrate Keycloak email)
+  - Acceptance: Email received with link, clicking opens reset form, password updated in Keycloak
+  - Estimate: 4h
+  - Dependencies: Email service (defer if no SMTP - use Keycloak admin reset for MVP)
+
+**Epic Estimate**: 23h (20h MVP without email, 3h email integration deferred)
+
+**Tech Stack**:
+
+- **Keycloak**: Identity provider (OIDC/OAuth2)
+- **NestJS**: Auth microservice (services/auth-api)
+- **Fastify**: JWT validation plugin in gateway
+- **Redis**: Token blacklist for logout/revocation
+- **Vanilla JS**: Sign-up/sign-in pages (no framework overhead)
 
 ---
 

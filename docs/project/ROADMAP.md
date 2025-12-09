@@ -105,27 +105,41 @@
 
 ---
 
-## Phase 2: Core Gateway (Q1 2026)
+## Phase 2: User Management & Core Services (Q1 2026)
 
-**Goal**: Production-ready routing and resilience
+**Goal**: Centralized authentication and first microservices
 
-### Epic 5: Service Routing & Discovery
+### Epic 5: Centralized Authentication (Keycloak + NestJS)
 
-**Duration**: Sprint 4-6 (3 weeks)  
+**Duration**: Sprint 3-5 (3 weeks)  
 **Status**: Not started
 
 **Deliverables**:
 
-- Platformatic Watt service mesh configured
-- Dynamic service registration
-- HTTP routing with path-based rules
-- Circuit breaker pattern implemented
+- Keycloak deployed and realm configured (techcitizen.it)
+- Auth microservice (NestJS) with user registration/login/logout
+- Sign-up and sign-in pages (vanilla JS, PKCE flow)
+- JWT validation middleware in gateway (@fastify/jwt)
+- Session management with refresh token rotation
+- Redis token blacklist for logout/revocation
+- Password reset flow (deferred if no SMTP)
 
 **Success Metrics**:
 
-- New service auto-discovered in < 30s
-- Circuit opens after 50% error rate in 10s window
-- Zero manual routing config changes needed
+- User registration creates Keycloak account (POST /auth/register)
+- Login returns JWT with httpOnly refresh cookie
+- Protected routes return 401 without valid token
+- Refresh token rotation invalidates old tokens
+- All auth pages load in < 500ms (P95)
+
+**Tech Stack**:
+
+- Keycloak (OIDC provider)
+- NestJS (auth microservice)
+- Redis (token blacklist)
+- Vanilla JS (auth pages)
+
+**Reference**: BACKLOG.md EPIC-005 (US-022 to US-028, 23h estimate)
 
 ---
 
