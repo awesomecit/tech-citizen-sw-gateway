@@ -1,0 +1,259 @@
+---
+# Security Audit Playbook
+# Verifies security baseline is correctly applied
+# CIS Benchmark checks
+# Tags: staging (skip SSH checks), production (full audit)
+
+- name: Security Audit - Verify Hardening
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    ssh_port: 2222
+    audit_results_path: /tmp/security-audit-{{ ansible_date_time.iso8601 }}.txt
+    is_production: "{{ 'production' in group_names }}"
+    is_staging: "{{ 'staging' in group_names }}"
+
+  tasks:
+    # ========================================
+    # 1. SSH Configuration Checks
+    # PRODUCTION ONLY
+    # ========================================
+    - name: Check root login disabled
+      tags: [production, audit-ssh]
+      when: is_production
+      shell: grep "^PermitRootLogin no" /etc/ssh/sshd_config
+      register: root_login_check
+      failed_when: root_login_check.rc != 0
+      changed_when: false
+
+    - name: Check password auth disabled
+      tags: [production, audit-ssh]
+      when: is_production
+      shell: grep "^PasswordAuthentication no" /etc/ssh/sshd_config
+      register: password_auth_check
+      failed_when: password_auth_check.rc != 0
+      changed_when: false
+
+    - name: Check SSH port changed
+      tags: [production, audit-ssh]
+      when: is_production
+      shell: grep "^Port {{ ssh_port }}" /etc/ssh/sshd_config
+      register: ssh_port_check
+      failed_when: ssh_port_check.rc != 0
+      changed_when: false
+
+    # ========================================
+    # 2. UFW Firewall Checks
+    # STAGING + PRODUCTION
+    # ========================================
+    - name: Check UFW is active
+      tags: [staging, production, audit-firewall]
+      command: ufw status
+      register: ufw_status
+      failed_when: "'Status: active' not in ufw_status.stdout"
+      changed_when: false
+
+    - name: Check SSH port allowed
+      tags: [production, audit-firewall]
+      when: is_production
+      shell: ufw status | grep "{{ ssh_port }}/tcp"
+      register: ufw_ssh_check
+      failed_when: ufw_ssh_check.rc != 0
+      changed_when: false
+
+    - name: Check HTTP/HTTPS allowed
+      tags: [staging, production, audit-firewall]
+      shell: ufw status | grep -E "(80/tcp|443/tcp)"
+      register: ufw_http_check
+      failed_when: ufw_http_check.rc != 0
+      changed_when: false
+
+    # ========================================
+    # 3. Fail2Ban Checks
+    # PRODUCTION ONLY
+    # ========================================
+    - name: Check Fail2Ban is running
+      tags: [production, audit-fail2ban]
+      when: is_production
+      service:
+        name: fail2ban
+        state: started
+      check_mode: true
+      register: fail2ban_status
+
+    - name: Verify Fail2Ban SSH jail active
+      tags: [production, audit-fail2ban]
+      when: is_production
+      command: fail2ban-client status sshd
+      register: fail2ban_jail
+      changed_when: false
+
+    # ========================================
+    # 4. Automatic Updates Checks
+    # PRODUCTION ONLY
+    # ========================================
+    - name: Check unattended-upgrades installed
+      tags: [production, audit-updates]
+      when: is_production
+      package:
+        name: unattended-upgrades
+        state: present
+      check_mode: true
+      register: unattended_upgrades_check
+
+    - name: Check security updates enabled
+      tags: [production, audit-updates]
+      when: is_production
+      shell: grep "security" /etc/apt/apt.conf.d/50unattended-upgrades
+      register: security_updates_check
+      failed_when: security_updates_check.rc != 0
+      changed_when: false
+
+    # ========================================
+    # 5. Kernel Hardening Checks
+    # STAGING + PRODUCTION (alcuni parametri limitati in Docker)
+    # ========================================
+    - name: Check sysctl security settings
+      tags: [staging, production, audit-kernel]
+      shell: sysctl {{ item }}
+      loop:
+        - net.ipv4.conf.all.rp_filter
+        - net.ipv4.tcp_syncookies
+        - net.ipv4.conf.all.send_redirects
+        - kernel.dmesg_restrict
+      register: sysctl_checks
+      changed_when: false
+
+    - name: Verify sysctl values
+      assert:
+        that:
+          - "'= 1' in item.stdout"
+        fail_msg: 'Sysctl setting {{ item.item }} not correctly set'
+      loop: '{{ sysctl_checks.results }}'
+
+    # ========================================
+    # 6. Docker Security Checks
+    # STAGING + PRODUCTION
+    # ========================================
+    - name: Check Docker daemon running
+      tags: [staging, production, audit-docker]
+      service:
+        name: docker
+        state: started
+      check_mode: true
+      register: docker_status
+      ignore_errors: true
+
+    - name: Check Docker daemon config
+      shell: cat /etc/docker/daemon.json | grep -E "(log-driver|live-restore)"
+      register: docker_config_check
+      failed_when: docker_config_check.rc != 0
+      changed_when: false
+
+    # ========================================
+    # 7. User and Permission Checks
+    # STAGING + PRODUCTION
+    # ========================================
+    - name: Check deploy user exists
+      tags: [staging, production, audit-users]
+      command: id deploy
+      register: deploy_user_check
+      changed_when: false
+      failed_when: false
+
+    - name: Check deploy user in docker/sudo group
+      tags: [staging, production, audit-users]
+      shell: groups deploy | grep -E "(docker|sudo)"
+      register: docker_group_check
+      failed_when: false
+      changed_when: false
+
+    - name: Check deploy user in docker group
+      shell: groups deploy | grep docker
+      register: docker_group_check
+      failed_when: docker_group_check.rc != 0
+      changed_when: false
+
+    # ========================================
+    # 8. Gateway Health Check
+    # STAGING + PRODUCTION
+    # ========================================
+    - name: Check gateway is running
+      tags: [staging, production, audit-gateway]
+      command: curl -f -s http://localhost:3042/health
+      register: gateway_health
+      changed_when: false
+      failed_when: false
+
+    # ========================================
+    # 9. Generate Audit Report
+    # ========================================
+    - name: Create audit report
+      tags: [staging, production, audit-report]
+      copy:
+        dest: '{{ audit_results_path }}'
+        content: |
+          ========================================
+          SECURITY AUDIT REPORT - {{ 'PRODUCTION' if is_production else 'STAGING' }}
+          ========================================
+          Date: {{ ansible_date_time.iso8601 }}
+          Host: {{ inventory_hostname }}
+          Environment: {{ 'production' if is_production else 'staging (Docker simulation)' }}
+
+          {% if is_production %}
+          SSH SECURITY:
+          - Root login disabled: {{ root_login_check.rc == 0 }}
+          - Password auth disabled: {{ password_auth_check.rc == 0 }}
+          - SSH port changed to {{ ssh_port }}: {{ ssh_port_check.rc == 0 }}
+          {% endif %}
+
+          FIREWALL:
+          - UFW active: {{ 'Status: active' in ufw_status.stdout }}
+          {% if is_production %}
+          - SSH port {{ ssh_port }} allowed: {{ ufw_ssh_check.rc == 0 }}
+          {% endif %}
+          - HTTP/HTTPS allowed: {{ ufw_http_check.rc == 0 }}
+
+          {% if is_production %}
+          INTRUSION PREVENTION:
+          - Fail2Ban running: {{ fail2ban_status is success }}
+          - SSH jail active: {{ fail2ban_jail.rc == 0 }}
+          {% endif %}
+
+          {% if is_production %}
+          UPDATES:
+          - Unattended upgrades installed: {{ unattended_upgrades_check is success }}
+          - Security updates enabled: {{ security_updates_check.rc == 0 }}
+          {% endif %}
+
+          KERNEL HARDENING:
+          - Sysctl settings applied: {{ sysctl_checks.results | selectattr('rc', 'equalto', 0) | list | length }}/{{ sysctl_checks.results | length }}
+
+          {% if is_production %}
+          DOCKER:
+          - Docker daemon running: {{ docker_status is defined and docker_status is success }}
+          - Daemon config present: {{ docker_config_check is defined and docker_config_check.rc == 0 }}
+          {% endif %}
+
+          USERS:
+          - Deploy user exists: {{ deploy_user_check.rc == 0 }}
+          - Deploy user in docker/sudo group: {{ docker_group_check.rc == 0 }}
+
+          GATEWAY:
+          - Health check status: {{ 'OK' if gateway_health.rc == 0 else 'FAILED' }}
+
+          ========================================
+          OVERALL STATUS: {% if is_staging and 'Status: active' in ufw_status.stdout and deploy_user_check.rc == 0 %}STAGING OK{% elif is_production and (root_login_check.rc == 0 and password_auth_check.rc == 0 and 'Status: active' in ufw_status.stdout and fail2ban_status is success) %}PRODUCTION PASS{% else %}PARTIAL{% endif %}
+          ========================================
+
+    - name: Display audit report
+      debug:
+        msg: "{{ lookup('file', audit_results_path) }}"
+
+    - name: Fetch audit report locally
+      fetch:
+        src: '{{ audit_results_path }}'
+        dest: './security-audit-reports/'
+        flat: true

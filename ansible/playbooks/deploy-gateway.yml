@@ -1,0 +1,131 @@
+---
+# Gateway Deployment Playbook
+# Zero-downtime deployment using Docker Compose
+# Blue-green deployment pattern
+# Tags: staging (Docker exec), production (SSH)
+
+- name: Deploy API Gateway
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    project_name: tech-citizen-sw-gateway
+    deploy_user: deploy
+    project_path: /home/{{ deploy_user }}/{{ project_name }}
+    git_repo: "{{ lookup('env', 'GIT_REPO') | default('https://github.com/antoniocittadino/tech-citizen-sw-gateway.git', true) }}"
+    git_branch: main
+    docker_network: gateway_network
+    health_check_url: 'http://localhost:3042/health'
+    health_check_timeout: 30
+    is_production: "{{ 'production' in group_names }}"
+    is_staging: "{{ 'staging' in group_names }}"
+    compose_file: "{{ 'docker-compose.production.yml' if is_production else 'docker-compose.staging.yml' }}"
+    env_file: "{{ '.env.production' if is_production else '.env.staging' }}"
+
+  tasks:
+    # ========================================
+    # 1. Clone or update repository
+    # ========================================
+    - name: Create project directory
+      tags: [staging, production, deploy]
+      file:
+        path: '{{ project_path }}'
+        state: directory
+        owner: '{{ deploy_user }}'
+        group: '{{ deploy_user }}'
+        mode: '0755'
+
+    - name: Clone repository
+      git:
+        repo: '{{ git_repo }}'
+        dest: '{{ project_path }}'
+        version: '{{ git_branch }}'
+        force: true
+      become_user: '{{ deploy_user }}'
+      register: git_result
+
+    - name: Display deployment version
+      debug:
+        msg: 'Deploying commit: {{ git_result.after }}'
+
+    # ========================================
+    # 2. Setup environment configuration
+    # ========================================
+    - name: Create environment file
+      tags: [staging, production, deploy]
+      template:
+        src: templates/env.production.j2
+        dest: '{{ project_path }}/{{ env_file }}'
+        owner: '{{ deploy_user }}'
+        group: '{{ deploy_user }}'
+        mode: '0600'
+
+    - name: Generate watt.json from template
+      tags: [staging, production, deploy]
+      shell: |
+        export $(cat {{ project_path }}/{{ env_file }} | xargs)
+        envsubst '${PLT_SERVER_HOSTNAME} ${PORT}' < {{ project_path }}/watt.json.template > {{ project_path }}/watt.json
+        envsubst '${PLT_SERVER_HOSTNAME} ${PORT}' < {{ project_path }}/services/gateway/watt.json.template > {{ project_path }}/services/gateway/watt.json
+      args:
+        executable: /bin/bash
+      become_user: '{{ deploy_user }}'
+
+    # ========================================
+    # 3. Build new version (blue)
+    # ========================================
+    - name: Stop existing containers
+      tags: [staging, production, deploy]
+      command: docker-compose -f {{ project_path }}/{{ compose_file }} down
+      become_user: '{{ deploy_user }}'
+      ignore_errors: true
+
+    - name: Build new images
+      tags: [staging, production, deploy]
+      command: docker-compose -f {{ project_path }}/{{ compose_file }} build
+      args:
+        chdir: '{{ project_path }}'
+      become_user: '{{ deploy_user }}'
+
+    - name: Start new containers
+      tags: [staging, production, deploy]
+      command: docker-compose -f {{ project_path }}/{{ compose_file }} up -d
+      args:
+        chdir: '{{ project_path }}'
+      become_user: '{{ deploy_user }}'
+
+    # ========================================
+    # 4. Health check
+    # ========================================
+    - name: Wait for gateway health check
+      uri:
+        url: '{{ health_check_url }}'
+        status_code: 200
+        timeout: '{{ health_check_timeout }}'
+      register: health_result
+      retries: 10
+      delay: 3
+      until: health_result.status == 200
+
+    - name: Display health check result
+      debug:
+        msg: 'Gateway is healthy: {{ health_result.json }}'
+
+    # ========================================
+    # 5. Cleanup old images
+    # ========================================
+    - name: Prune unused Docker images
+      command: docker image prune -f
+      become_user: '{{ deploy_user }}'
+
+    # ========================================
+    # 6. Post-deployment verification
+    # ========================================
+    - name: Verify running containers
+      command: docker ps --filter "name={{ project_name }}" --format "table {{.Names}}\t{{.Status}}"
+      register: containers
+      changed_when: false
+
+    - name: Display running containers
+      debug:
+        msg: '{{ containers.stdout_lines }}'

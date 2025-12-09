@@ -155,6 +155,76 @@ curl http://localhost:3000/api/datasources
 curl 'http://localhost:9090/api/v1/query?query=up{job="api-gateway"}'
 ```
 
+## Ansible Automation
+
+### Available Playbooks
+
+| Playbook                | Purpose                                      |
+| ----------------------- | -------------------------------------------- |
+| `security-baseline.yml` | SSH, UFW, Fail2Ban, sysctl, auto-updates     |
+| `docker-install.yml`    | Install Docker Engine + Compose              |
+| `deploy-gateway.yml`    | Deploy gateway con zero-downtime             |
+| `security-audit.yml`    | CIS Benchmark verification                   |
+| `server-discovery.yml`  | Analizza software installato (pre-cleanup)   |
+| `server-cleanup.yml`    | Rimuove pacchetti/container/immagini inutili |
+
+### Staging Commands
+
+```bash
+# Test connessione
+npm run ansible:ping
+
+# Security hardening
+npm run ansible:staging:security
+
+# Audit sicurezza
+npm run ansible:staging:audit
+
+# Discovery server (analizza installato)
+npm run ansible:staging:discovery
+
+# Cleanup (dry-run default)
+npm run ansible:staging:cleanup
+
+# Deploy gateway
+npm run ansible:staging:deploy
+```
+
+### Production Commands
+
+```bash
+# SEMPRE discovery prima di modifiche
+npm run ansible:prod:discovery
+
+# Security baseline completo
+npm run ansible:prod:security
+
+# Audit CIS Benchmark
+npm run ansible:prod:audit
+
+# Deploy gateway
+npm run ansible:prod:deploy
+
+# Cleanup server (ATTENZIONE: dry-run prima)
+ansible-playbook -i ansible/inventory/hosts.ini \
+  ansible/playbooks/server-cleanup.yml \
+  --limit=production \
+  --extra-vars "dry_run=false"
+```
+
+### Report Location
+
+```bash
+# Audit reports
+ls -lh security-audit-reports/
+
+# Discovery reports
+ls -lh server-discovery-reports/
+
+# Cleanup reports
+ls -lh server-cleanup-reports/
+```
+
 ## Next Steps (YAGNI)
 
 Add these services **only when use case arises**:

@@ -1,0 +1,371 @@
+---
+# Server Cleanup Playbook
+# Rimuove software inutilizzato e libera spazio disco
+# ATTENZIONE: Eseguire solo dopo aver verificato con server-discovery.yml
+
+- name: Server Cleanup - Remove Unused Software
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    is_production: "{{ 'production' in group_names }}"
+    is_staging: "{{ 'staging' in group_names }}"
+    dry_run: true # IMPORTANTE: Cambiare a false per eseguire cleanup reale
+    cleanup_report_path: /tmp/server-cleanup-{{ ansible_date_time.iso8601 }}.txt
+
+  pre_tasks:
+    - name: Safety check - confirm cleanup intent
+      tags: [staging, production, cleanup]
+      pause:
+        prompt: |
+          ⚠️  WARNING: This will REMOVE unused packages and data!
+          - Environment: {{ 'production' if is_production else 'staging' }}
+          - Dry run: {{ dry_run }}
+          - Host: {{ inventory_hostname }}
+
+          Press ENTER to continue or Ctrl+C to abort
+      when: not dry_run
+
+  tasks:
+    # ========================================
+    # 1. Remove Unused Docker Resources
+    # ========================================
+    - name: Stop unused Docker containers
+      tags: [staging, production, cleanup, docker]
+      shell: |
+        {% raw %}
+        docker ps -a --filter "status=exited" --format "{{.ID}}" | xargs -r docker rm
+        {% endraw %}
+      register: removed_containers
+      changed_when: removed_containers.stdout != ""
+      when: not dry_run
+
+    - name: List Docker containers to remove (dry run)
+      tags: [staging, production, cleanup, docker]
+      shell: |
+        {% raw %}
+        docker ps -a --filter "status=exited" --format "table {{.Names}}\t{{.Image}}\t{{.Status}}"
+        {% endraw %}
+      register: containers_to_remove
+      changed_when: false
+      when: dry_run
+
+    - name: Remove dangling Docker images
+      tags: [staging, production, cleanup, docker]
+      shell: docker image prune -f
+      register: removed_images
+      when: not dry_run
+
+    - name: List dangling images (dry run)
+      tags: [staging, production, cleanup, docker]
+      shell: docker images -f "dangling=true"
+      register: images_to_remove
+      changed_when: false
+      when: dry_run
+
+    - name: Remove unused Docker volumes
+      tags: [staging, production, cleanup, docker]
+      shell: docker volume prune -f
+      register: removed_volumes
+      when: not dry_run
+
+    - name: List unused volumes (dry run)
+      tags: [staging, production, cleanup, docker]
+      shell: docker volume ls -f "dangling=true"
+      register: volumes_to_remove
+      changed_when: false
+      when: dry_run
+
+    # ========================================
+    # 2. APT Cleanup
+    # ========================================
+    - name: Remove unused APT packages (autoremove)
+      tags: [staging, production, cleanup, apt]
+      apt:
+        autoremove: true
+        purge: true
+      register: apt_autoremove
+      when: not dry_run
+
+    - name: Simulate APT autoremove (dry run)
+      tags: [staging, production, cleanup, apt]
+      command: apt-get --dry-run autoremove
+      register: apt_autoremove_dry
+      changed_when: false
+      when: dry_run
+
+    - name: Clean APT cache
+      tags: [staging, production, cleanup, apt]
+      apt:
+        autoclean: true
+      when: not dry_run
+
+    - name: Remove old kernels (keep current + 1 previous)
+      tags: [production, cleanup, kernel]
+      when: is_production and not dry_run
+      shell: |
+        current_kernel=$(uname -r | sed 's/-generic//')
+        dpkg -l 'linux-*' | \
+          grep '^ii' | \
+          awk '{print $2}' | \
+          grep -v "$current_kernel" | \
+          grep -E 'linux-(image|headers)-[0-9]' | \
+          sort -V | \
+          head -n -1 | \
+          xargs -r apt-get -y purge
+      register: removed_kernels
+
+    - name: List old kernels to remove (dry run)
+      tags: [production, cleanup, kernel]
+      when: is_production and dry_run
+      shell: |
+        current_kernel=$(uname -r | sed 's/-generic//')
+        dpkg -l 'linux-*' | \
+          grep '^ii' | \
+          awk '{print $2}' | \
+          grep -v "$current_kernel" | \
+          grep -E 'linux-(image|headers)-[0-9]' | \
+          sort -V | \
+          head -n -1
+      register: kernels_to_remove
+      changed_when: false
+
+    # ========================================
+    # 3. Clean Temporary Files
+    # ========================================
+    - name: Clean /tmp (files older than 7 days)
+      tags: [staging, production, cleanup, tmp]
+      shell: find /tmp -type f -mtime +7 -delete
+      register: cleaned_tmp
+      when: not dry_run
+
+    - name: List /tmp files to clean (dry run)
+      tags: [staging, production, cleanup, tmp]
+      shell: find /tmp -type f -mtime +7 -ls | wc -l
+      register: tmp_files_count
+      changed_when: false
+      when: dry_run
+
+    - name: Clean /var/tmp (files older than 30 days)
+      tags: [staging, production, cleanup, tmp]
+      shell: find /var/tmp -type f -mtime +30 -delete
+      when: not dry_run
+
+    - name: Clean systemd journal logs (older than 30 days)
+      tags: [production, cleanup, logs]
+      when: is_production and not dry_run
+      shell: journalctl --vacuum-time=30d
+      register: cleaned_journal
+
+    # ========================================
+    # 4. Remove Common Bloat Packages (Safe List)
+    # ========================================
+    - name: Remove safe bloat packages
+      tags: [staging, production, cleanup, bloat]
+      apt:
+        name:
+          - snapd # Snap daemon (se non usato)
+          - popularity-contest # Statistiche utilizzo pacchetti
+          - command-not-found # Suggerimenti comandi
+          - command-not-found-data
+        state: absent
+        purge: true
+      register: removed_bloat
+      when: not dry_run
+      ignore_errors: true
+
+    - name: Check if bloat packages are installed (dry run)
+      tags: [staging, production, cleanup, bloat]
+      shell: dpkg -l | grep -E "(snapd|popularity-contest|command-not-found)" | wc -l
+      register: bloat_count
+      changed_when: false
+      when: dry_run
+
+    # ========================================
+    # 5. Clean Log Files
+    # ========================================
+    - name: Rotate and compress logs
+      tags: [staging, production, cleanup, logs]
+      command: logrotate -f /etc/logrotate.conf
+      when: not dry_run
+
+    - name: Remove old compressed logs (older than 90 days)
+      tags: [staging, production, cleanup, logs]
+      shell: find /var/log -name "*.gz" -mtime +90 -delete
+      when: not dry_run
+
+    - name: List log files to clean (dry run)
+      tags: [staging, production, cleanup, logs]
+      shell: |
+        echo "Compressed logs older than 90 days:"
+        find /var/log -name "*.gz" -mtime +90 -ls | wc -l
+        echo "Total /var/log size:"
+        du -sh /var/log
+      register: logs_info
+      changed_when: false
+      when: dry_run
+
+    # ========================================
+    # 6. Clean Package Manager Caches
+    # ========================================
+    - name: Clean pip cache
+      tags: [staging, production, cleanup, cache]
+      shell: pip3 cache purge 2>/dev/null || true
+      when: not dry_run
+      ignore_errors: true
+
+    - name: Clean npm cache
+      tags: [staging, production, cleanup, cache]
+      shell: npm cache clean --force 2>/dev/null || true
+      when: not dry_run
+      ignore_errors: true
+
+    # ========================================
+    # 7. Disk Space Report
+    # ========================================
+    - name: Get disk usage before cleanup
+      tags: [staging, production, cleanup]
+      shell: df -h / | tail -1 | awk '{print $3, $4, $5}'
+      register: disk_before
+      changed_when: false
+
+    - name: Get disk usage after cleanup
+      tags: [staging, production, cleanup]
+      shell: df -h / | tail -1 | awk '{print $3, $4, $5}'
+      register: disk_after
+      changed_when: false
+      when: not dry_run
+
+    # ========================================
+    # 8. Generate Cleanup Report
+    # ========================================
+    - name: Create cleanup report
+      tags: [staging, production, cleanup]
+      copy:
+        dest: '{{ cleanup_report_path }}'
+        content: |
+          ========================================
+          SERVER CLEANUP REPORT
+          ========================================
+          Date: {{ ansible_date_time.iso8601 }}
+          Host: {{ inventory_hostname }}
+          Environment: {{ 'production' if is_production else 'staging' }}
+          Mode: {{ 'DRY RUN (no changes made)' if dry_run else 'REAL CLEANUP (changes applied)' }}
+
+          ========================================
+          DISK SPACE
+          ========================================
+          Before: {{ disk_before.stdout }}
+          {% if not dry_run %}
+          After:  {{ disk_after.stdout }}
+          {% endif %}
+
+          ========================================
+          DOCKER CLEANUP
+          ========================================
+          {% if dry_run %}
+          Containers to remove:
+          {{ containers_to_remove.stdout | default('None') }}
+
+          Dangling images:
+          {{ images_to_remove.stdout | default('None') }}
+
+          Unused volumes:
+          {{ volumes_to_remove.stdout | default('None') }}
+          {% else %}
+          Removed containers: {{ removed_containers.stdout_lines | default([]) | length }}
+          Removed images: {{ removed_images.stdout | default('None') }}
+          Removed volumes: {{ removed_volumes.stdout | default('None') }}
+          {% endif %}
+
+          ========================================
+          APT CLEANUP
+          ========================================
+          {% if dry_run %}
+          Packages to autoremove:
+          {{ apt_autoremove_dry.stdout | default('Run real cleanup to see') }}
+          {% else %}
+          Autoremoved packages: {{ apt_autoremove.changed }}
+          {% endif %}
+
+          {% if is_production %}
+          Old kernels to remove:
+          {% if dry_run %}
+          {{ kernels_to_remove.stdout | default('None') }}
+          {% else %}
+          {{ removed_kernels.stdout | default('None removed') }}
+          {% endif %}
+          {% endif %}
+
+          ========================================
+          TEMPORARY FILES
+          ========================================
+          {% if dry_run %}
+          /tmp files older than 7 days: {{ tmp_files_count.stdout | default('0') }}
+          {% else %}
+          /tmp cleaned: {{ cleaned_tmp.changed }}
+          {% endif %}
+
+          ========================================
+          BLOAT PACKAGES
+          ========================================
+          {% if dry_run %}
+          Bloat packages installed: {{ bloat_count.stdout | default('0') }}
+          {% else %}
+          Removed bloat packages: {{ removed_bloat.changed }}
+          {% endif %}
+
+          ========================================
+          LOG FILES
+          ========================================
+          {% if dry_run %}
+          {{ logs_info.stdout | default('N/A') }}
+          {% else %}
+          Logs rotated and old logs removed
+          {% if is_production %}
+          Journal cleaned: {{ cleaned_journal.stdout | default('N/A') }}
+          {% endif %}
+          {% endif %}
+
+          ========================================
+          NEXT STEPS
+          ========================================
+          {% if dry_run %}
+          1. Review this report carefully
+          2. Set dry_run=false in playbook vars
+          3. Re-run: ansible-playbook ... --extra-vars "dry_run=false"
+          4. Monitor disk space after cleanup
+          {% else %}
+          1. Verify services are running: systemctl status docker
+          2. Check disk space: df -h
+          3. Review removed packages: apt list --installed
+          4. Reboot if kernels were removed
+          {% endif %}
+          ========================================
+
+    - name: Display cleanup report
+      tags: [staging, production, cleanup]
+      debug:
+        msg: "{{ lookup('file', cleanup_report_path) }}"
+      when: not dry_run
+
+    - name: Show cleanup summary (dry run)
+      tags: [staging, production, cleanup]
+      debug:
+        msg: |
+          DRY RUN SUMMARY:
+          - Containers to remove: {{ containers_to_remove.stdout_lines | default([]) | length }}
+          - Bloat packages: {{ bloat_count.stdout | default('0') }}
+          - /tmp files: {{ tmp_files_count.stdout | default('0') }}
+
+          Set dry_run=false to execute real cleanup
+      when: dry_run
+
+    - name: Fetch cleanup report locally
+      tags: [staging, production, cleanup]
+      fetch:
+        src: '{{ cleanup_report_path }}'
+        dest: './server-cleanup-reports/'
+        flat: true
+      when: not dry_run

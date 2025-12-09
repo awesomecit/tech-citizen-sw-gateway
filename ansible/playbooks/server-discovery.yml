@@ -1,0 +1,355 @@
+---
+# Server Discovery Playbook
+# Analizza cosa è installato sul server (non-OS packages)
+# Utile prima di cleanup o migrazione
+
+- name: Server Discovery - Installed Software Inventory
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    discovery_report_path: /tmp/server-discovery-{{ ansible_date_time.iso8601 }}.txt
+
+  tasks:
+    # ========================================
+    # 1. Sistema Operativo Base
+    # ========================================
+    - name: Get OS info
+      tags: [staging, production, discovery]
+      command: lsb_release -a
+      register: os_info
+      changed_when: false
+      failed_when: false
+
+    - name: Get kernel version
+      tags: [staging, production, discovery]
+      command: uname -r
+      register: kernel_version
+      changed_when: false
+
+    # ========================================
+    # 2. Pacchetti Installati Manualmente
+    # ========================================
+    - name: List manually installed packages (not dependencies)
+      tags: [staging, production, discovery]
+      shell: |
+        apt-mark showmanual | sort > /tmp/manual-packages.txt
+        wc -l /tmp/manual-packages.txt
+      register: manual_packages_count
+      changed_when: false
+
+    - name: Get top 30 manually installed packages
+      tags: [staging, production, discovery]
+      shell: apt-mark showmanual | sort | head -30
+      register: manual_packages_sample
+      changed_when: false
+
+    # ========================================
+    # 3. Servizi Attivi (systemd)
+    # ========================================
+    - name: List running services
+      tags: [staging, production, discovery]
+      shell: systemctl list-units --type=service --state=running --no-pager --no-legend | awk '{print $1}' | grep -v "^system-" | head -20
+      register: running_services
+      changed_when: false
+      failed_when: false
+
+    - name: List enabled services (autostart)
+      tags: [staging, production, discovery]
+      shell: systemctl list-unit-files --type=service --state=enabled --no-pager --no-legend | awk '{print $1}' | grep -v "^system-" | head -20
+      register: enabled_services
+      changed_when: false
+      failed_when: false
+
+    # ========================================
+    # 4. Docker Containers e Immagini
+    # ========================================
+    - name: List Docker containers
+      tags: [staging, production, discovery]
+      shell: |
+        {% raw %}
+        docker ps -a --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+        {% endraw %}
+      register: docker_containers
+      changed_when: false
+      failed_when: false
+
+    - name: List Docker images
+      tags: [staging, production, discovery]
+      shell: |
+        {% raw %}
+        docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
+        {% endraw %}
+      register: docker_images
+      changed_when: false
+      failed_when: false
+
+    - name: Get Docker volumes
+      tags: [staging, production, discovery]
+      shell: |
+        {% raw %}
+        docker volume ls --format "table {{.Name}}\t{{.Driver}}"
+        {% endraw %}
+      register: docker_volumes
+      changed_when: false
+      failed_when: false
+
+    # ========================================
+    # 5. Porte in Ascolto
+    # ========================================
+    - name: List listening ports
+      tags: [staging, production, discovery]
+      shell: ss -tuln | grep LISTEN | awk '{print $5}' | sed 's/.*://' | sort -u
+      register: listening_ports
+      changed_when: false
+
+    - name: Get detailed port listeners
+      tags: [staging, production, discovery]
+      shell: ss -tulnp | grep LISTEN | head -20
+      register: port_listeners
+      changed_when: false
+
+    # ========================================
+    # 6. Directory /opt, /srv, /var/www
+    # ========================================
+    - name: Check /opt contents
+      tags: [staging, production, discovery]
+      shell: ls -lh /opt 2>/dev/null || echo "empty"
+      register: opt_contents
+      changed_when: false
+
+    - name: Check /srv contents
+      tags: [staging, production, discovery]
+      shell: ls -lh /srv 2>/dev/null || echo "empty"
+      register: srv_contents
+      changed_when: false
+
+    - name: Check /var/www contents
+      tags: [staging, production, discovery]
+      shell: ls -lh /var/www 2>/dev/null || echo "empty"
+      register: www_contents
+      changed_when: false
+
+    - name: Check /home directories
+      tags: [staging, production, discovery]
+      shell: ls -lh /home 2>/dev/null | grep "^d" || echo "empty"
+      register: home_contents
+      changed_when: false
+
+    # ========================================
+    # 7. Cron Jobs
+    # ========================================
+    - name: List system crontabs
+      tags: [staging, production, discovery]
+      shell: |
+        echo "=== /etc/crontab ==="
+        cat /etc/crontab 2>/dev/null | grep -v "^#" | grep -v "^$" || echo "none"
+        echo ""
+        echo "=== /etc/cron.d/ ==="
+        ls -1 /etc/cron.d/ 2>/dev/null || echo "none"
+      register: system_crons
+      changed_when: false
+
+    - name: List user crontabs
+      tags: [staging, production, discovery]
+      shell: |
+        for user in $(cut -f1 -d: /etc/passwd); do
+          crontab -l -u $user 2>/dev/null && echo "User: $user"
+        done || echo "No user crontabs"
+      register: user_crons
+      changed_when: false
+      failed_when: false
+
+    # ========================================
+    # 8. Database/Redis/RabbitMQ
+    # ========================================
+    - name: Check PostgreSQL
+      tags: [staging, production, discovery]
+      shell: systemctl status postgresql 2>/dev/null | grep "Active:" || echo "not installed"
+      register: postgresql_status
+      changed_when: false
+      failed_when: false
+
+    - name: Check MySQL/MariaDB
+      tags: [staging, production, discovery]
+      shell: systemctl status mysql 2>/dev/null | grep "Active:" || echo "not installed"
+      register: mysql_status
+      changed_when: false
+      failed_when: false
+
+    - name: Check Redis
+      tags: [staging, production, discovery]
+      shell: systemctl status redis 2>/dev/null | grep "Active:" || echo "not installed"
+      register: redis_status
+      changed_when: false
+      failed_when: false
+
+    - name: Check RabbitMQ
+      tags: [staging, production, discovery]
+      shell: systemctl status rabbitmq-server 2>/dev/null | grep "Active:" || echo "not installed"
+      register: rabbitmq_status
+      changed_when: false
+      failed_when: false
+
+    # ========================================
+    # 9. Web Servers
+    # ========================================
+    - name: Check Nginx
+      tags: [staging, production, discovery]
+      shell: systemctl status nginx 2>/dev/null | grep "Active:" || echo "not installed"
+      register: nginx_status
+      changed_when: false
+      failed_when: false
+
+    - name: Check Apache
+      tags: [staging, production, discovery]
+      shell: systemctl status apache2 2>/dev/null | grep "Active:" || echo "not installed"
+      register: apache_status
+      changed_when: false
+      failed_when: false
+
+    - name: Check Caddy
+      tags: [staging, production, discovery]
+      shell: systemctl status caddy 2>/dev/null | grep "Active:" || echo "not installed"
+      register: caddy_status
+      changed_when: false
+      failed_when: false
+
+    # ========================================
+    # 10. Disk Usage
+    # ========================================
+    - name: Get disk usage
+      tags: [staging, production, discovery]
+      shell: df -h | grep -E "^/dev|Filesystem"
+      register: disk_usage
+      changed_when: false
+
+    - name: Get largest directories in /
+      tags: [staging, production, discovery]
+      shell: du -sh /* 2>/dev/null | sort -h | tail -10
+      register: large_dirs
+      changed_when: false
+
+    # ========================================
+    # 11. Generate Discovery Report
+    # ========================================
+    - name: Create discovery report
+      tags: [staging, production, discovery]
+      copy:
+        dest: '{{ discovery_report_path }}'
+        content: |
+          ========================================
+          SERVER DISCOVERY REPORT
+          ========================================
+          Date: {{ ansible_date_time.iso8601 }}
+          Host: {{ inventory_hostname }}
+          Hostname: {{ ansible_hostname }}
+
+          ========================================
+          OPERATING SYSTEM
+          ========================================
+          {{ os_info.stdout }}
+          Kernel: {{ kernel_version.stdout }}
+          Architecture: {{ ansible_architecture }}
+
+          ========================================
+          MANUALLY INSTALLED PACKAGES ({{ manual_packages_count.stdout }})
+          ========================================
+          {{ manual_packages_sample.stdout }}
+          ... (full list in /tmp/manual-packages.txt)
+
+          ========================================
+          RUNNING SERVICES
+          ========================================
+          {{ running_services.stdout | default('No running services found') }}
+
+          Enabled Services (autostart):
+          {{ enabled_services.stdout | default('No enabled services found') }}
+
+          ========================================
+          DOCKER CONTAINERS
+          ========================================
+          {{ docker_containers.stdout | default('Docker not running or no containers') }}
+
+          Docker Images:
+          {{ docker_images.stdout | default('No images') }}
+
+          Docker Volumes:
+          {{ docker_volumes.stdout | default('No volumes') }}
+
+          ========================================
+          LISTENING PORTS
+          ========================================
+          Open Ports: {{ listening_ports.stdout_lines | join(', ') }}
+
+          Detailed Listeners:
+          {{ port_listeners.stdout }}
+
+          ========================================
+          INSTALLED APPLICATIONS
+          ========================================
+          /opt contents:
+          {{ opt_contents.stdout }}
+
+          /srv contents:
+          {{ srv_contents.stdout }}
+
+          /var/www contents:
+          {{ www_contents.stdout }}
+
+          /home directories:
+          {{ home_contents.stdout }}
+
+          ========================================
+          DATABASES & SERVICES
+          ========================================
+          PostgreSQL: {{ postgresql_status.stdout }}
+          MySQL/MariaDB: {{ mysql_status.stdout }}
+          Redis: {{ redis_status.stdout }}
+          RabbitMQ: {{ rabbitmq_status.stdout }}
+
+          ========================================
+          WEB SERVERS
+          ========================================
+          Nginx: {{ nginx_status.stdout }}
+          Apache: {{ apache_status.stdout }}
+          Caddy: {{ caddy_status.stdout }}
+
+          ========================================
+          CRON JOBS
+          ========================================
+          {{ system_crons.stdout }}
+
+          User Crontabs:
+          {{ user_crons.stdout | default('None') }}
+
+          ========================================
+          DISK USAGE
+          ========================================
+          {{ disk_usage.stdout }}
+
+          Largest Directories:
+          {{ large_dirs.stdout }}
+
+          ========================================
+          CLEANUP CANDIDATES
+          ========================================
+          - Check /tmp/manual-packages.txt for unneeded packages
+          - Review Docker images/volumes for old data
+          - Check /opt, /srv, /var/www for old projects
+          - Review enabled services for unused daemons
+          - Check user crontabs for old scheduled tasks
+          ========================================
+
+    - name: Display discovery report
+      tags: [staging, production, discovery]
+      debug:
+        msg: "{{ lookup('file', discovery_report_path) }}"
+
+    - name: Fetch discovery report locally
+      tags: [staging, production, discovery]
+      fetch:
+        src: '{{ discovery_report_path }}'
+        dest: './server-discovery-reports/'
+        flat: true

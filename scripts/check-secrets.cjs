@@ -114,6 +114,8 @@ const EXCLUDED_PATTERNS = [
   /ROADMAP\.md$/, // Skip project roadmap
   /CONSOLIDATION_PLAN\.md$/, // Skip doc planning (has file sizes like "92L")
   /0001-minimal-infrastructure-yagni\.md$/, // Skip ADR with examples
+  /COURSE\.md$/, // Skip course materials (has markdown table separators)
+  /COURSE_LINK\.md$/, // Skip course reference
 ];
 
 // Known safe values (whitelist)
@@ -130,6 +132,8 @@ const SAFE_VALUES = [
   'your_super_secure_jwt_secret_32_characters_minimum',
   'forceConsistentCasingInFileNames',
   '----------------------------------------', // Separator lines
+  '| --------------- | -------------------------------- |', // Markdown table separators
+  '| ------------------ | -------------------------------------- |', // Markdown table separators (longer)
 ];
 
 function shouldExcludeFile(filePath) {

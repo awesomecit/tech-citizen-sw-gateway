@@ -1,0 +1,258 @@
+---
+# Security Baseline Playbook
+# Hardens SSH, enables UFW firewall, installs Fail2Ban
+# Based on SECURITY_CHECKLIST.md sections 1.1-1.6
+# Tags: staging (Docker-compatible), production (full hardening)
+
+- name: Security Hardening - Server Baseline
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    ssh_port: 2222 # Change from default 22
+    allowed_ssh_users: ['deploy']
+    fail2ban_maxretry: 3
+    fail2ban_bantime: 3600 # 1 hour
+    is_production: "{{ 'production' in group_names }}"
+    is_staging: "{{ 'staging' in group_names }}"
+
+  pre_tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install sudo (if not present)
+      tags: [staging, production]
+      apt:
+        name: sudo
+        state: present
+
+    - name: Ensure deploy user exists
+      tags: [staging, production]
+      user:
+        name: deploy
+        shell: /bin/bash
+        groups: sudo
+        append: true
+        create_home: true
+
+    - name: Configure passwordless sudo for deploy
+      tags: [staging, production]
+      lineinfile:
+        path: /etc/sudoers.d/deploy
+        line: 'deploy ALL=(ALL) NOPASSWD:ALL'
+        create: true
+        mode: '0440'
+        validate: 'visudo -cf %s'
+
+  tasks:
+    # ========================================
+    # 1. SSH Hardening (US-011)
+    # PRODUCTION ONLY - Docker usa exec, non SSH
+    # ========================================
+
+    - name: Set authorized key for deploy user
+      tags: [production, ssh]
+      when: is_production
+      authorized_key:
+        user: deploy
+        state: present
+        key: "{{ lookup('file', '~/.ssh/hetzner_deploy_key.pub') }}"
+
+    - name: Disable root login via SSH
+      tags: [production, ssh]
+      when: is_production
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PermitRootLogin'
+        line: 'PermitRootLogin no'
+        state: present
+      notify: restart sshd
+
+    - name: Disable password authentication
+      tags: [production, ssh]
+      when: is_production
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PasswordAuthentication'
+        line: 'PasswordAuthentication no'
+        state: present
+      notify: restart sshd
+
+    - name: Change SSH port
+      tags: [production, ssh]
+      when: is_production
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?Port'
+        line: 'Port {{ ssh_port }}'
+        state: present
+      notify: restart sshd
+
+    - name: Limit SSH users
+      tags: [production, ssh]
+      when: is_production
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: "AllowUsers {{ allowed_ssh_users | join(' ') }}"
+        state: present
+      notify: restart sshd
+
+    # ========================================
+    # 2. UFW Firewall (US-012)
+    # STAGING + PRODUCTION - Funziona in Docker privileged
+    # ========================================
+    - name: Install UFW
+      tags: [staging, production, firewall]
+      apt:
+        name: ufw
+        state: present
+
+    - name: Allow SSH on custom port
+      tags: [production, firewall]
+      when: is_production
+      ufw:
+        rule: allow
+        port: '{{ ssh_port }}'
+        proto: tcp
+
+    - name: Allow HTTP
+      tags: [staging, production, firewall]
+      ufw:
+        rule: allow
+        port: '80'
+        proto: tcp
+
+    - name: Allow HTTPS
+      tags: [staging, production, firewall]
+      ufw:
+        rule: allow
+        port: '443'
+        proto: tcp
+
+    - name: Allow Gateway port (3042)
+      tags: [staging, production, firewall]
+      ufw:
+        rule: allow
+        port: '3042'
+        proto: tcp
+
+    - name: Enable UFW
+      tags: [staging, production, firewall]
+      ufw:
+        state: enabled
+        policy: deny
+
+    # ========================================
+    # 3. Fail2Ban (US-013)
+    # PRODUCTION ONLY - Richiede systemd
+    # ========================================
+    - name: Install Fail2Ban
+      tags: [production, fail2ban]
+      when: is_production
+      apt:
+        name: fail2ban
+        state: present
+
+    - name: Configure Fail2Ban for SSH
+      tags: [production, fail2ban]
+      when: is_production
+      copy:
+        dest: /etc/fail2ban/jail.local
+        content: |
+          [DEFAULT]
+          bantime = {{ fail2ban_bantime }}
+          findtime = 600
+          maxretry = {{ fail2ban_maxretry }}
+
+          [sshd]
+          enabled = true
+          port = {{ ssh_port }}
+          logpath = /var/log/auth.log
+      notify: restart fail2ban
+
+    # ========================================
+    # 4. Automatic Security Updates (US-014)
+    # PRODUCTION ONLY - Richiede systemd
+    # ========================================
+    - name: Install unattended-upgrades
+      tags: [production, updates]
+      when: is_production
+      apt:
+        name: unattended-upgrades
+        state: present
+
+    - name: Enable automatic security updates
+      tags: [production, updates]
+      when: is_production
+      copy:
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        content: |
+          Unattended-Upgrade::Allowed-Origins {
+              "${distro_id}:${distro_codename}-security";
+          };
+          Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+          Unattended-Upgrade::Remove-Unused-Dependencies "true";
+          Unattended-Upgrade::Automatic-Reboot "false";
+
+    # ========================================
+    # 5. Kernel Hardening (US-015)
+    # STAGING + PRODUCTION - Alcuni parametri funzionano in Docker
+    # ========================================
+    - name: Apply sysctl security settings
+      tags: [staging, production, kernel]
+      sysctl:
+        name: '{{ item.key }}'
+        value: '{{ item.value }}'
+        state: present
+        reload: true
+      loop:
+        - { key: 'net.ipv4.conf.all.rp_filter', value: '1' }
+        - { key: 'net.ipv4.conf.default.rp_filter', value: '1' }
+        - { key: 'net.ipv4.icmp_echo_ignore_broadcasts', value: '1' }
+        - { key: 'net.ipv4.conf.all.accept_source_route', value: '0' }
+        - { key: 'net.ipv6.conf.all.accept_source_route', value: '0' }
+        - { key: 'net.ipv4.conf.all.send_redirects', value: '0' }
+        - { key: 'net.ipv4.conf.default.send_redirects', value: '0' }
+        - { key: 'net.ipv4.tcp_syncookies', value: '1' }
+        - { key: 'net.ipv4.conf.all.log_martians', value: '1' }
+        - { key: 'kernel.dmesg_restrict', value: '1' }
+
+    # ========================================
+    # 6. Only allow Cloudflare IPs (US-021)
+    # PRODUCTION ONLY - Staging usa network Docker interno
+    # ========================================
+    - name: Fetch Cloudflare IPv4 ranges
+      tags: [production, cloudflare]
+      when: is_production
+      uri:
+        url: https://www.cloudflare.com/ips-v4
+        return_content: true
+      register: cloudflare_ipv4
+
+    - name: Allow Cloudflare IPs to port 80/443
+      tags: [production, cloudflare]
+      when: is_production and item | length > 0
+      ufw:
+        rule: allow
+        from_ip: '{{ item }}'
+        to_port: '80,443'
+        proto: tcp
+      loop: "{{ cloudflare_ipv4.content.split('\n') }}"
+
+  handlers:
+    - name: restart sshd
+      tags: [production, ssh]
+      when: is_production
+      service:
+        name: sshd
+        state: restarted
+
+    - name: restart fail2ban
+      tags: [production, fail2ban]
+      when: is_production
+      service:
+        name: fail2ban
+        state: restarted

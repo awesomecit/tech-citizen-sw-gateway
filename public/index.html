@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tech Citizen - Healthcare API Gateway</title>
+    <meta
+      name="description"
+      content="Gateway API centralizzato per suite software healthcare enterprise"
+    />
+    <meta name="robots" content="noindex, nofollow" />
+    <style>
+      :root {
+        --primary: #2563eb;
+        --primary-dark: #1e40af;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-700: #374151;
+        --gray-900: #111827;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: var(--gray-900);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+
+      .container {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        max-width: 1200px;
+        width: 100%;
+        padding: 3rem;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 3rem;
+        border-bottom: 2px solid var(--gray-100);
+        padding-bottom: 2rem;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .subtitle {
+        font-size: 1.125rem;
+        color: var(--gray-700);
+      }
+
+      .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+      }
+
+      .status-card {
+        border: 1px solid var(--gray-100);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .status-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+
+      .status-card h2 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+
+      .status-indicator.healthy {
+        background-color: var(--success);
+      }
+
+      .status-indicator.warning {
+        background-color: var(--warning);
+      }
+
+      .status-indicator.error {
+        background-color: var(--danger);
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .endpoints {
+        background: var(--gray-50);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .endpoints h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--primary);
+      }
+
+      .endpoint-list {
+        list-style: none;
+      }
+
+      .endpoint-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--gray-100);
+      }
+
+      .endpoint-list li:last-child {
+        border-bottom: none;
+      }
+
+      .endpoint-name {
+        font-weight: 600;
+        color: var(--gray-700);
+      }
+
+      .endpoint-url {
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+        color: var(--primary);
+        text-decoration: none;
+      }
+
+      .endpoint-url:hover {
+        text-decoration: underline;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .badge.public {
+        background-color: #dbeafe;
+        color: #1e40af;
+      }
+
+      .badge.protected {
+        background-color: #fef3c7;
+        color: #92400e;
+      }
+
+      .badge.internal {
+        background-color: #fee2e2;
+        color: #991b1b;
+      }
+
+      footer {
+        text-align: center;
+        padding-top: 2rem;
+        border-top: 2px solid var(--gray-100);
+        color: var(--gray-700);
+        font-size: 0.875rem;
+      }
+
+      .footer-links {
+        margin-top: 1rem;
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+      }
+
+      .footer-links a {
+        color: var(--primary);
+        text-decoration: none;
+      }
+
+      .footer-links a:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 1.5rem;
+        }
+
+        h1 {
+          font-size: 1.875rem;
+        }
+
+        .status-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .endpoint-list li {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Tech Citizen Gateway</h1>
+        <p class="subtitle">Healthcare API Suite - Production Environment</p>
+      </header>
+
+      <div class="status-grid">
+        <div class="status-card">
+          <h2>
+            <span class="status-indicator healthy"></span>
+            API Gateway
+          </h2>
+          <p>Status: <strong>Operational</strong></p>
+          <p>
+            Uptime: <span id="uptime">Loading...</span>
+          </p>
+          <p>
+            Version: <span id="version">Loading...</span>
+          </p>
+        </div>
+
+        <div class="status-card">
+          <h2>
+            <span class="status-indicator healthy"></span>
+            Security
+          </h2>
+          <p>TLS: <strong>Enabled (Cloudflare)</strong></p>
+          <p>Firewall: <strong>UFW Active</strong></p>
+          <p>WAF: <strong>Enabled</strong></p>
+        </div>
+
+        <div class="status-card">
+          <h2>
+            <span class="status-indicator healthy"></span>
+            Monitoring
+          </h2>
+          <p>Prometheus: <strong>Active</strong></p>
+          <p>Grafana: <strong>Available</strong></p>
+          <p>Alerts: <strong>Configured</strong></p>
+        </div>
+      </div>
+
+      <div class="endpoints">
+        <h2>API Endpoints</h2>
+        <ul class="endpoint-list">
+          <li>
+            <span class="endpoint-name">Health Check</span>
+            <div>
+              <span class="badge public">Public</span>
+              <a
+                href="/health"
+                class="endpoint-url"
+                id="health-link"
+                target="_blank"
+                >/health</a
+              >
+            </div>
+          </li>
+          <li>
+            <span class="endpoint-name">API Documentation</span>
+            <div>
+              <span class="badge public">Public</span>
+              <a href="/api/docs" class="endpoint-url" target="_blank"
+                >/api/docs</a
+              >
+            </div>
+          </li>
+          <li>
+            <span class="endpoint-name">Metrics (Prometheus)</span>
+            <div>
+              <span class="badge internal">Internal</span>
+              <a href="/metrics" class="endpoint-url" target="_blank"
+                >/metrics</a
+              >
+            </div>
+          </li>
+          <li>
+            <span class="endpoint-name">Admin Dashboard</span>
+            <div>
+              <span class="badge protected">Protected</span>
+              <a
+                href="https://dashboard.techcitizen.it"
+                class="endpoint-url"
+                target="_blank"
+                >dashboard.techcitizen.it</a
+              >
+            </div>
+          </li>
+          <li>
+            <span class="endpoint-name">Grafana Monitoring</span>
+            <div>
+              <span class="badge protected">Protected</span>
+              <a
+                href="https://grafana.techcitizen.it"
+                class="endpoint-url"
+                target="_blank"
+                >grafana.techcitizen.it</a
+              >
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <footer>
+        <p>&copy; 2025 Tech Citizen - Healthcare Technology Suite</p>
+        <div class="footer-links">
+          <a href="https://status.techcitizen.it" target="_blank">Status Page</a>
+          <a href="https://docs.techcitizen.it" target="_blank">Documentation</a>
+          <a href="mailto:support@techcitizen.it">Support</a>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      // Fetch health status
+      async function checkHealth() {
+        try {
+          const response = await fetch('/health');
+          const data = await response.json();
+
+          if (data.status === 'ok') {
+            document.getElementById('version').textContent =
+              data.version || '1.0.0';
+            document.getElementById('uptime').textContent = calculateUptime(
+              data.timestamp,
+            );
+          }
+        } catch (error) {
+          console.error('Health check failed:', error);
+          document.getElementById('version').textContent = 'Unknown';
+          document.getElementById('uptime').textContent = 'N/A';
+        }
+      }
+
+      function calculateUptime(timestamp) {
+        const now = new Date();
+        const start = new Date(timestamp);
+        const diff = now - start;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const days = Math.floor(hours / 24);
+
+        if (days > 0) return `${days}d ${hours % 24}h`;
+        return `${hours}h`;
+      }
+
+      // Auto-refresh every 30 seconds
+      checkHealth();
+      setInterval(checkHealth, 30000);
+    </script>
+  </body>
+</html>
