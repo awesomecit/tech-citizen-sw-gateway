@@ -4,7 +4,7 @@
 **Product Owner**: Antonio Cittadino  
 **Sprint Duration**: 1 week (timebox)  
 **Team Capacity**: 16h agent coding per sprint  
-**Last Updated**: 2025-12-08
+**Last Updated**: 2025-12-09
 
 ---
 
@@ -95,7 +95,78 @@
 
 ---
 
-### Priority 2: Security Hardening (Sprint 2)
+### Priority 2: Production Deployment (Sprint 2)
+
+#### EPIC-008: Production Server Setup ⏸️ BLOCKED
+
+**Goal**: Deploy and secure production Hetzner server with enterprise architecture
+
+**Status**: Blocked - awaiting server access credentials
+
+**Prerequisites**:
+
+- Hetzner server IP address + SSH port
+- Cloudflare Zone ID + API Token for techcitizen.it
+- Domain root confirmation (techcitizen.it)
+
+**User Stories**:
+
+- [ ] US-030: As a DevOps, I want server inventory analysis so I understand current state before changes
+  - Task: Execute server-discovery.yml to analyze installed packages, disk usage, running services
+  - Acceptance: Report generated in /tmp/server-discovery-\*.txt with full inventory
+  - Estimate: 0.5h
+  - Command: `npm run ansible:prod:discovery`
+  - Files: ansible/playbooks/server-discovery.yml
+
+- [ ] US-031: As a DevOps, I want safe server cleanup so obsolete packages/logs are removed without breaking system
+  - Task: Run server-cleanup.yml with --dry-run, verify report, execute real cleanup
+  - Acceptance: Dry-run report shows items to remove, real cleanup executes without errors
+  - Estimate: 1h
+  - Command: `npm run ansible staging cleanup --dry-run` then `--real`
+  - Files: ansible/playbooks/server-cleanup.yml
+
+- [ ] US-032: As a Security Engineer, I want production security baseline so server is hardened against attacks
+  - Task: Apply security-baseline.yml (SSH hardening, UFW, Fail2Ban, sysctl, Cloudflare IP whitelist)
+  - Acceptance: security-audit.yml returns PRODUCTION PASS status
+  - Estimate: 2h
+  - Command: `npm run ansible:prod:security` then `npm run ansible:prod:audit`
+  - Files: ansible/playbooks/security-baseline.yml, ansible/playbooks/security-audit.yml
+  - Dependency: US-030 (need inventory first)
+
+- [ ] US-033: As a Product Owner, I want WIP landing pages deployed so users see professional placeholder
+  - Task: Create public/\*.html variants for all subdomains (api/gateway/app/admin/dashboard/grafana/prometheus/staging/dev/status/docs)
+  - Acceptance: All 12 subdomains return 200 with "Work in Progress" page, branded design
+  - Estimate: 2h
+  - Files: public/index.html (template), infrastructure/caddy/Caddyfile (routing)
+
+- [ ] US-034: As a DevOps, I want current DNS state documented so I can plan migrations without downtime
+  - Task: Query Cloudflare API for techcitizen.it zone, document all A/CNAME/TXT records, identify conflicts
+  - Acceptance: DNS analysis report in docs/operations/DNS_CURRENT_STATE.md with record table
+  - Estimate: 1h
+  - Tools: Cloudflare API v4, curl/jq scripts
+
+- [ ] US-035: As a DevOps, I want enterprise DNS architecture implemented so services are accessible via subdomains
+  - Task: Create Cloudflare DNS records for 12 subdomains, configure SSL Full Strict, HSTS, WAF, rate limiting
+  - Acceptance: All subdomains resolve to server IP, SSL Labs A+ rating, WAF rules active
+  - Estimate: 3h
+  - Reference: docs/operations/PRODUCTION_SETUP.md section 3 (DNS enterprise)
+  - Dependency: US-034 (need current state first)
+
+- [ ] US-036: As a DevOps, I want gateway deployed to production so system is live and monitored
+  - Task: Execute deploy-gateway.yml, verify /health endpoint, test /metrics, check Grafana dashboard
+  - Acceptance: `curl https://api.techcitizen.it/health` returns 200, uptime > 0, metrics visible in Grafana
+  - Estimate: 2h
+  - Command: `npm run ansible:prod:deploy`
+  - Files: ansible/playbooks/deploy-gateway.yml
+  - Dependency: US-035 (DNS must resolve first)
+
+**Epic Estimate**: 11.5h total (blocked until server access available)
+
+**Critical Path**: US-030 → US-031 → US-032 → US-034 → US-035 → US-036 (US-033 can run parallel after US-032)
+
+---
+
+### Priority 3: Security Hardening (Sprint 2-3)
 
 #### EPIC-003: Server Security Baseline
 

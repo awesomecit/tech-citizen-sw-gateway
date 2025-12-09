@@ -49,23 +49,39 @@
 
 ---
 
-### Epic 3: Server Security Hardening
+### Epic 3: Production Server Setup ⏸️ BLOCKED
 
 **Duration**: Sprint 2 (1 week)  
-**Status**: Not started
+**Status**: Blocked - awaiting Hetzner server credentials
+
+**Prerequisites**:
+
+- Hetzner server IP + SSH port
+- Cloudflare Zone ID + API Token
+- Domain root confirmation (techcitizen.it)
 
 **Deliverables**:
 
-- SSH hardening (Ansible playbook)
+- Server discovery and cleanup (server-discovery.yml, server-cleanup.yml)
+- SSH hardening (security-baseline.yml)
 - UFW firewall + Fail2Ban
 - Automatic security updates
-- Kernel hardening
+- Kernel hardening (sysctl)
+- WIP landing pages for 12 enterprise subdomains
+- DNS analysis and enterprise architecture (Cloudflare API)
+- Gateway production deployment with health checks
 
 **Success Metrics**:
 
-- Pass CIS Benchmark Level 1 (automated check)
+- Pass CIS Benchmark Level 1 via security-audit.yml (PRODUCTION PASS)
 - No direct root SSH access possible
 - Auto-ban after 3 failed login attempts
+- All 12 subdomains return 200 (WIP pages)
+- DNS resolves correctly for api/gateway/app/admin/dashboard subdomains
+- `https://api.techcitizen.it/health` returns status 200
+- Grafana dashboard shows live metrics from production gateway
+
+**Reference**: docs/operations/PRODUCTION_SETUP.md, BACKLOG.md EPIC-008
 
 ---
 
@@ -368,6 +384,7 @@ Epic 5 → Epic 7 (events need service mesh)
 
 ## Revision History
 
+- **2025-12-09**: Added Epic 3 Production Server Setup (EPIC-008) with 6 user stories, blocked until server credentials available
 - **2025-12-08**: Initial roadmap created, Epic 1 60% complete
 - **2025-12-08**: Added security hardening epics from SECURITY_CHECKLIST.md
 - **2025-12-08**: Deferred Epic 6-7-9 per ADR-0001 YAGNI principle
