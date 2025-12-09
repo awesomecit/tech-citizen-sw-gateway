@@ -1,7 +1,7 @@
 {
   "$schema": "./features.schema.json",
   "version": "1.0.0",
-  "lastUpdated": "2025-12-09T22:03:42.464Z",
+  "lastUpdated": "2025-12-09T22:13:46.924Z",
   "project": {
     "name": "tech-citizen-sw-gateway",
     "repository": "github.com/awesomecit/tech-citizen-sw-gateway"
@@ -9,9 +9,9 @@
   "release": {
     "current": "1.0.0",
     "nextSuggested": "1.1.0",
-    "lastCommit": "3585b09",
+    "lastCommit": "e101c14",
     "unreleased": {
-      "feat": 12,
+      "feat": 13,
       "fix": 3,
       "breaking": 0
     }
@@ -96,7 +96,10 @@
             "failing": 0
           },
           "completedAt": "2025-12-09T14:00:00Z",
-          "commits": ["ab73b71", "333b490"]
+          "commits": [
+            "ab73b71",
+            "333b490"
+          ]
         },
         "US-038": {
           "name": "JWT validation plugin",
@@ -116,7 +119,11 @@
           },
           "bddFeature": "e2e/features/auth-jwt-validation.feature",
           "completedAt": "2025-12-09T21:15:00Z",
-          "commits": ["f4e80d5", "ecb791e", "cfa3c6a"]
+          "commits": [
+            "f4e80d5",
+            "ecb791e",
+            "cfa3c6a"
+          ]
         },
         "US-039": {
           "name": "Keycloak integration plugin",
@@ -304,8 +311,12 @@
         "staging": false,
         "production": false
       },
-      "dependencies": ["auth-package"],
-      "blockers": ["EPIC-009 must complete first (auth package foundation)"],
+      "dependencies": [
+        "auth-package"
+      ],
+      "blockers": [
+        "EPIC-009 must complete first (auth package foundation)"
+      ],
       "metrics": {
         "estimatedHours": 15,
         "actualHours": 0,
@@ -374,7 +385,9 @@
         "signature": true,
         "expiration": true,
         "issuer": true,
-        "requiredClaims": ["sub"]
+        "requiredClaims": [
+          "sub"
+        ]
       }
     },
     "auth.jwt.issuerValidation": {
@@ -421,7 +434,9 @@
       "rolloutPercentage": 100,
       "feature": "infrastructure-foundation",
       "since": "1.0.0",
-      "endpoints": ["/metrics"]
+      "endpoints": [
+        "/metrics"
+      ]
     }
   },
   "changelog": {

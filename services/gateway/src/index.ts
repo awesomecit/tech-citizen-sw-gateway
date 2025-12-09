@@ -1,5 +1,7 @@
 import { type FastifyInstance } from 'fastify';
 import sensible from '@fastify/sensible';
+import { register, collectDefaultMetrics, Counter, Histogram } from 'prom-client';
+import { randomUUID } from 'crypto';
 
 interface HealthResponse {
   status: 'ok' | 'degraded' | 'error';
@@ -14,40 +16,69 @@ interface HelloResponse {
 
 const GRACEFUL_SHUTDOWN_TIMEOUT = 10000; // 10 seconds
 
-export async function plugin(app: FastifyInstance): Promise<void> {
-  await app.register(sensible);
+// Prometheus metrics (initialized at module level)
+collectDefaultMetrics({ prefix: 'gateway_' });
 
-  // Graceful shutdown handler
-  const gracefulShutdown = async (signal: string): Promise<void> => {
-    app.log.info(`Received ${signal}, starting graceful shutdown...`);
+const httpRequestDuration = new Histogram({
+  name: 'http_request_duration_ms',
+  help: 'Duration of HTTP requests in milliseconds',
+  labelNames: ['method', 'route', 'status'],
+  buckets: [10, 50, 100, 300, 500, 1000, 3000, 5000],
+});
 
-    // Stop accepting new connections
-    await app.close();
+const httpRequestsTotal = new Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'route', 'status'],
+});
 
-    app.log.info('Graceful shutdown completed');
-    process.exit(0);
-  };
+// Graceful shutdown handler
+async function gracefulShutdown(app: FastifyInstance, signal: string): Promise<void> {
+  app.log.info(`Received ${signal}, starting graceful shutdown...`);
+  await app.close();
+  app.log.info('Graceful shutdown completed');
+  process.exit(0);
+}
 
-  // Register signal handlers
-  process.once('SIGTERM', () => gracefulShutdown('SIGTERM'));
-  process.once('SIGINT', () => gracefulShutdown('SIGINT'));
-
-  // Cleanup hook - called by Fastify.close()
-  app.addHook('onClose', async instance => {
-    instance.log.info('Cleaning up resources...');
-    // TODO: Close database connections when added
-    // TODO: Close Redis connections when added
-    // TODO: Close RabbitMQ connections when added
+// Setup hooks for metrics and correlation ID
+function setupHooks(app: FastifyInstance): void {
+  // Correlation ID + start timer
+  app.addHook('onRequest', async (request, reply) => {
+    const requestId = (request.headers['x-request-id'] as string) || randomUUID();
+    request.log = request.log.child({ requestId });
+    reply.header('X-Request-ID', requestId);
+    (request as unknown as { startTime: number }).startTime = Date.now();
   });
 
-  // Force exit if graceful shutdown takes too long
+  // Record metrics
+  app.addHook('onResponse', async (request, reply) => {
+    const duration = Date.now() - (request as unknown as { startTime: number }).startTime;
+    const route = request.routeOptions?.url || request.url;
+    const status = reply.statusCode.toString();
+    httpRequestDuration.labels(request.method, route, status).observe(duration);
+    httpRequestsTotal.labels(request.method, route, status).inc();
+  });
+
+  // Cleanup resources
+  app.addHook('onClose', async instance => {
+    instance.log.info('Cleaning up resources...');
+  });
+}
+
+export async function plugin(app: FastifyInstance): Promise<void> {
+  await app.register(sensible);
+  setupHooks(app);
+
+  // Register signal handlers
+  process.once('SIGTERM', () => gracefulShutdown(app, 'SIGTERM'));
+  process.once('SIGINT', () => gracefulShutdown(app, 'SIGINT'));
+
+  // Force exit if graceful shutdown timeout
   const shutdownTimer = setTimeout(() => {
-    app.log.error(
-      `Graceful shutdown timeout after ${GRACEFUL_SHUTDOWN_TIMEOUT}ms, forcing exit`,
-    );
+    app.log.error(`Graceful shutdown timeout after ${GRACEFUL_SHUTDOWN_TIMEOUT}ms`);
     process.exit(1);
   }, GRACEFUL_SHUTDOWN_TIMEOUT);
-  shutdownTimer.unref(); // Don't keep process alive
+  shutdownTimer.unref();
 
   app.get<{ Reply: HealthResponse }>('/health', async () => {
     return {
@@ -60,6 +91,12 @@ export async function plugin(app: FastifyInstance): Promise<void> {
 
   app.get<{ Reply: HelloResponse }>('/', async () => {
     return { message: 'API Gateway Suite - Hello World' };
+  });
+
+  // Prometheus metrics endpoint (no auth required for scraping)
+  app.get('/metrics', async (_request, reply) => {
+    reply.header('Content-Type', register.contentType);
+    return register.metrics();
   });
 }
 
