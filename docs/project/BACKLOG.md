@@ -260,6 +260,198 @@
 
 ### Priority 3: User Management & Authentication (Sprint 3-5)
 
+#### EPIC-009: Reusable Auth Package (Foundation) 🛠️
+
+**Goal**: Create modular, reusable authentication package for mono-repo services
+
+**Status**: Not started
+
+**Package**: `@tech-citizen/auth` in `packages/auth/`
+
+**Why**: Centralize auth logic for reuse across gateway, auth-api, and future microservices (patient-api, etc.)
+
+**User Stories**:
+
+- [ ] US-037: As a Developer, I want auth package structure so I can share logic across services
+  - **Task 1**: Create `packages/auth/` with TypeScript + workspace setup
+  - **Task 2**: Configure package.json with peerDependencies (fastify, @fastify/jwt)
+  - **Task 3**: Setup tsconfig.json with paths alias (`@tech-citizen/auth`)
+  - **Acceptance Criteria** (BDD):
+    - **Given** mono-repo workspace configured
+    - **When** I run `npm install` in root
+    - **Then** `packages/auth` is linked in all services
+    - **And** TypeScript resolves `import from '@tech-citizen/auth'`
+  - **Files**: packages/auth/package.json, packages/auth/tsconfig.json, root package.json workspaces
+  - **Estimate**: 1h
+
+- [ ] US-038: As a Developer, I want JWT validation plugin so services can verify tokens
+  - **Task 1**: Create `src/plugins/jwt.ts` with @fastify/jwt wrapper
+  - **Task 2**: Add Keycloak public key fetching + caching
+  - **Task 3**: Add `fastify.authenticate` decorator
+  - **Task 4**: Write unit tests for JWT verify/decode/validate
+  - **Acceptance Criteria** (BDD):
+    - **Scenario 1: Valid JWT**
+      - **Given** a valid JWT signed by Keycloak
+      - **When** I call `fastify.authenticate(request, reply)`
+      - **Then** request.user is populated with decoded payload
+      - **And** no error is thrown
+    - **Scenario 2: Expired JWT**
+      - **Given** a JWT with exp claim in the past
+      - **When** I call `fastify.authenticate(request, reply)`
+      - **Then** reply sends 401 Unauthorized
+      - **And** error is `TokenExpiredError`
+    - **Scenario 3: Invalid signature**
+      - **Given** a JWT with tampered signature
+      - **When** I call `fastify.authenticate(request, reply)`
+      - **Then** reply sends 401 Unauthorized
+      - **And** error is `JsonWebTokenError`
+  - **Files**: packages/auth/src/plugins/jwt.ts, packages/auth/test/jwt.test.ts
+  - **Test Coverage**: >90% (happy path + 3 error cases)
+  - **Estimate**: 3h
+
+- [ ] US-039: As a Developer, I want Keycloak integration plugin so I can manage users
+  - **Task 1**: Create `src/plugins/keycloak.ts` with keycloak-admin-client
+  - **Task 2**: Add methods: createUser, findUserByEmail, updatePassword, deleteUser
+  - **Task 3**: Add connection pooling + retry logic
+  - **Task 4**: Write integration tests with Keycloak testcontainer
+  - **Acceptance Criteria** (BDD):
+    - **Scenario 1: Create user successfully**
+      - **Given** Keycloak is running
+      - **And** I have valid admin credentials
+      - **When** I call `keycloak.createUser({ email, password })`
+      - **Then** user is created in realm `techcitizen`
+      - **And** user ID is returned
+      - **And** user can login with credentials
+    - **Scenario 2: User already exists**
+      - **Given** user with email `test@example.com` exists
+      - **When** I call `keycloak.createUser({ email: 'test@example.com' })`
+      - **Then** error is thrown with code `USER_EXISTS`
+      - **And** original user is unchanged
+    - **Scenario 3: Keycloak unavailable**
+      - **Given** Keycloak container is stopped
+      - **When** I call any keycloak method
+      - **Then** retry 3 times with exponential backoff
+      - **And** after retries, throw `SERVICE_UNAVAILABLE`
+  - **Files**: packages/auth/src/plugins/keycloak.ts, packages/auth/test/keycloak.integration.test.ts
+  - **Test Coverage**: >85% (mocked + real Keycloak container)
+  - **Estimate**: 4h
+
+- [ ] US-040: As a Developer, I want session management plugin so I can handle refresh tokens
+  - **Task 1**: Create `src/plugins/session.ts` with Redis integration
+  - **Task 2**: Add methods: storeRefreshToken, validateRefreshToken, revokeToken, rotateTokens
+  - **Task 3**: Implement token blacklist with TTL = token exp
+  - **Task 4**: Write unit tests with ioredis-mock
+  - **Acceptance Criteria** (BDD):
+    - **Scenario 1: Store and retrieve refresh token**
+      - **Given** a valid refresh token with userId and exp
+      - **When** I call `session.storeRefreshToken(token, userId)`
+      - **Then** token is stored in Redis with key `refresh:{userId}:{tokenId}`
+      - **And** TTL is set to token exp - current time
+      - **And** subsequent `validateRefreshToken(token)` returns true
+    - **Scenario 2: Revoke token (logout)**
+      - **Given** an active refresh token
+      - **When** I call `session.revokeToken(token)`
+      - **Then** token is added to blacklist `blacklist:{tokenId}`
+      - **And** `validateRefreshToken(token)` returns false
+      - **And** blacklist entry expires at token exp
+    - **Scenario 3: Rotate tokens (refresh endpoint)**
+      - **Given** a valid refresh token
+      - **When** I call `session.rotateTokens(oldToken)`
+      - **Then** new access + refresh tokens are generated
+      - **And** old refresh token is revoked
+      - **And** new refresh token is stored
+  - **Files**: packages/auth/src/plugins/session.ts, packages/auth/test/session.test.ts
+  - **Dependencies**: Redis container in docker-compose.yml
+  - **Test Coverage**: >90%
+  - **Estimate**: 3h
+
+- [ ] US-041: As a Developer, I want TypeBox schemas so I can validate auth requests
+  - **Task 1**: Create `src/schemas/user.ts` with RegisterUserSchema, LoginUserSchema
+  - **Task 2**: Create `src/schemas/token.ts` with TokenResponseSchema, RefreshTokenSchema
+  - **Task 3**: Compile schemas with TypeCompiler for performance
+  - **Task 4**: Export schemas for reuse in services
+  - **Acceptance Criteria** (BDD):
+    - **Scenario 1: Valid registration data**
+      - **Given** RegisterUserSchema compiled validator
+      - **When** I validate `{ email: 'test@example.com', password: 'SecureP@ss1' }`
+      - **Then** validation passes
+      - **And** TypeScript infers correct type
+    - **Scenario 2: Invalid email format**
+      - **Given** RegisterUserSchema compiled validator
+      - **When** I validate `{ email: 'invalid-email', password: 'SecureP@ss1' }`
+      - **Then** validation fails with error path `/email`
+      - **And** error message is `must match format "email"`
+    - **Scenario 3: Weak password**
+      - **Given** RegisterUserSchema with password rules (min 8 chars, 1 upper, 1 number)
+      - **When** I validate `{ email: 'test@example.com', password: 'weak' }`
+      - **Then** validation fails with error path `/password`
+      - **And** error message describes requirements
+  - **Files**: packages/auth/src/schemas/user.ts, packages/auth/src/schemas/token.ts, packages/auth/test/schemas.test.ts
+  - **Performance**: TypeCompiler validation <1ms per request (10-100x faster than class-validator)
+  - **Estimate**: 2h
+
+- [ ] US-042: As a Developer, I want main auth plugin so I can register all features at once
+  - **Task 1**: Create `src/index.ts` exporting main plugin with options
+  - **Task 2**: Compose jwt + keycloak + session plugins
+  - **Task 3**: Add optional route handlers (register, login, logout, refresh)
+  - **Task 4**: Write E2E test registering plugin in Fastify app
+  - **Acceptance Criteria** (BDD):
+    - **Scenario 1: Register plugin with routes enabled**
+      - **Given** a Fastify instance
+      - **When** I register `@tech-citizen/auth` with `enableRoutes: true`
+      - **Then** plugin registers successfully
+      - **And** routes `/auth/register`, `/auth/login`, `/auth/logout` exist
+      - **And** decorators `authenticate`, `keycloak`, `session` are available
+    - **Scenario 2: Register plugin without routes (gateway mode)**
+      - **Given** a Fastify instance (gateway)
+      - **When** I register `@tech-citizen/auth` with `enableRoutes: false`
+      - **Then** plugin registers successfully
+      - **And** no `/auth/*` routes exist
+      - **And** only decorators are available (for JWT validation)
+    - **Scenario 3: Missing required options**
+      - **Given** a Fastify instance
+      - **When** I register plugin without `keycloakUrl`
+      - **Then** plugin throws error `Missing required option: keycloakUrl`
+  - **Files**: packages/auth/src/index.ts, packages/auth/test/e2e.test.ts
+  - **API**:
+    ```typescript
+    fastify.register(authPlugin, {
+      keycloakUrl: 'http://localhost:8080',
+      realm: 'techcitizen',
+      clientId: 'gateway',
+      clientSecret: 'secret',
+      redisUrl: 'redis://localhost:6379',
+      enableRoutes: true, // false for gateway
+    });
+    ```
+  - **Estimate**: 2h
+
+**Epic Estimate**: 15h
+
+**BDD Feature Files** (to create in `e2e/features/`):
+
+- `auth-jwt-validation.feature` (US-038 scenarios)
+- `auth-keycloak-integration.feature` (US-039 scenarios)
+- `auth-session-management.feature` (US-040 scenarios)
+- `auth-schema-validation.feature` (US-041 scenarios)
+- `auth-plugin-registration.feature` (US-042 scenarios)
+
+**Test Strategy**:
+
+1. **Unit tests**: Mocked dependencies (ioredis-mock, nock for Keycloak)
+2. **Integration tests**: Real Keycloak + Redis testcontainers
+3. **E2E tests**: Full Fastify app with plugin registered
+
+**Dependencies**:
+
+- `@fastify/jwt` (peer dependency)
+- `@sinclair/typebox` + `@sinclair/typebox/compiler`
+- `keycloak-admin-client`
+- `ioredis`
+- `fastify-plugin` (for plugin wrapper)
+
+---
+
 #### EPIC-005: Centralized Authentication with Keycloak
 
 **Goal**: Implement user registration, authentication, and centralized session management
@@ -281,12 +473,12 @@
   - Files: infrastructure/keycloak/realm-export.json, docker-compose.yml
 
 - [ ] US-023: As a Developer, I want auth microservice (Platformatic) so I can manage user lifecycle
-  - Task: Create services/auth-api with Platformatic Service + Keycloak adapter, register in watt.json
+  - Task: Create services/auth-api with Platformatic Service, import @tech-citizen/auth package
   - Acceptance: POST /auth/register creates user in Keycloak, returns JWT
-  - Estimate: 4h
-  - Tech Stack: Platformatic Service, @fastify/jwt, keycloak-admin-client, @sinclair/typebox
-  - Routes: POST /auth/register, POST /auth/login, POST /auth/logout, GET /auth/me
-  - Schemas: TypeBox for request/response validation + auto OpenAPI generation
+  - Estimate: 2h (reduced from 4h - logic in package)
+  - Tech Stack: Platformatic Service, @tech-citizen/auth (from EPIC-009)
+  - Routes: Exposed by @tech-citizen/auth plugin with `enableRoutes: true`
+  - Dependencies: EPIC-009 US-037 to US-042 (auth package must exist first)
 
 - [ ] US-024: As a User, I want sign-up page so I can create account
   - Task: Create public/signup.html with form (email, password, confirm), integrate with /auth/register
@@ -303,18 +495,19 @@
   - Security: PKCE flow, secure cookie flags (httpOnly, secure, sameSite=strict)
 
 - [ ] US-026: As a Developer, I want JWT validation middleware so only authenticated requests access protected routes
-  - Task: Add @fastify/jwt plugin to gateway, verify Keycloak public key, attach user to request
+  - Task: Register @tech-citizen/auth plugin in gateway with `enableRoutes: false`
   - Acceptance: GET /api/profile returns 401 without valid JWT, 200 with user data when authenticated
-  - Estimate: 2h
+  - Estimate: 1h (reduced from 2h - plugin from EPIC-009)
   - Files: services/gateway/src/plugins/auth.ts
-  - Validation: Verify signature, check exp claim, validate issuer (Keycloak URL)
+  - Usage: `onRequest: [fastify.authenticate]` decorator from plugin
+  - Dependencies: EPIC-009 US-038 (JWT plugin)
 
 - [ ] US-027: As a Security Engineer, I want session management so refresh tokens rotate and revoke
-  - Task: Implement refresh token rotation in auth-api, add logout endpoint to revoke tokens
+  - Task: Use fastify.session decorator from @tech-citizen/auth for token rotation
   - Acceptance: POST /auth/refresh returns new access token, old refresh token invalidated
-  - Estimate: 3h
-  - Files: services/auth-api/src/modules/session/
-  - Storage: Redis for revoked tokens (blacklist with TTL = token exp)
+  - Estimate: 1h (reduced from 3h - logic in package)
+  - Implementation: Call `fastify.session.rotateTokens(oldRefreshToken)` in route handler
+  - Dependencies: EPIC-009 US-040 (session plugin)
 
 - [ ] US-028: As a User, I want password reset flow so I can recover account access
   - Task: Add /auth/reset-password endpoint, send email with reset link (integrate Keycloak email)
@@ -322,7 +515,9 @@
   - Estimate: 4h
   - Dependencies: Email service (defer if no SMTP - use Keycloak admin reset for MVP)
 
-**Epic Estimate**: 22h (19h MVP without email, 3h email integration deferred)
+**Epic Estimate**: 15h (was 22h, -7h thanks to EPIC-009 reusable package)
+
+**Dependencies**: EPIC-009 must complete first (auth package foundation)
 
 **Tech Stack**:
 

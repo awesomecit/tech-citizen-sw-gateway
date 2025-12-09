@@ -119,6 +119,7 @@ const EXCLUDED_PATTERNS = [
   /COURSE_REFERENCES\.md$/, // Skip course references (has markdown tables)
   /docs\/README\.md$/, // Skip docs index (has markdown tables)
   /DOCUMENTATION_ANALYSIS\.md$/, // Skip analysis report (has markdown tables)
+  /e2e\/features\/.*\.feature$/, // Skip BDD feature files (Gherkin scenarios with example data)
 ];
 
 // Known safe values (whitelist)
