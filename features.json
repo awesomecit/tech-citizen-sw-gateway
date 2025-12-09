@@ -1,7 +1,7 @@
 {
   "$schema": "./features.schema.json",
   "version": "1.0.0",
-  "lastUpdated": "2025-12-09T21:30:00Z",
+  "lastUpdated": "2025-12-09T21:47:18.793Z",
   "project": {
     "name": "tech-citizen-sw-gateway",
     "repository": "github.com/awesomecit/tech-citizen-sw-gateway"
@@ -9,10 +9,10 @@
   "release": {
     "current": "1.0.0",
     "nextSuggested": "1.1.0",
-    "lastCommit": "333b490",
+    "lastCommit": "1157772",
     "unreleased": {
-      "feat": 4,
-      "fix": 0,
+      "feat": 12,
+      "fix": 3,
       "breaking": 0
     }
   },
@@ -73,6 +73,14 @@
           "subject": "add US-038 Scenarios 6-7 - issuer and claims validation",
           "timestamp": "2025-12-09T21:15:00Z",
           "userStory": "US-038"
+        },
+        {
+          "hash": "fbd701f",
+          "type": "feat",
+          "scope": "project",
+          "subject": "add EPIC-009 auth package with BDD scenarios",
+          "timestamp": "2025-12-09T13:53:43.000Z",
+          "userStory": null
         }
       ],
       "userStories": {
@@ -88,7 +96,7 @@
             "failing": 0
           },
           "completedAt": "2025-12-09T14:00:00Z",
-          "commits": ["ab73b71"]
+          "commits": ["ab73b71", "333b490"]
         },
         "US-038": {
           "name": "JWT validation plugin",
@@ -139,7 +147,7 @@
         "estimatedHours": 15,
         "actualHours": 4,
         "remainingHours": 11,
-        "velocity": 1.0,
+        "velocity": 1,
         "testCoverage": 100,
         "totalTests": 14,
         "passingTests": 14
@@ -177,7 +185,33 @@
         "remainingHours": 3
       },
       "releaseTarget": "1.0.0",
-      "releaseNotes": "Core infrastructure setup with monitoring and graceful shutdown"
+      "releaseNotes": "Core infrastructure setup with monitoring and graceful shutdown",
+      "commits": [
+        {
+          "hash": "696ddc4",
+          "type": "feat",
+          "scope": "infra",
+          "subject": "add multi-environment Ansible automation with security hardening",
+          "timestamp": "2025-12-09T13:10:59.000Z",
+          "userStory": null
+        },
+        {
+          "hash": "ee1e161",
+          "type": "feat",
+          "scope": "infra",
+          "subject": "add multi-environment support with dedicated env files",
+          "timestamp": "2025-12-08T13:21:53.000Z",
+          "userStory": null
+        },
+        {
+          "hash": "294bf4a",
+          "type": "feat",
+          "scope": "infra",
+          "subject": "add minimal infrastructure with YAGNI",
+          "timestamp": "2025-12-08T12:37:54.000Z",
+          "userStory": null
+        }
+      ]
     },
     "production-deployment": {
       "id": "EPIC-008",
@@ -214,6 +248,30 @@
           "subject": "add multi-environment Ansible automation with security hardening",
           "timestamp": "2025-12-07T10:00:00Z",
           "userStory": "US-032"
+        },
+        {
+          "hash": "1e5f703",
+          "type": "feat",
+          "scope": "project",
+          "subject": "add EPIC-008 Production Deployment to backlog and roadmap",
+          "timestamp": "2025-12-09T13:41:01.000Z",
+          "userStory": null
+        },
+        {
+          "hash": "ee1e161",
+          "type": "feat",
+          "scope": "infra",
+          "subject": "add multi-environment support with dedicated env files",
+          "timestamp": "2025-12-08T13:21:53.000Z",
+          "userStory": null
+        },
+        {
+          "hash": "294bf4a",
+          "type": "feat",
+          "scope": "infra",
+          "subject": "add minimal infrastructure with YAGNI",
+          "timestamp": "2025-12-08T12:37:54.000Z",
+          "userStory": null
         }
       ],
       "metrics": {
@@ -254,7 +312,49 @@
         "remainingHours": 15
       },
       "releaseTarget": "1.3.0",
-      "releaseNotes": "Full authentication service with Keycloak integration"
+      "releaseNotes": "Full authentication service with Keycloak integration",
+      "commits": [
+        {
+          "hash": "cfa3c6a",
+          "type": "feat",
+          "scope": "auth",
+          "subject": "add US-038 Scenarios 6-7 - issuer and claims validation",
+          "timestamp": "2025-12-09T21:39:21.000Z",
+          "userStory": "US-038"
+        },
+        {
+          "hash": "ecb791e",
+          "type": "feat",
+          "scope": "auth",
+          "subject": "add US-038 Scenarios 2-5 - JWT error validation",
+          "timestamp": "2025-12-09T21:26:08.000Z",
+          "userStory": "US-038"
+        },
+        {
+          "hash": "f4e80d5",
+          "type": "feat",
+          "scope": "auth",
+          "subject": "add US-038 Scenario 1 - JWT valid token validation",
+          "timestamp": "2025-12-09T21:19:27.000Z",
+          "userStory": "US-038"
+        },
+        {
+          "hash": "ab73b71",
+          "type": "feat",
+          "scope": "auth",
+          "subject": "add US-037 package structure with TDD",
+          "timestamp": "2025-12-09T14:51:27.000Z",
+          "userStory": "US-037"
+        },
+        {
+          "hash": "1f7097f",
+          "type": "refactor",
+          "scope": "project",
+          "subject": "replace EPIC-005 with Keycloak authentication system",
+          "timestamp": "2025-12-09T13:44:08.000Z",
+          "userStory": null
+        }
+      ]
     }
   },
   "toggles": {
