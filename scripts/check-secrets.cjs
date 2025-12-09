@@ -146,6 +146,8 @@ const SAFE_VALUES = [
   'a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6', // Example UUID in docs
   '123e4567-e89b-12d3-a456-426614174000', // Example UUID format
   'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', // UUID placeholder
+  'change-me-in-production-min-32-chars', // Keycloak session secret placeholder
+  'getAccessTokenUsingAuthorizationCodeFlow', // OAuth2 plugin function name
 ];
 
 // Additional pattern exclusions

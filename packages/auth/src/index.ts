@@ -91,4 +91,5 @@ export default fp(authPlugin, {
 
 // Export sub-plugins and schemas for advanced usage
 export * from './plugins/jwt.js';
-// TODO: Export keycloak, session, user, token after US-039/040/041 implementation
+export * from './keycloak.js';
+// TODO: Export session, user, token after US-040/041 implementation
