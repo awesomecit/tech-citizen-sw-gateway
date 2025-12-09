@@ -11,6 +11,12 @@ dist/
 coverage/
 .watt/
 
+# Secrets and keys (NEVER commit!)
+.keys/
+*.key
+*.pem
+secrets.json
+
 # Generated configuration files
 watt.json
 services/gateway/watt.json

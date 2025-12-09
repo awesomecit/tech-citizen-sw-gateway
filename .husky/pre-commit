@@ -16,6 +16,19 @@ fi
 
 echo "🔍 Running pre-commit checks..."
 
+# Update features.json from git commits
+echo "📊 Updating features.json from commits..."
+npm run features:update --silent
+git add features.json
+
+# Validate features.json schema
+echo "🔍 Validating features.json schema..."
+npm run features:validate --silent || {
+  echo "❌ features.json validation failed!"
+  echo "   Run 'npm run features:validate' to see errors"
+  exit 1
+}
+
 # Lint staged files
 if [ "$RUN_LINT_STAGED" != "false" ]; then
   echo "📝 Formatting and linting staged files..."

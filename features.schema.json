@@ -355,8 +355,15 @@
           "format": "date-time"
         },
         "userStory": {
-          "type": "string",
-          "pattern": "^US-\\d{3,}$"
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^US-\\d{3,}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       }
     },

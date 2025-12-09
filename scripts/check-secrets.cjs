@@ -108,8 +108,8 @@ const EXCLUDED_PATTERNS = [
   /check-secrets\.cjs$/, // Don't scan this file itself
   /CONTRIBUTING\.md$/, // Skip documentation with examples
   /DX-IMPLEMENTATION-GUIDE\.md$/, // Skip setup guide
-  /\.feature$/,  // Skip BDD feature files
-  /\/test\/.*\.(spec|test)\.(ts|js)$/,  // Skip test files (may contain test RSA keys)
+  /\.feature$/, // Skip BDD feature files
+  /\/test\/.*\.(spec|test)\.(ts|js)$/, // Skip test files (may contain test RSA keys)
   /INFRASTRUCTURE\.md$/, // Skip infrastructure documentation
   /IAC_TESTING\.md$/, // Skip IaC testing documentation
   /BACKLOG\.md$/, // Skip project backlog
@@ -143,13 +143,25 @@ const SAFE_VALUES = [
   '| --------------------------------- | ------------------------------------------', // Longer table separator
   '- [0001: Minimal Infrastructure](./architecture/decisions/0001-minimal-infrastru', // ADR link
   '| ------------ | -------------------------------- | ----------------------------', // 3-column table
+  'a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6', // Example UUID in docs
+  '123e4567-e89b-12d3-a456-426614174000', // Example UUID format
+  'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', // UUID placeholder
 ];
+
+// Additional pattern exclusions
+function isLikelyUUID(value) {
+  // UUID v4 pattern: 8-4-4-4-12 hex chars
+  return /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(
+    value,
+  );
+}
 
 function shouldExcludeFile(filePath) {
   return EXCLUDED_PATTERNS.some(pattern => pattern.test(filePath));
 }
 
 function isSafeValue(value) {
+  if (isLikelyUUID(value)) return true; // Exclude UUIDs
   return SAFE_VALUES.some(safe => value.includes(safe));
 }
 

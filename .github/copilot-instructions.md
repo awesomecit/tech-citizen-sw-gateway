@@ -355,6 +355,74 @@ npm run quality:fix
 - [ ] Lint clean (`npm run lint:check`)
 - [ ] Formatted (`npm run format:check`)
 - [ ] Complexity analysis passes (`npm run analyze:cognitive`)
+- [ ] **Feature tracking updated** (`npm run features:update`)
+- [ ] **features.json validated** (`npm run features:validate`)
+- [ ] **Conventional commit format** (feat/fix/docs with US-XXX reference)
+
+### Feature Tracking Workflow (MANDATORY)
+
+**Before committing work on user stories:**
+
+1. **Update features.json** from git commits:
+
+   ```bash
+   npm run features:update
+   # Parses conventional commits since last release
+   # Updates userStory.commits[], feature.commits[], release.unreleased
+   ```
+
+2. **Manually update progress** when completing user stories:
+
+   ```json
+   // features.json
+   {
+     "userStories": {
+       "US-043": {
+         "status": "done", // Update from "in-progress"
+         "coverage": 100, // Add test coverage
+         "completedAt": "2025-12-09T22:00:00Z" // Add timestamp
+       }
+     }
+   }
+   ```
+
+3. **Validate schema compliance**:
+
+   ```bash
+   npm run features:validate
+   # Ensures features.json matches features.schema.json
+   ```
+
+4. **Commit with conventional format**:
+
+   ```bash
+   git commit -m "feat(gateway): add prometheus metrics endpoint
+
+   Implements US-043 with prom-client integration.
+   Exposes /metrics endpoint with http_request_duration_ms histogram.
+
+   BREAKING CHANGE: none"
+   ```
+
+**Conventional Commit Rules**:
+
+- **Type**: `feat|fix|docs|style|refactor|perf|test|build|ci|chore`
+- **Scope**: `gateway|auth|cache|telemetry|events` (optional)
+- **Subject**: Imperative mood, lowercase, no period
+- **Body**: Reference `US-XXX` or `EPIC-XXX` (auto-extracted by `features:update`)
+- **Footer**: `BREAKING CHANGE:` triggers major version bump
+
+**Pre-commit hook integration** (.husky/pre-commit):
+
+```bash
+#!/bin/bash
+# Auto-update features.json before commit
+npm run features:update
+git add features.json
+
+# Validate schema
+npm run features:validate || exit 1
+```
 
 ### Commands Reference
 
@@ -383,6 +451,22 @@ npm run release          # Execute semantic release
 # Security
 npm run security:check   # Scan for hardcoded secrets
 npm audit                # Dependency vulnerability check
+
+# Keys & Secrets Generation
+npm run keys:generate    # Interactive mode (all types)
+npm run keys:rsa         # RSA key pair for JWT (2048-bit, dev)
+npm run keys:rsa:prod    # RSA key pair for JWT (4096-bit, prod)
+npm run keys:jwt         # JWT secret (HMAC-SHA256)
+npm run keys:api         # API key (service-to-service)
+npm run keys:session     # Session secret (cookie signing)
+npm run keys:keycloak    # Keycloak client secret
+npm run keys:all         # Generate all keys (development)
+npm run keys:all:prod    # Generate all keys (production)
+
+# Feature Tracking
+npm run features:update  # Auto-update from git commits
+npm run features:preview # Dry-run (preview changes)
+npm run features:validate # JSON Schema validation
 ```
 
 ---
