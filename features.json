@@ -1,7 +1,7 @@
 {
   "$schema": "./features.schema.json",
   "version": "1.0.0",
-  "lastUpdated": "2025-12-09T22:36:39.530Z",
+  "lastUpdated": "2025-12-09T22:50:44.060Z",
   "project": {
     "name": "tech-citizen-sw-gateway",
     "repository": "github.com/awesomecit/tech-citizen-sw-gateway"
@@ -9,9 +9,9 @@
   "release": {
     "current": "1.0.0",
     "nextSuggested": "1.1.0",
-    "lastCommit": "5ecc652",
+    "lastCommit": "169680d",
     "unreleased": {
-      "feat": 14,
+      "feat": 15,
       "fix": 3,
       "breaking": 0
     }
@@ -81,6 +81,14 @@
           "subject": "add EPIC-009 auth package with BDD scenarios",
           "timestamp": "2025-12-09T13:53:43.000Z",
           "userStory": null
+        },
+        {
+          "hash": "169680d",
+          "type": "feat",
+          "scope": "auth",
+          "subject": "implement Keycloak OIDC integration (US-039)",
+          "timestamp": "2025-12-09T22:36:39.000Z",
+          "userStory": "US-039"
         }
       ],
       "userStories": {
@@ -120,9 +128,10 @@
         },
         "US-039": {
           "name": "Keycloak integration plugin",
-          "status": "todo",
+          "status": "in-progress",
           "estimate": "4h",
-          "bddFeature": "e2e/features/auth-keycloak-integration.feature"
+          "bddFeature": "e2e/features/auth-keycloak-integration.feature",
+          "commits": ["169680d"]
         },
         "US-040": {
           "name": "Session management plugin",
@@ -353,6 +362,14 @@
           "subject": "replace EPIC-005 with Keycloak authentication system",
           "timestamp": "2025-12-09T13:44:08.000Z",
           "userStory": null
+        },
+        {
+          "hash": "169680d",
+          "type": "feat",
+          "scope": "auth",
+          "subject": "implement Keycloak OIDC integration (US-039)",
+          "timestamp": "2025-12-09T22:36:39.000Z",
+          "userStory": "US-039"
         }
       ]
     }

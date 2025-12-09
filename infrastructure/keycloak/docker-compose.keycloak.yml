@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: tech-citizen-keycloak
+    environment:
+      # Admin credentials (CHANGE IN PRODUCTION!)
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+
+      # Database (H2 for dev, PostgreSQL for production)
+      KC_DB: dev-mem
+
+      # HTTP settings
+      KC_HTTP_ENABLED: 'true'
+      KC_HTTP_PORT: ${KEYCLOAK_HTTP_PORT:-8080}
+      KC_HOSTNAME_STRICT: 'false'
+      KC_HOSTNAME_STRICT_HTTPS: 'false'
+
+      # Metrics
+      KC_METRICS_ENABLED: 'true'
+      KC_HEALTH_ENABLED: 'true'
+
+    ports:
+      - '${KEYCLOAK_PORT:-8090}:${KEYCLOAK_HTTP_PORT:-8080}'
+
+    volumes:
+      # Import realm on startup
+      - ./realm-export.json:/opt/keycloak/data/import/realm-healthcare-domain.json:ro
+
+    command:
+      - start-dev
+      - --import-realm
+
+    networks:
+      - tech-citizen-network
+
+    healthcheck:
+      test:
+        ['CMD-SHELL', 'curl -f http://localhost:8080/health/ready || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+    restart: unless-stopped
+
+  # Redis for session storage (shared with gateway)
+  redis-session:
+    image: redis:7-alpine
+    container_name: tech-citizen-redis-session
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    volumes:
+      - redis-session-data:/data
+    command: redis-server --appendonly yes --requirepass "${REDIS_PASSWORD:-dev-redis-password}"
+    networks:
+      - tech-citizen-network
+    healthcheck:
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+networks:
+  tech-citizen-network:
+    driver: bridge
+
+volumes:
+  redis-session-data:
+    driver: local

@@ -148,6 +148,14 @@ const SAFE_VALUES = [
   'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', // UUID placeholder
   'change-me-in-production-min-32-chars', // Keycloak session secret placeholder
   'getAccessTokenUsingAuthorizationCodeFlow', // OAuth2 plugin function name
+  'gateway-client-secret-change-in-production', // Keycloak client secret placeholder (example)
+  'test-session-secret-32-characters-min', // Test environment session secret
+  'test-jwt-secret-32-characters-minimum', // Test environment JWT secret
+  'accessTokenLifespanForImplicitFlow', // Keycloak realm config parameter
+  'offlineSessionMaxLifespanEnabled', // Keycloak realm config parameter
+  'oidc-usermodel-realm-role-mapper', // Keycloak protocol mapper name
+  '| ------------------------- | ------------- | ----------------------------------', // Markdown table (4 columns)
+  '- [ADR-003: User Management Architecture](../../docs/architecture/decisions/ADR-', // ADR link (truncated by grep)
 ];
 
 // Additional pattern exclusions
@@ -162,8 +170,15 @@ function shouldExcludeFile(filePath) {
   return EXCLUDED_PATTERNS.some(pattern => pattern.test(filePath));
 }
 
-function isSafeValue(value) {
+function isSafeValue(value, fullLine = '') {
   if (isLikelyUUID(value)) return true; // Exclude UUIDs
+  
+  // Exclude markdown table separators (check full line)
+  if (/^\|[\s-]+\|/.test(fullLine.trim())) return true;
+  
+  // Exclude markdown links (check full line for ADR references)
+  if (/^\s*-\s*\[ADR-\d+:/.test(fullLine)) return true;
+  
   return SAFE_VALUES.some(safe => value.includes(safe));
 }
 
@@ -180,8 +195,8 @@ function scanFile(filePath) {
         if (matches) {
           const matchedValue = matches[0];
 
-          // Skip if it's a safe/test value
-          if (isSafeValue(matchedValue)) {
+          // Skip if it's a safe/test value (pass full line for context)
+          if (isSafeValue(matchedValue, line)) {
             return;
           }
 
