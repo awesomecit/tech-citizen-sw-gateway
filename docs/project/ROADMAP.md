@@ -109,10 +109,79 @@
 
 **Goal**: Centralized authentication and first microservices
 
+### Epic 9: Reusable Auth Package (Foundation) ✅ 40% COMPLETE
+
+**Duration**: Sprint 3 (1 week)  
+**Status**: IN PROGRESS (2/5 user stories complete)
+
+**Why First**: This epic creates the `@tech-citizen/auth` package that Epic 5 depends on. By building reusable auth primitives (JWT validation, Keycloak client, session management) FIRST, we avoid duplicating logic across gateway and auth-api services.
+
+**Deliverables**:
+
+- ✅ Package structure with mono-repo workspace integration
+- ✅ JWT validation plugin with @fastify/jwt (7 BDD scenarios)
+- 🔄 Keycloak admin client plugin (user CRUD operations)
+- 🔄 Session management plugin (Redis-based refresh tokens)
+- 🔄 TypeBox validation schemas (user registration, login)
+- 🔄 Main auth plugin composition with optional routes
+
+**Success Metrics**:
+
+- ✅ Package importable in all services via `@tech-citizen/auth`
+- ✅ JWT plugin validates tokens with 100% test coverage (14 tests passing)
+- ✅ All 7 BDD scenarios in auth-jwt-validation.feature pass
+- 🔄 Keycloak integration tests with Testcontainers pass
+- 🔄 Session plugin supports token rotation and blacklist
+- 🔄 Epic 5 auth-api reuses all plugins (zero duplication)
+
+**Tech Stack**:
+
+- @fastify/jwt 9.1.0 (JWT validation)
+- fast-jwt 4.0.5 (test token generation)
+- keycloak-admin-client (for US-039)
+- ioredis (for US-040)
+- TypeBox + TypeCompiler (for US-041)
+
+**Completed Work**:
+
+- ✅ US-037: Package structure (commit ab73b71, 100% coverage, 7 tests)
+- ✅ US-038: JWT validation plugin (commits f4e80d5, ecb791e, cfa3c6a)
+  - Scenario 1: Valid JWT → 200 with request.user
+  - Scenario 2-5: Error handling (expired, invalid signature, malformed, missing header)
+  - Scenario 6-7: Issuer + required claims validation
+  - Implementation: verify-only mode, RSA256 algorithm, allowedIss + requiredClaims
+
+**Remaining Work** (60% of epic):
+
+- 🔄 US-039: Keycloak integration plugin (4h)
+- 🔄 US-040: Session management plugin (3h)
+- 🔄 US-041: TypeBox schemas (2h)
+- 🔄 US-042: Main auth plugin composition (2h)
+
+**Reference**: BACKLOG.md EPIC-009 (US-037 to US-042, 15h estimate, 4h done)
+
+**BDD Features**:
+
+- ✅ e2e/features/auth-jwt-validation.feature (7 scenarios implemented)
+- 🔄 e2e/features/auth-keycloak-integration.feature
+- 🔄 e2e/features/auth-session-management.feature
+- 🔄 e2e/features/auth-plugin-registration.feature
+- 🔄 e2e/features/auth-schema-validation.feature
+
+---
+
 ### Epic 5: Centralized Authentication (Keycloak + Platformatic)
 
-**Duration**: Sprint 3-5 (3 weeks)  
-**Status**: Not started
+**Duration**: Sprint 4-5 (2 weeks)  
+**Status**: Blocked by Epic 9 (auth package must complete first)
+
+**Duration**: Sprint 4-5 (2 weeks)  
+**Status**: Blocked by Epic 9 (auth package must complete first)
+
+**Dependencies**:
+
+- Epic 9 US-037 to US-042 (auth package foundation)
+- Requires completed @tech-citizen/auth with all plugins
 
 **Deliverables**:
 

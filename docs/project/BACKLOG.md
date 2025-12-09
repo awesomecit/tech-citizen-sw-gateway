@@ -260,11 +260,11 @@
 
 ### Priority 3: User Management & Authentication (Sprint 3-5)
 
-#### EPIC-009: Reusable Auth Package (Foundation) 🛠️
+#### EPIC-009: Reusable Auth Package (Foundation) ✅ IN PROGRESS
 
 **Goal**: Create modular, reusable authentication package for mono-repo services
 
-**Status**: Not started
+**Status**: 40% complete (2/5 user stories done)
 
 **Package**: `@tech-citizen/auth` in `packages/auth/`
 
@@ -272,7 +272,7 @@
 
 **User Stories**:
 
-- [ ] US-037: As a Developer, I want auth package structure so I can share logic across services
+- [x] US-037: As a Developer, I want auth package structure so I can share logic across services
   - **Task 1**: Create `packages/auth/` with TypeScript + workspace setup
   - **Task 2**: Configure package.json with peerDependencies (fastify, @fastify/jwt)
   - **Task 3**: Setup tsconfig.json with paths alias (`@tech-citizen/auth`)
@@ -283,31 +283,61 @@
     - **And** TypeScript resolves `import from '@tech-citizen/auth'`
   - **Files**: packages/auth/package.json, packages/auth/tsconfig.json, root package.json workspaces
   - **Estimate**: 1h
+  - **Status**: ✅ DONE (commit ab73b71) - 100% coverage, 7 tests passing
 
-- [ ] US-038: As a Developer, I want JWT validation plugin so services can verify tokens
+- [x] US-038: As a Developer, I want JWT validation plugin so services can verify tokens
   - **Task 1**: Create `src/plugins/jwt.ts` with @fastify/jwt wrapper
   - **Task 2**: Add Keycloak public key fetching + caching
   - **Task 3**: Add `fastify.authenticate` decorator
   - **Task 4**: Write unit tests for JWT verify/decode/validate
   - **Acceptance Criteria** (BDD):
-    - **Scenario 1: Valid JWT**
+    - **Scenario 1: Valid JWT** ✅
       - **Given** a valid JWT signed by Keycloak
       - **When** I call `fastify.authenticate(request, reply)`
       - **Then** request.user is populated with decoded payload
       - **And** no error is thrown
-    - **Scenario 2: Expired JWT**
+    - **Scenario 2: Expired JWT** ✅
       - **Given** a JWT with exp claim in the past
       - **When** I call `fastify.authenticate(request, reply)`
       - **Then** reply sends 401 Unauthorized
       - **And** error is `TokenExpiredError`
-    - **Scenario 3: Invalid signature**
+    - **Scenario 3: Invalid signature** ✅
       - **Given** a JWT with tampered signature
       - **When** I call `fastify.authenticate(request, reply)`
       - **Then** reply sends 401 Unauthorized
       - **And** error is `JsonWebTokenError`
-  - **Files**: packages/auth/src/plugins/jwt.ts, packages/auth/test/jwt.test.ts
-  - **Test Coverage**: >90% (happy path + 3 error cases)
+    - **Scenario 4: Malformed JWT** ✅
+      - **Given** Authorization header "Bearer not-a-valid-jwt"
+      - **When** I call `fastify.authenticate(request, reply)`
+      - **Then** reply sends 401 Unauthorized
+      - **And** error message contains "malformed"
+    - **Scenario 5: Missing Authorization** ✅
+      - **Given** no Authorization header in request
+      - **When** I call `fastify.authenticate(request, reply)`
+      - **Then** reply sends 401 Unauthorized
+      - **And** error message contains "No Authorization was found"
+    - **Scenario 6: Wrong issuer** ✅
+      - **Given** a JWT with issuer different from Keycloak realm
+      - **When** I call `fastify.authenticate(request, reply)`
+      - **Then** reply sends 401 Unauthorized
+      - **And** error message contains "iss claim"
+    - **Scenario 7: Missing required claims** ✅
+      - **Given** a JWT missing the "sub" claim
+      - **When** I call `fastify.authenticate(request, reply)`
+      - **Then** reply sends 401 Unauthorized
+      - **And** error message contains "sub"
+  - **Files**:
+    - packages/auth/src/plugins/jwt.ts (implemented)
+    - packages/auth/test/plugins/jwt.spec.ts (7 scenarios)
+    - e2e/features/auth-jwt-validation.feature (BDD reference)
+  - **Test Coverage**: 100% statements, 80% branches, 100% functions (14/14 tests passing)
   - **Estimate**: 3h
+  - **Status**: ✅ DONE (commits f4e80d5, ecb791e, cfa3c6a) - All 7 BDD scenarios implemented
+  - **Implementation Notes**:
+    - Used @fastify/jwt 9.1.0 (verify-only mode with RSA256 public key)
+    - Added issuer validation via `allowedIss` option
+    - Added required claims validation via `requiredClaims: ['sub']`
+    - RSA-2048 test key pair generated with openssl for unit tests
 
 - [ ] US-039: As a Developer, I want Keycloak integration plugin so I can manage users
   - **Task 1**: Create `src/plugins/keycloak.ts` with keycloak-admin-client
