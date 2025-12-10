@@ -34,6 +34,8 @@
     "infra:stop:test": "bash scripts/infra-stop.sh test",
     "infra:clean": "bash scripts/infra-stop.sh development volumes",
     "staging:deploy": "bash scripts/deploy-staging.sh",
+    "staging:startup": "bash scripts/staging-startup.sh",
+    "staging:demo-users": "bash scripts/ensure-demo-users.sh staging",
     "staging:start": "docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d",
     "staging:stop": "docker compose -f docker-compose.yml -f docker-compose.staging.yml down",
     "staging:logs": "docker compose -f docker-compose.yml -f docker-compose.staging.yml logs -f",

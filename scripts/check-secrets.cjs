@@ -128,6 +128,10 @@ const EXCLUDED_PATTERNS = [
 const SAFE_VALUES = [
   'test-secret',
   'your-api-key',
+  'admin', // Default Keycloak admin password (development only)
+  'DemoPatient123!', // Demo user passwords
+  'DemoDoctor123!',
+  'DemoAdmin123!',
   'example',
   'changeme',
   'CHANGE_ME_IN_PRODUCTION',
