@@ -15,6 +15,8 @@ KEYCLOAK_URL="${KEYCLOAK_URL:-http://localhost:8090}"
 KEYCLOAK_ADMIN="${KEYCLOAK_ADMIN:-admin}"
 KEYCLOAK_ADMIN_PASSWORD="${KEYCLOAK_ADMIN_PASSWORD:-admin}"
 REALM="${KEYCLOAK_REALM:-healthcare-domain}"
+ADMIN_CLIENT_ID="${ADMIN_CLIENT_ID:-admin-automation}"
+ADMIN_CLIENT_SECRET="${ADMIN_CLIENT_SECRET:-admin-automation-secret-change-in-production}"
 
 LOG_FILE="/tmp/keycloak-demo-users-${ENV}.log"
 
@@ -26,14 +28,29 @@ echo "" | tee -a "$LOG_FILE"
 
 # Get admin token
 echo "🔑 Getting admin token..." | tee -a "$LOG_FILE"
+
+# Try admin-automation client first (preferred)
 TOKEN_RESPONSE=$(curl -s -X POST "$KEYCLOAK_URL/realms/master/protocol/openid-connect/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "username=$KEYCLOAK_ADMIN" \
-  -d "password=$KEYCLOAK_ADMIN_PASSWORD" \
-  -d "grant_type=password" \
-  -d "client_id=admin-cli" 2>&1)
+  -d "client_id=$ADMIN_CLIENT_ID" \
+  -d "client_secret=$ADMIN_CLIENT_SECRET" \
+  -d "grant_type=client_credentials" 2>&1)
 
 ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.access_token' 2>/dev/null || echo "null")
+
+# Fallback to admin-cli with password grant (requires manual configuration)
+if [ "$ACCESS_TOKEN" = "null" ] || [ -z "$ACCESS_TOKEN" ]; then
+  echo "   ℹ️  admin-automation client not available, trying admin-cli..." | tee -a "$LOG_FILE"
+  
+  TOKEN_RESPONSE=$(curl -s -X POST "$KEYCLOAK_URL/realms/master/protocol/openid-connect/token" \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -d "username=$KEYCLOAK_ADMIN" \
+    -d "password=$KEYCLOAK_ADMIN_PASSWORD" \
+    -d "grant_type=password" \
+    -d "client_id=admin-cli" 2>&1)
+
+  ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.access_token' 2>/dev/null || echo "null")
+fi
 
 if [ "$ACCESS_TOKEN" = "null" ] || [ -z "$ACCESS_TOKEN" ]; then
   echo "❌ Failed to get admin token" | tee -a "$LOG_FILE"

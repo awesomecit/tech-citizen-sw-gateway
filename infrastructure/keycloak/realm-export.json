@@ -193,6 +193,39 @@
         "offline_access",
         "microprofile-jwt"
       ]
+    },
+    {
+      "clientId": "admin-automation",
+      "name": "Admin Automation Client",
+      "description": "Client for automated admin operations (user provisioning, realm management)",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "admin-automation-secret-change-in-production",
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "consentRequired": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": false,
+      "fullScopeAllowed": true,
+      "attributes": {
+        "access.token.lifespan": "300"
+      },
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "profile",
+        "roles",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
     }
   ],
   "clientScopes": [
