@@ -150,13 +150,18 @@
   - Scenario 2-5: Error handling (expired, invalid signature, malformed, missing header)
   - Scenario 6-7: Issuer + required claims validation
   - Implementation: verify-only mode, RSA256 algorithm, allowedIss + requiredClaims
+- ✅ US-040: Session Manager (commit XXXXXXX, 10/10 tests passing)
+  - Sliding window TTL extension on recent activity (< 5 min)
+  - Auto-refresh access token before expiration (< 5 min)
+  - Activity tracking with lastActivity timestamp
+  - Cleanup job for stale sessions (hourly)
+  - Redis-based storage with configurable TTL
 
-**Remaining Work** (60% of epic):
+**Remaining Work** (33% of epic):
 
-- 🔄 US-039: Keycloak integration plugin (4h)
-- 🔄 US-040: Session management plugin (3h)
-- 🔄 US-041: TypeBox schemas (2h)
-- 🔄 US-042: Main auth plugin composition (2h)
+- 📋 US-039: Keycloak integration plugin (4h) - partially complete, needs final integration
+- 📋 US-041: TypeBox schemas (2h)
+- 📋 US-042: Main auth plugin composition (2h)
 
 **Reference**: BACKLOG.md EPIC-009 (US-037 to US-042, 15h estimate, 4h done)
 

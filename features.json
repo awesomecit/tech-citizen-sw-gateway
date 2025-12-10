@@ -1,7 +1,7 @@
 {
   "$schema": "./features.schema.json",
   "version": "1.0.0",
-  "lastUpdated": "2025-12-10T13:36:40.593Z",
+  "lastUpdated": "2025-12-10T13:42:22.957Z",
   "project": {
     "name": "tech-citizen-sw-gateway",
     "repository": "github.com/awesomecit/tech-citizen-sw-gateway"
@@ -9,9 +9,9 @@
   "release": {
     "current": "1.0.0",
     "nextSuggested": "1.1.0",
-    "lastCommit": "b7d12bf",
+    "lastCommit": "2c88430",
     "unreleased": {
-      "feat": 19,
+      "feat": 20,
       "fix": 5,
       "breaking": 0
     }
@@ -105,6 +105,14 @@
           "subject": "integrate Keycloak OIDC with gateway and E2E tests",
           "timestamp": "2025-12-09T23:27:42.000Z",
           "userStory": null
+        },
+        {
+          "hash": "2c88430",
+          "type": "feat",
+          "scope": "auth",
+          "subject": "implement US-040 enhanced session management",
+          "timestamp": "2025-12-10T13:36:40.000Z",
+          "userStory": "US-040"
         }
       ],
       "userStories": {
@@ -151,9 +159,10 @@
         },
         "US-040": {
           "name": "Session management plugin",
-          "status": "todo",
+          "status": "in-progress",
           "estimate": "3h",
-          "bddFeature": "e2e/features/auth-session-management.feature"
+          "bddFeature": "e2e/features/auth-session-management.feature",
+          "commits": ["2c88430"]
         },
         "US-041": {
           "name": "TypeBox schemas",
@@ -450,6 +459,14 @@
           "subject": "integrate Keycloak OIDC with gateway and E2E tests",
           "timestamp": "2025-12-09T23:27:42.000Z",
           "userStory": null
+        },
+        {
+          "hash": "2c88430",
+          "type": "feat",
+          "scope": "auth",
+          "subject": "implement US-040 enhanced session management",
+          "timestamp": "2025-12-10T13:36:40.000Z",
+          "userStory": "US-040"
         }
       ]
     }
