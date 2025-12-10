@@ -38,7 +38,10 @@ ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.access_token' 2>/dev/null || ech
 if [ "$ACCESS_TOKEN" = "null" ] || [ -z "$ACCESS_TOKEN" ]; then
   echo "❌ Failed to get admin token" | tee -a "$LOG_FILE"
   echo "Response: $TOKEN_RESPONSE" | tee -a "$LOG_FILE"
-  exit 1
+  echo "" | tee -a "$LOG_FILE"
+  echo "⚠️  Keycloak admin-cli requires Direct Access Grants enabled" | tee -a "$LOG_FILE"
+  echo "💡 Enable in: Keycloak Admin → Clients → admin-cli → Settings → Direct access grants: ON" | tee -a "$LOG_FILE"
+  exit 2
 fi
 
 echo "   ✅ Token obtained" | tee -a "$LOG_FILE"
