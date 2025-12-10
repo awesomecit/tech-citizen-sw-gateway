@@ -300,7 +300,7 @@ class AutoRelease {
         encoding: 'utf8',
       }).trim();
       const remoteCommit = execSync(
-        'git rev-parse origin/HEAD 2>/dev/null || git rev-parse origin/main 2>/dev/null || git rev-parse origin/master',
+        'git rev-parse origin/main 2>/dev/null || git rev-parse origin/master',
         {
           encoding: 'utf8',
         },
