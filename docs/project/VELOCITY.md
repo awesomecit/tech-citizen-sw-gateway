@@ -2,7 +2,33 @@
 
 **Last Updated**: 2025-12-10  
 **Team**: AI-Assisted Development (Antonio Cittadino + Claude Sonnet 4.5)  
-**Sprint Duration**: 1 week (flexible, timeboxed)
+**Sprint Duration**: ~1 week (flexible timeboxing, not strict Scrum - sprints end when goal is met or calendar week ends)
+
+---
+
+## Sprint Methodology
+
+**Approach**: Flexible timeboxing (adapted Scrum for solo AI-assisted development)
+
+**Sprint Cadence**:
+
+- **Target Duration**: 5-7 calendar days
+- **Goal-Driven**: Sprint ends when primary goal is met OR calendar week ends (whichever comes first)
+- **No Ceremonies**: Skip standup/retrospective overhead for solo work
+- **Async Planning**: Next sprint planned at end of current sprint
+
+**Why Not Strict Scrum**:
+
+- Solo developer (no team coordination needed)
+- AI pairing allows variable velocity (8-16 SP/week depending on complexity)
+- Flexible schedule (not full-time dedicated)
+
+**Velocity Tracking Purpose**:
+
+- Forecast epic completion dates
+- Identify bottlenecks and learning curves
+- Improve estimation accuracy over time
+- **NOT for team performance measurement** (no pressure, just data)
 
 ---
 
@@ -106,7 +132,8 @@
 | Sprint 2 (current) | 12 SP   | 4 SP (so far) | TBD      | 33% (in progress) |
 
 **Average Velocity**: 11.5 SP/week  
-**Trend**: 📈 Improving (+30% from Sprint 0 to Sprint 1)
+**Trend**: 📈 Improving (+30% from Sprint 0 to Sprint 1)  
+**Confidence Level**: ⚠️ Low (only 2 sprints completed - need 3-5 sprints for reliable forecasting)
 
 ### Burndown Chart (Sprint 2)
 
@@ -202,29 +229,38 @@ Story Points Remaining
 
 ### Epic 9: Reusable Auth Package
 
-**Status**: ✅ 60% COMPLETE (8/13 SP)
+**Status**: ✅ 47% COMPLETE (7/15 SP)
 
-| User Story                  | Status  | SP  |
-| --------------------------- | ------- | --- |
-| US-037: Package Structure   | ✅ DONE | 1   |
-| US-038: JWT Plugin          | ✅ DONE | 3   |
-| US-039: Keycloak Plugin     | ✅ DONE | 4   |
-| US-043: Metrics Integration | 📋 TODO | 2   |
-| US-044: Circuit Breaker     | 📋 TODO | 3   |
+**Story Points Breakdown**:
 
-**Remaining Work**: 5 SP  
-**ETA**: Sprint 3
+- Total Epic: 15 SP (US-037: 1 SP, US-038: 3 SP, US-039: 4 SP, US-040: 3 SP, US-041: 2 SP, US-042: 2 SP)
+- Completed: 7 SP (US-037 + US-038 + US-040)
+- Remaining: 8 SP
+
+| User Story                 | Status     | SP  |
+| -------------------------- | ---------- | --- |
+| US-037: Package Structure  | ✅ DONE    | 1   |
+| US-038: JWT Plugin         | ✅ DONE    | 3   |
+| US-039: Keycloak Plugin    | 🔄 PARTIAL | 4   |
+| US-040: Session Manager    | ✅ DONE    | 3   |
+| US-041: TypeBox Validation | 📋 TODO    | 2   |
+| US-042: Auth Composition   | 📋 TODO    | 2   |
+
+**Remaining Work**: 8 SP (US-039 completion: 2 SP, US-041: 2 SP, US-042: 2 SP, integration: 2 SP)  
+**ETA**: Sprint 3 (Dec 22)
 
 ---
 
 ## Forecast
+
+⚠️ **Warning**: Forecasts based on only 2 completed sprints have low confidence. Use as rough estimate only. Reassess after Sprint 3-4.
 
 ### Based on Average Velocity (11.5 SP/week)
 
 | Epic                      | Remaining SP | Estimated Completion |
 | ------------------------- | ------------ | -------------------- |
 | Epic 3: Platformatic Watt | 8 SP         | Sprint 2 (Dec 15)    |
-| Epic 9: Auth Package      | 5 SP         | Sprint 3 (Dec 22)    |
+| Epic 9: Auth Package      | 8 SP         | Sprint 3 (Dec 22)    |
 | Epic 1: Infrastructure    | 3 SP         | Sprint 3 (Dec 22)    |
 | Epic 2: Observability     | 9 SP         | Sprint 4 (Dec 29)    |
 

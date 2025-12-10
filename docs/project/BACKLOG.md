@@ -264,7 +264,9 @@
 
 **Goal**: Create modular, reusable authentication package for mono-repo services
 
-**Status**: 40% complete (2/5 user stories done)
+**Status**: 47% complete (3/6 user stories done: US-037, US-038, US-040)
+
+**Story Points**: 7/15 SP completed (US-037: 1 SP, US-038: 3 SP, US-040: 3 SP)
 
 **Package**: `@tech-citizen/auth` in `packages/auth/`
 
