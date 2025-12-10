@@ -1,7 +1,7 @@
 {
   "$schema": "./features.schema.json",
   "version": "1.0.0",
-  "lastUpdated": "2025-12-10T12:38:09.621Z",
+  "lastUpdated": "2025-12-10T13:36:40.593Z",
   "project": {
     "name": "tech-citizen-sw-gateway",
     "repository": "github.com/awesomecit/tech-citizen-sw-gateway"
@@ -9,9 +9,9 @@
   "release": {
     "current": "1.0.0",
     "nextSuggested": "1.1.0",
-    "lastCommit": "d3fdbf8",
+    "lastCommit": "b7d12bf",
     "unreleased": {
-      "feat": 18,
+      "feat": 19,
       "fix": 5,
       "breaking": 0
     }
@@ -251,6 +251,14 @@
           "subject": "add smoke tests for demo users provisioning",
           "timestamp": "2025-12-10T00:54:41.000Z",
           "userStory": null
+        },
+        {
+          "hash": "b7d12bf",
+          "type": "feat",
+          "scope": "infra",
+          "subject": "add admin-automation client for Keycloak admin operations",
+          "timestamp": "2025-12-10T12:38:09.000Z",
+          "userStory": null
         }
       ]
     },
@@ -328,6 +336,14 @@
           "scope": "infra",
           "subject": "add smoke tests for demo users provisioning",
           "timestamp": "2025-12-10T00:54:41.000Z",
+          "userStory": null
+        },
+        {
+          "hash": "b7d12bf",
+          "type": "feat",
+          "scope": "infra",
+          "subject": "add admin-automation client for Keycloak admin operations",
+          "timestamp": "2025-12-10T12:38:09.000Z",
           "userStory": null
         }
       ],

@@ -135,8 +135,10 @@ describe('Keycloak OIDC Plugin (US-039)', () => {
         url: '/auth/callback?code=test-code&state=invalid-state',
       });
 
-      // OAuth2 plugin might return 500 or 403 depending on implementation
-      expect([403, 500]).toContain(response.statusCode);
+      // CSRF attack should return 401 (authentication failed)
+      expect(response.statusCode).toBe(401);
+      const body = JSON.parse(response.body);
+      expect(body.error).toBe('Authentication failed');
     });
   });
 

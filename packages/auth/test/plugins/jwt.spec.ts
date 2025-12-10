@@ -72,7 +72,7 @@ FQIDAQAB
     const validToken = signSync({
       sub: 'user-123',
       email: 'test@example.com',
-      exp: Math.floor(new Date('2025-12-10T00:00:00Z').getTime() / 1000),
+      exp: Math.floor(new Date('2026-12-10T00:00:00Z').getTime() / 1000),
       iss: 'http://localhost:8080/realms/techcitizen',
     });
 
@@ -156,14 +156,14 @@ FQIDAQAB
 
     // Create valid token, then tamper with signature
     const signSync = createSigner({ key: PRIVATE_KEY, algorithm: 'RS256' });
-    const validToken = signSync({
+    const token = signSync({
       sub: 'user-123',
-      exp: Math.floor(new Date('2025-12-10T00:00:00Z').getTime() / 1000),
+      exp: Math.floor(new Date('2026-12-10T00:00:00Z').getTime() / 1000),
       iss: 'http://localhost:8080/realms/techcitizen',
     });
 
     // Tamper with signature (replace entire signature part with invalid data)
-    const parts = validToken.split('.');
+    const parts = token.split('.');
     const tamperedToken = `${parts[0]}.${parts[1]}.invalidSignatureData`;
 
     fastify.get(
@@ -270,7 +270,7 @@ FQIDAQAB
     const signSync = createSigner({ key: PRIVATE_KEY, algorithm: 'RS256' });
     const wrongIssuerToken = signSync({
       sub: 'user-123',
-      exp: Math.floor(new Date('2025-12-10T00:00:00Z').getTime() / 1000),
+      exp: Math.floor(new Date('2026-12-10T00:00:00Z').getTime() / 1000),
       iss: 'http://evil.com/realms/fake', // Wrong issuer
     });
 
@@ -312,7 +312,7 @@ FQIDAQAB
     const signSync = createSigner({ key: PRIVATE_KEY, algorithm: 'RS256' });
     const missingSubToken = signSync({
       // sub missing!
-      exp: Math.floor(new Date('2025-12-10T00:00:00Z').getTime() / 1000),
+      exp: Math.floor(new Date('2026-12-10T00:00:00Z').getTime() / 1000),
       iss: 'http://localhost:8080/realms/techcitizen',
     });
 
