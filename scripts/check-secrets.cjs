@@ -14,6 +14,22 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+// Load configuration from external files
+function loadLines(filePath) {
+  if (!fs.existsSync(filePath)) return [];
+  return fs
+    .readFileSync(filePath, 'utf8')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('#'));
+}
+
+const PROJECT_ROOT = path.resolve(__dirname, '..');
+const IGNORED_PATTERNS = loadLines(
+  path.join(PROJECT_ROOT, '.secretsignore'),
+).map((pattern) => new RegExp(pattern.replace(/\*/g, '.*')));
+const SAFE_VALUES = loadLines(path.join(PROJECT_ROOT, '.secretsafe'));
+
 // Patterns to detect (high entropy strings, common secret formats)
 const SECRET_PATTERNS = [
   // API Keys and Tokens
@@ -91,76 +107,7 @@ const SECRET_PATTERNS = [
   },
 ];
 
-// Files/patterns to exclude from scanning
-const EXCLUDED_PATTERNS = [
-  /node_modules\//,
-  /\.git\//,
-  /coverage\//,
-  /dist\//,
-  /\.log$/,
-  /\.lock$/,
-  /package-lock\.json$/,
-  /pnpm-lock\.yaml$/,
-  /yarn\.lock$/,
-  /\.env\.example$/,
-  /\.env\.template$/,
-  /check-secrets\.js$/, // Don't scan this file itself
-  /check-secrets\.cjs$/, // Don't scan this file itself
-  /CONTRIBUTING\.md$/, // Skip documentation with examples
-  /DX-IMPLEMENTATION-GUIDE\.md$/, // Skip setup guide
-  /\.feature$/, // Skip BDD feature files
-  /\/test\/.*\.(spec|test)\.(ts|js)$/, // Skip test files (may contain test RSA keys)
-  /INFRASTRUCTURE\.md$/, // Skip infrastructure documentation
-  /IAC_TESTING\.md$/, // Skip IaC testing documentation
-  /BACKLOG\.md$/, // Skip project backlog
-  /ROADMAP\.md$/, // Skip project roadmap
-  /CONSOLIDATION_PLAN\.md$/, // Skip doc planning (has file sizes like "92L")
-  /0001-minimal-infrastructure-yagni\.md$/, // Skip ADR with examples
-  /COURSE\.md$/, // Skip course materials (has markdown table separators)
-  /COURSE_LINK\.md$/, // Skip course reference
-  /COURSE_REFERENCES\.md$/, // Skip course references (has markdown tables)
-  /docs\/README\.md$/, // Skip docs index (has markdown tables)
-  /DOCUMENTATION_ANALYSIS\.md$/, // Skip analysis report (has markdown tables)
-  /e2e\/features\/.*\.feature$/, // Skip BDD feature files (Gherkin scenarios with example data)
-];
-
-// Known safe values (whitelist)
-const SAFE_VALUES = [
-  'test-secret',
-  'your-api-key',
-  'admin', // Default Keycloak admin password (development only)
-  'DemoPatient123!', // Demo user passwords
-  'DemoDoctor123!',
-  'DemoAdmin123!',
-  'example',
-  'changeme',
-  'CHANGE_ME_IN_PRODUCTION',
-  'GENERATE_RANDOM_32_CHAR_SECRET',
-  'password',
-  'secure_password_change_me',
-  'this_is_a_very_long_test_jwt_secret_key_with_32_chars_minimum',
-  'your_super_secure_jwt_secret_32_characters_minimum',
-  'forceConsistentCasingInFileNames',
-  '----------------------------------------', // Separator lines
-  '| --------------- | -------------------------------- |', // Markdown table separators
-  '| ------------------ | -------------------------------------- |', // Markdown table separators (longer)
-  '| --------------------------------- | ------------------------------------------', // Longer table separator
-  '- [0001: Minimal Infrastructure](./architecture/decisions/0001-minimal-infrastru', // ADR link
-  '| ------------ | -------------------------------- | ----------------------------', // 3-column table
-  'a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6', // Example UUID in docs
-  '123e4567-e89b-12d3-a456-426614174000', // Example UUID format
-  'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', // UUID placeholder
-  'change-me-in-production-min-32-chars', // Keycloak session secret placeholder
-  'getAccessTokenUsingAuthorizationCodeFlow', // OAuth2 plugin function name
-  'gateway-client-secret-change-in-production', // Keycloak client secret placeholder (example)
-  'test-session-secret-32-characters-min', // Test environment session secret
-  'test-jwt-secret-32-characters-minimum', // Test environment JWT secret
-  'accessTokenLifespanForImplicitFlow', // Keycloak realm config parameter
-  'offlineSessionMaxLifespanEnabled', // Keycloak realm config parameter
-  'oidc-usermodel-realm-role-mapper', // Keycloak protocol mapper name
-  '| ------------------------- | ------------- | ----------------------------------', // Markdown table (4 columns)
-  '- [ADR-003: User Management Architecture](../../docs/architecture/decisions/ADR-', // ADR link (truncated by grep)
-];
+// EXCLUDED_PATTERNS and SAFE_VALUES now loaded from .secretsignore and .secretsafe
 
 // Additional pattern exclusions
 function isLikelyUUID(value) {
@@ -171,7 +118,7 @@ function isLikelyUUID(value) {
 }
 
 function shouldExcludeFile(filePath) {
-  return EXCLUDED_PATTERNS.some(pattern => pattern.test(filePath));
+  return IGNORED_PATTERNS.some((pattern) => pattern.test(filePath));
 }
 
 function isSafeValue(value, fullLine = '') {
@@ -314,7 +261,7 @@ function main() {
   console.error('2. Use environment variables (.env)');
   console.error('3. Add values to .env.example as placeholders\n');
   console.error(
-    'If these are false positives, add them to SAFE_VALUES in scripts/check-secrets.js\n',
+    'If these are false positives, add them to .secretsafe file\n',
   );
 
   process.exit(1);
