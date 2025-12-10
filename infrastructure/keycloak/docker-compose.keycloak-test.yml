@@ -4,6 +4,8 @@ services:
   keycloak-test:
     image: quay.io/keycloak/keycloak:23.0
     container_name: tech-citizen-keycloak-test
+    env_file:
+      - .env.test
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
@@ -34,6 +36,8 @@ services:
   redis-session-test:
     image: redis:7-alpine
     container_name: tech-citizen-redis-session-test
+    env_file:
+      - .env.test
     command:
       - redis-server
       - --appendonly

@@ -1,17 +1,17 @@
 {
   "$schema": "./features.schema.json",
   "version": "1.5.0",
-  "lastUpdated": "2025-12-10T15:22:24.039Z",
+  "lastUpdated": "2025-12-10T15:53:22.328Z",
   "project": {
     "name": "tech-citizen-sw-gateway",
     "repository": "github.com/awesomecit/tech-citizen-sw-gateway"
   },
   "release": {
     "current": "1.5.0",
-    "nextSuggested": "1.5.0",
-    "lastCommit": "a0305ea",
+    "nextSuggested": "1.6.0",
+    "lastCommit": "511af26",
     "unreleased": {
-      "feat": 0,
+      "feat": 1,
       "fix": 0,
       "breaking": 0
     }
@@ -394,7 +394,17 @@
         "remainingHours": 8
       },
       "releaseTarget": "1.6.0",
-      "releaseNotes": "Dockerfiles for all services, automated build/tag/push on release"
+      "releaseNotes": "Dockerfiles for all services, automated build/tag/push on release",
+      "commits": [
+        {
+          "hash": "511af26",
+          "type": "feat",
+          "scope": "project",
+          "subject": "sincronizza versioning e aggiungi EPIC-011 Docker",
+          "timestamp": "2025-12-10T15:22:23.000Z",
+          "userStory": null
+        }
+      ]
     },
     "centralized-auth": {
       "id": "EPIC-005",

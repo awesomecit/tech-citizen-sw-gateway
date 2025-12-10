@@ -195,6 +195,37 @@
       ]
     },
     {
+      "clientId": "test-client",
+      "name": "Test Client",
+      "description": "Public client for integration tests with password grant",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "fullScopeAllowed": true,
+      "attributes": {
+        "access.token.lifespan": "300"
+      },
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "profile",
+        "roles",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
+    },
+    {
       "clientId": "admin-automation",
       "name": "Admin Automation Client",
       "description": "Client for automated admin operations (user provisioning, realm management)",
