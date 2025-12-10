@@ -66,6 +66,54 @@
 
 ---
 
+#### EPIC-010: Learning Path & Documentation 🔄 IN PROGRESS
+
+**Goal**: Complete course documentation for Modern Backend Development with AI
+
+**Status**: 20% complete (1/6 tasks done)
+
+**User Stories**:
+
+- [x] US-050: As a Student, I want a comprehensive learning path so I know what to study and in what order
+  - Task: Create LEARNING_PATH.md with 25 modules mapped to resources, exercises, quizzes
+  - Acceptance: Each module has: Prerequisites, Resources (Italian priority), Exercises (Codewars/Exercism), Quiz, Project
+  - Estimate: 6h
+  - **DONE** (Sprint 2, 2025-12-10)
+
+- [ ] US-051: As a Student, I want quiz validation so I can test my knowledge before advancing
+  - Task: Create docs/course/quizzes/M00_quiz.json through M25_quiz.json with 5-10 questions each
+  - Acceptance: Each JSON has schema {module, questions: [{id, question, options, correct, explanation}]}
+  - Estimate: 8h (25 modules × 20min average)
+  - Dependency: US-050 (need module structure)
+
+- [ ] US-052: As a Student, I want complete module mapping so I have specific exercises for each topic
+  - Task: Complete resource mapping for Modulo 7-25 (Observability through AI Integration)
+  - Acceptance: All modules have Italian resources where available, specific Codewars kata, Exercism tracks
+  - Estimate: 6h (19 modules × 20min average)
+  - Dependency: US-050 (need baseline structure)
+
+- [ ] US-053: As a Student, I want Anki flashcards so I can review concepts with spaced repetition
+  - Task: Generate 6 Anki .apkg files in docs/course/anki/ (Linux Commands, Git, Docker, TypeScript, Fastify, OAuth2)
+  - Acceptance: Each deck importable into Anki, properly tagged, 25-60 cards depending on topic
+  - Estimate: 4h (6 decks × 40min average)
+  - Format: Tab-separated .txt for Anki import
+
+- [ ] US-054: As a Student, I want real project examples so I understand how concepts apply to production code
+  - Task: Link real ADRs from docs/architecture/decisions/ to relevant modules as case studies
+  - Acceptance: ADR-001 (minimal infra) linked to Modulo 2, ADR-003 (dual auth) linked to Modulo 11-12
+  - Estimate: 2h
+  - Dependency: ADRs exist in project
+
+- [ ] US-055: As a Student, I want verified resources so I don't waste time on broken/paywalled links
+  - Task: Check all external links (HTML.it, Codecademy, Exercism, etc.), add licensing column to tables
+  - Acceptance: All links return 200, licensing documented (Free/Freemium/Paid), alternatives for paywalled content
+  - Estimate: 3h
+  - Tools: curl, link checker script
+
+**Epic Estimate**: 29h total / 6h done / 23h remaining
+
+---
+
 #### EPIC-002: Observability Stack ⏸️ BLOCKED
 
 **Goal**: Production-grade logging and tracing
@@ -658,20 +706,23 @@
 
 ### Sprint 2 (Dec 15-21, 2025) - Planned
 
-**Goal**: Security hardening baseline (Epic-003)
+**Goal**: Learning path completion + Security baseline start
 
 **Proposed Stories**:
 
-- US-011: SSH hardening (2h)
-- US-012: UFW firewall (1h)
-- US-013: Fail2Ban (2h)
-- US-014: Auto updates (1h)
-- US-015: Kernel hardening (1h)
-- US-008: Prometheus alerts (3h) - from Epic-002
-- US-009: Structured logging (2h) - from Epic-002
+- US-051: Quiz JSON files (8h) - from Epic-010
+- US-052: Complete module mapping (6h) - from Epic-010
+- US-006: IaC tests (3h) - spillover from Sprint 1
 
-**Capacity**: 16h (12h proposed)  
-**Buffer**: 4h for spillover from Sprint 1
+**Alternative Option** (if production server becomes available):
+
+- US-030: Server discovery (0.5h) - from Epic-008
+- US-031: Server cleanup (1h) - from Epic-008
+- US-032: Security baseline (2h) - from Epic-008
+- US-033: WIP landing pages (2h) - from Epic-008
+
+**Capacity**: 16h (17h proposed)  
+**Strategy**: Prioritize learning path (blocks content generation), defer security if server still unavailable
 
 ---
 

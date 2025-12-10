@@ -109,6 +109,32 @@
 
 **Goal**: Centralized authentication and first microservices
 
+### Epic 10: Learning Path & Documentation 🔄 IN PROGRESS
+
+**Duration**: Sprint 2-4 (3 weeks)  
+**Status**: 20% complete (LEARNING_PATH.md created)
+
+**Deliverables**:
+
+- ✅ LEARNING_PATH.md master file (700+ lines)
+- 📋 Quiz JSON files for all 25 modules
+- 📋 Complete module mapping (7-25) with Italian resources
+- 📋 Anki flashcard decks (6 decks)
+- 📋 Real ADR links in modules
+- 📋 Resource verification and licensing
+
+**Success Metrics**:
+
+- All 25 modules have: Resources + Exercises + Quiz + Project
+- Each quiz has 5-10 questions with explanations
+- All resource links verified and accessible
+- Anki decks importable and tagged correctly
+- NotebookLM can generate content from markdown structure
+
+**Reference**: BACKLOG.md EPIC-010 (US-050 to US-055, 29h estimate, 6h done)
+
+---
+
 ### Epic 9: Reusable Auth Package (Foundation) ✅ 40% COMPLETE
 
 **Duration**: Sprint 3 (1 week)  
@@ -475,6 +501,7 @@ Epic 5 → Epic 7 (events need service mesh)
 
 ## Revision History
 
+- **2025-12-10**: Added Epic 10 Learning Path (EPIC-010) with 5 user stories for course documentation
 - **2025-12-09**: Added Epic 3 Production Server Setup (EPIC-008) with 6 user stories, blocked until server credentials available
 - **2025-12-08**: Initial roadmap created, Epic 1 60% complete
 - **2025-12-08**: Added security hardening epics from SECURITY_CHECKLIST.md

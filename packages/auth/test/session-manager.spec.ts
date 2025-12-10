@@ -1,13 +1,23 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import RedisMock from 'ioredis-mock';
+import Redis from 'ioredis';
 import { SessionManager, type SessionData } from '../src/session-manager';
 
-describe('SessionManager', () => {
-  let redis: any;
+describe('SessionManager (Real Redis)', () => {
+  let redis: Redis;
   let sessionManager: SessionManager;
 
-  beforeEach(() => {
-    redis = new RedisMock();
+  beforeEach(async () => {
+    // Use real Redis on test port
+    redis = new Redis({
+      host: 'localhost',
+      port: 6381,
+      password: 'dev-redis-password',
+      db: 15, // Use dedicated DB for tests
+    });
+
+    // Flush test DB before each test
+    await redis.flushdb();
+
     sessionManager = new SessionManager(
       redis,
       {
@@ -18,7 +28,7 @@ describe('SessionManager', () => {
         enableAutoRefresh: false, // Disable for unit tests
       },
       {
-        url: 'http://localhost:8090/realms/healthcare-domain',
+        url: 'http://localhost:8091/realms/healthcare-domain',
         clientId: 'test-client',
         clientSecret: 'test-secret',
       },
@@ -26,7 +36,8 @@ describe('SessionManager', () => {
   });
 
   afterEach(async () => {
-    await redis.flushall();
+    await redis.flushdb();
+    await redis.quit();
   });
 
   describe('saveSession', () => {
@@ -45,7 +56,7 @@ describe('SessionManager', () => {
       const saved = await redis.get('session:session-123');
       expect(saved).toBeTruthy();
 
-      const parsed = JSON.parse(saved);
+      const parsed = JSON.parse(saved!);
       expect(parsed.userId).toBe('user-123');
       expect(parsed.createdAt).toBeDefined();
       expect(parsed.lastActivity).toBeDefined();
@@ -68,7 +79,7 @@ describe('SessionManager', () => {
 
       await sessionManager.saveSession('session-123', session);
 
-      const saved = JSON.parse(await redis.get('session:session-123'));
+      const saved = JSON.parse((await redis.get('session:session-123'))!);
       expect(saved.createdAt).toBe(1000000);
     });
   });

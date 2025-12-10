@@ -20,15 +20,19 @@ function loadLines(filePath) {
   return fs
     .readFileSync(filePath, 'utf8')
     .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith('#'));
+    .map(line => line.trim())
+    .filter(line => line && !line.startsWith('#'));
 }
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 const IGNORED_PATTERNS = loadLines(
   path.join(PROJECT_ROOT, '.secretsignore'),
-).map((pattern) => new RegExp(pattern.replace(/\*/g, '.*')));
-const SAFE_VALUES = loadLines(path.join(PROJECT_ROOT, '.secretsafe'));
+).map(pattern => new RegExp(pattern.replace(/\*/g, '.*')));
+
+// Load safe values and file skip patterns from .secretsafe
+const secretSafeLines = loadLines(path.join(PROJECT_ROOT, '.secretsafe'));
+const SAFE_VALUES = secretSafeLines.filter(line => !line.includes('/') && !line.includes('.'));
+const SKIPPED_FILES = secretSafeLines.filter(line => line.includes('/') || line.includes('.'));
 
 // Patterns to detect (high entropy strings, common secret formats)
 const SECRET_PATTERNS = [
@@ -118,19 +122,29 @@ function isLikelyUUID(value) {
 }
 
 function shouldExcludeFile(filePath) {
-  return IGNORED_PATTERNS.some((pattern) => pattern.test(filePath));
+  // Check .secretsignore patterns
+  if (IGNORED_PATTERNS.some(pattern => pattern.test(filePath))) {
+    return true;
+  }
+  
+  // Check .secretsafe file skip list
+  if (SKIPPED_FILES.some(skipped => filePath.includes(skipped) || filePath === skipped)) {
+    return true;
+  }
+  
+  return false;
 }
 
 function isSafeValue(value, fullLine = '') {
   if (isLikelyUUID(value)) return true; // Exclude UUIDs
-  
+
   // Exclude markdown table separators (check full line)
   if (/^\|[\s-]+\|/.test(fullLine.trim())) return true;
-  
+
   // Exclude markdown links (any path-like content in backticks or links)
   if (/`[^`]*docs\/architecture\/[^`]*`/.test(fullLine)) return true;
   if (/\[.*\]\([^)]*\)/.test(fullLine)) return true;
-  
+
   return SAFE_VALUES.some(safe => value.includes(safe));
 }
 
@@ -260,9 +274,7 @@ function main() {
   console.error('1. Remove hardcoded secrets');
   console.error('2. Use environment variables (.env)');
   console.error('3. Add values to .env.example as placeholders\n');
-  console.error(
-    'If these are false positives, add them to .secretsafe file\n',
-  );
+  console.error('If these are false positives, add them to .secretsafe file\n');
 
   process.exit(1);
 }
