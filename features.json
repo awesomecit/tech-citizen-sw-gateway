@@ -1,18 +1,18 @@
 {
   "$schema": "./features.schema.json",
-  "version": "1.0.0",
-  "lastUpdated": "2025-12-10T15:02:21.817Z",
+  "version": "1.5.0",
+  "lastUpdated": "2025-12-10T15:22:24.039Z",
   "project": {
     "name": "tech-citizen-sw-gateway",
     "repository": "github.com/awesomecit/tech-citizen-sw-gateway"
   },
   "release": {
-    "current": "1.0.0",
-    "nextSuggested": "1.1.0",
+    "current": "1.5.0",
+    "nextSuggested": "1.5.0",
     "lastCommit": "a0305ea",
     "unreleased": {
-      "feat": 1,
-      "fix": 1,
+      "feat": 0,
+      "fix": 0,
       "breaking": 0
     }
   },
@@ -364,6 +364,38 @@
       "releaseTarget": "1.2.0",
       "releaseNotes": "Production deployment automation ready"
     },
+    "docker-versioning": {
+      "id": "EPIC-011",
+      "name": "Docker Image Versioning",
+      "description": "Automated Docker image tagging synchronized with package.json version and git tags",
+      "status": "todo",
+      "enabled": false,
+      "maturity": "experimental",
+      "progress": {
+        "percentage": 0,
+        "userStories": {
+          "total": 3,
+          "completed": 0,
+          "inProgress": 0,
+          "todo": 3
+        }
+      },
+      "environment": {
+        "development": false,
+        "test": false,
+        "staging": false,
+        "production": false
+      },
+      "dependencies": [],
+      "blockers": [],
+      "metrics": {
+        "estimatedHours": 8,
+        "actualHours": 0,
+        "remainingHours": 8
+      },
+      "releaseTarget": "1.6.0",
+      "releaseNotes": "Dockerfiles for all services, automated build/tag/push on release"
+    },
     "centralized-auth": {
       "id": "EPIC-005",
       "name": "Centralized Authentication",
@@ -471,94 +503,31 @@
       ]
     }
   },
-  "toggles": {
-    "auth.jwt.validation": {
-      "enabled": true,
-      "description": "JWT token validation with @fastify/jwt",
-      "environments": {
-        "development": true,
-        "test": true,
-        "staging": false,
-        "production": false
-      },
-      "rolloutPercentage": 100,
-      "feature": "auth-package",
-      "since": "1.0.0",
-      "validations": {
-        "signature": true,
-        "expiration": true,
-        "issuer": true,
-        "requiredClaims": ["sub"]
-      }
-    },
-    "auth.jwt.issuerValidation": {
-      "enabled": true,
-      "description": "Validate JWT issuer matches Keycloak realm",
-      "environments": {
-        "development": true,
-        "test": true,
-        "staging": false,
-        "production": false
-      },
-      "rolloutPercentage": 100,
-      "feature": "auth-package",
-      "since": "1.0.0",
-      "config": {
-        "allowedIss": "${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}"
-      }
-    },
-    "infra.gracefulShutdown": {
-      "enabled": true,
-      "description": "Graceful shutdown on SIGTERM/SIGINT",
-      "environments": {
-        "development": true,
-        "test": true,
-        "staging": true,
-        "production": false
-      },
-      "rolloutPercentage": 100,
-      "feature": "infrastructure-foundation",
-      "since": "1.0.0",
-      "config": {
-        "timeout": 30000
-      }
-    },
-    "monitoring.prometheus": {
-      "enabled": true,
-      "description": "Prometheus metrics collection",
-      "environments": {
-        "development": true,
-        "test": true,
-        "staging": true,
-        "production": false
-      },
-      "rolloutPercentage": 100,
-      "feature": "infrastructure-foundation",
-      "since": "1.0.0",
-      "endpoints": ["/metrics"]
-    }
-  },
   "changelog": {
-    "1.0.0": {
-      "released": false,
-      "targetDate": "2025-12-15",
+    "1.5.0": {
+      "released": true,
+      "releasedAt": "2025-12-10T15:00:00Z",
       "features": [
-        "EPIC-001: Infrastructure Foundation (60% complete)",
-        "EPIC-009: Auth Package - JWT validation (US-037, US-038)"
+        "EPIC-009: Auth Package - JWT validation, Keycloak OIDC, session management"
       ],
-      "fixes": [],
+      "fixes": [
+        "Release automation improvements",
+        "Features.json version synchronization"
+      ],
       "breaking": [],
       "commits": {
-        "feat": 4,
-        "fix": 0,
-        "docs": 1,
-        "refactor": 2
+        "feat": 9,
+        "fix": 3,
+        "docs": 2,
+        "refactor": 1,
+        "test": 2
       },
       "highlights": [
-        "JWT validation plugin with 100% test coverage",
-        "7 BDD scenarios implemented (auth-jwt-validation.feature)",
-        "Docker Compose infrastructure with Prometheus + Grafana",
-        "Graceful shutdown handling"
+        "JWT validation with 100% test coverage (US-037, US-038)",
+        "Keycloak OIDC integration (US-039)",
+        "Enhanced session management (US-040)",
+        "Release automation with semantic versioning",
+        "Features tracking synchronized with package.json"
       ]
     }
   }

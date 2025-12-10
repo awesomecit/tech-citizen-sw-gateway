@@ -90,6 +90,84 @@ function getServiceStatus(id: any): any {
 }
 ```
 
+### Additional Principles
+
+**Comments Philosophy**:
+
+- Explain **why**, not **what** - code should be self-explanatory
+- TODO comments must include context and owner: `// TODO(@username): reason - context`
+- Remove commented-out code - use git history instead
+- Avoid obvious comments like `// increment counter` before `counter++`
+
+**Law of Demeter** (Principle of Least Knowledge):
+
+- Avoid chain calls: `object.getA().getB().getC().doSomething()`
+- Prefer: expose method on object that encapsulates the chain
+- Example:
+
+  ```typescript
+  // ❌ Bad
+  const city = user.getAddress().getCity();
+
+  // ✅ Good
+  const city = user.getCity(); // Address logic encapsulated
+  ```
+
+**Don't Return Null**:
+
+- Prefer empty arrays over `null`: `return []` not `return null`
+- Use Optional pattern or throw errors for missing values
+- Avoid null checks in caller code
+- Example:
+
+  ```typescript
+  // ❌ Bad
+  function getPatients(): Patient[] | null {
+    return patients.length > 0 ? patients : null;
+  }
+
+  // ✅ Good
+  function getPatients(): Patient[] {
+    return patients; // Empty array is valid
+  }
+  ```
+
+**Formatting Standards**:
+
+- Max line length: **120 characters**
+- Use Prettier defaults (already configured)
+- Consistent indentation: 2 spaces (TypeScript/JavaScript)
+- One statement per line
+
+**Boy Scout Rule**:
+
+- Leave code cleaner than you found it
+- Refactor nearby code when touching it (within reason)
+- Fix small issues opportunistically (typos, naming, formatting)
+- Don't create separate "cleanup" commits - include in feature work
+
+**KISS (Keep It Simple, Stupid)**:
+
+- Prefer simple solutions over clever ones
+- Avoid premature optimization
+- Choose readability over brevity
+- Question complexity: "Is there a simpler way?"
+
+**Immutability**:
+
+- Prefer `const` over `let`
+- Avoid mutating function arguments
+- Use array methods that return new arrays (`.map()`, `.filter()`) over mutation (`.push()`, `.splice()`)
+- Use object spread for updates: `{ ...obj, newField: value }`
+
+**Test FIRST Principles**:
+
+- **F**ast - tests run in milliseconds, not seconds
+- **I**ndependent - no test depends on another's state
+- **R**epeatable - same result every time, any environment
+- **S**elf-validating - clear pass/fail, no manual inspection
+- **T**imely - write tests before or with code (TDD), not after
+
 ---
 
 ## Testing Approach

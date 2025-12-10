@@ -170,6 +170,13 @@ class FeatureTracker {
    * Update release metadata
    */
   updateReleaseMetadata(features, commits) {
+    // Sync version from package.json (single source of truth)
+    const packageJson = JSON.parse(fs.readFileSync(PACKAGE_FILE, 'utf8'));
+    const packageVersion = packageJson.version;
+
+    features.version = packageVersion;
+    features.release.current = packageVersion;
+
     const lastCommit = commits[0];
     if (lastCommit) {
       features.release.lastCommit = lastCommit.hash;
@@ -186,7 +193,7 @@ class FeatureTracker {
     features.release.unreleased = unreleased;
 
     // Suggest next version
-    const currentVersion = features.release.current;
+    const currentVersion = packageVersion;
     const nextVersion = this.calculateNextVersion(currentVersion, unreleased);
     features.release.nextSuggested = nextVersion;
 

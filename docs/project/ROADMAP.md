@@ -353,7 +353,38 @@
 
 **Goal**: Production deployment and hardening
 
-### Epic 11: CI/CD Pipeline
+### Epic 11: Docker Image Versioning 📋 TODO
+
+**Duration**: Sprint 17 (1 week)  
+**Status**: Planned for v1.6.0
+
+**Deliverables**:
+
+- Dockerfiles for all services (gateway, auth, cache, events, telemetry)
+- `scripts/docker-build.sh` - Build and tag images from package.json version
+- Auto-release.cjs integration - Tag and push on release
+- Docker Compose with versioned images (not hardcoded tags)
+
+**User Stories**:
+
+- US-056: Create Dockerfiles for all packages and services
+- US-057: Build script with version tagging (package.json → image tag)
+- US-058: Integrate Docker build/push into release automation
+
+**Success Metrics**:
+
+- All services buildable as Docker images
+- Image tags match git tags (e.g., `gateway:1.5.0` = tag v1.5.0)
+- `docker-compose.yml` uses versioned images from registry
+- Zero manual Docker operations on release
+
+**Rationale**: Ensures deployment artifacts (Docker images) are synchronized with git tags, package.json, and features.json for traceable releases.
+
+**Reference**: features.json EPIC-011
+
+---
+
+### Epic 12: CI/CD Pipeline
 
 **Duration**: Sprint 18-19 (2 weeks)  
 **Status**: Not started
@@ -372,7 +403,7 @@
 
 ---
 
-### Epic 12: Disaster Recovery
+### Epic 13: Disaster Recovery
 
 **Duration**: Sprint 20 (1 week)  
 **Status**: Not started

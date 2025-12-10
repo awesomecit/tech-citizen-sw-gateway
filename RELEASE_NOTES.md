@@ -6,11 +6,7 @@ This release includes improvements to code quality, documentation, and developme
 
 ## 🚀 Features
 
-- feat(release): aggiungi script generate-release-notes (31f81ca)
-
 ## 🐛 Bug Fixes
-
-- fix(release): aggiungi release:changelog e fix validazione features (a0305ea)
 
 ## 📚 Documentation
 
@@ -72,14 +68,12 @@ No special migration steps required for this release.
 
 ## 🤝 Contributors
 
-- Antonio Cittadino
-
 ## 🔗 Links
 
-- [Full Changelog](https://github.com/awesomecit/tech-citizen-sw-gateway/compare/v1.4.0...v1.5.0)
+- [Full Changelog](https://github.com/awesomecit/tech-citizen-sw-gateway/compare/v1.5.0...v1.5.0)
 - [Issues](https://github.com/awesomecit/tech-citizen-sw-gateway/issues)
 - [Documentation](./docs/)
 
 ---
 
-**Full changelog**: https://github.com/awesomecit/tech-citizen-sw-gateway/compare/v1.4.0...v1.5.0
+**Full changelog**: https://github.com/awesomecit/tech-citizen-sw-gateway/compare/v1.5.0...v1.5.0
