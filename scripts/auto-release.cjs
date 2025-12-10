@@ -333,12 +333,12 @@ class AutoRelease {
     try {
       if (this.options.dryRun) {
         console.log(
-          '🧪 DRY RUN: Would analyze commits with release-analyzer.js',
+          '🧪 DRY RUN: Would analyze commits with release-analyzer.cjs',
         );
       }
 
       const analysisOutput = this.execCommand(
-        'node scripts/release-analyzer.js --json',
+        'node scripts/release-analyzer.cjs --json',
         true,
         true, // alwaysExecute = true per comandi di sola lettura
       );
