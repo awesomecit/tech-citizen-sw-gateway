@@ -7,7 +7,9 @@ import {
   Histogram,
 } from 'prom-client';
 import { randomUUID } from 'crypto';
-import authPlugin from '@tech-citizen/auth/dist/index.js';
+import auth from '@tech-citizen/auth';
+
+const authPlugin = auth.default || auth;
 
 interface HealthResponse {
   status: 'ok' | 'degraded' | 'error';
@@ -19,8 +21,6 @@ interface HealthResponse {
 interface HelloResponse {
   message: string;
 }
-
-const GRACEFUL_SHUTDOWN_TIMEOUT = 10000; // 10 seconds
 
 // Prometheus metrics (initialized at module level)
 collectDefaultMetrics({ prefix: 'gateway_' });
@@ -37,17 +37,6 @@ const httpRequestsTotal = new Counter({
   help: 'Total number of HTTP requests',
   labelNames: ['method', 'route', 'status'],
 });
-
-// Graceful shutdown handler
-async function gracefulShutdown(
-  app: FastifyInstance,
-  signal: string,
-): Promise<void> {
-  app.log.info(`Received ${signal}, starting graceful shutdown...`);
-  await app.close();
-  app.log.info('Graceful shutdown completed');
-  process.exit(0);
-}
 
 // Setup hooks for metrics and correlation ID
 function setupHooks(app: FastifyInstance): void {
@@ -91,19 +80,6 @@ export async function plugin(app: FastifyInstance): Promise<void> {
     redisUrl: process.env.REDIS_URL || 'redis://localhost:6380',
     enableRoutes: true,
   });
-
-  // Register signal handlers
-  process.once('SIGTERM', () => gracefulShutdown(app, 'SIGTERM'));
-  process.once('SIGINT', () => gracefulShutdown(app, 'SIGINT'));
-
-  // Force exit if graceful shutdown timeout
-  const shutdownTimer = setTimeout(() => {
-    app.log.error(
-      `Graceful shutdown timeout after ${GRACEFUL_SHUTDOWN_TIMEOUT}ms`,
-    );
-    process.exit(1);
-  }, GRACEFUL_SHUTDOWN_TIMEOUT);
-  shutdownTimer.unref();
 
   // Routes
   registerHealthRoute(app);
