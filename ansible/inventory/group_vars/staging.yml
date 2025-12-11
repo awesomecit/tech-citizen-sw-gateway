@@ -1,0 +1,47 @@
+---
+# Staging Environment Variables
+# Used for pre-release testing with tagged versions
+
+environment: staging
+deployment_target: staging
+
+# Domain Configuration
+domain: "{{ lookup('env', 'DOMAIN') | default('tech-citizen.me', true) }}"
+
+# Subdomains (nested under staging subdomain)
+gateway_domain: 'gateway.staging.{{ domain }}'
+auth_domain: 'auth.staging.{{ domain }}'
+grafana_domain: 'grafana.staging.{{ domain }}'
+www_domain: 'staging.{{ domain }}'
+
+# Service Ports (same as production)
+gateway_port: 3042
+keycloak_port: 8090
+grafana_port: 3001
+prometheus_port: 19090
+caddy_http_port: 18080
+caddy_https_port: 18443
+caddy_admin_port: 12019
+
+# SSL/TLS Configuration
+ssl_email: "{{ lookup('env', 'SSL_EMAIL') | default('admin@' + domain, true) }}"
+ssl_staging: true # Use Let's Encrypt staging (no rate limits)
+
+# Deployment Paths
+deployment_root: /opt/gateway-staging
+docker_compose_file: '{{ deployment_root }}/docker-compose.yml'
+env_file: '{{ deployment_root }}/.env'
+infrastructure_dir: '{{ deployment_root }}/infrastructure'
+
+# Cloudflare (loaded from secrets if available)
+cloudflare_zone_id: "{{ lookup('env', 'CLOUDFLARE_ZONE_ID') | default('', true) }}"
+cloudflare_api_token: "{{ lookup('env', 'CLOUDFLARE_API_TOKEN') | default('', true) }}"
+
+# Monitoring
+enable_monitoring: true
+enable_loki: false
+enable_tempo: false
+
+# Backup Configuration
+backup_enabled: false # No backups for staging
+backup_retention_days: 7

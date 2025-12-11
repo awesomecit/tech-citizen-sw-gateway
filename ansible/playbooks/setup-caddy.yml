@@ -1,0 +1,104 @@
+---
+# Caddy Setup Playbook - Configure reverse proxy with SSL/TLS
+# Usage: ansible-playbook -i inventory/hosts.ini playbooks/setup-caddy.yml --limit=production
+
+- name: Setup Caddy Reverse Proxy with SSL
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  vars:
+    caddy_config_dir: '{{ infrastructure_dir }}/caddy'
+    caddy_log_dir: /var/log/caddy
+
+  tasks:
+    - name: Print Caddy setup banner
+      debug:
+        msg: |
+          ================================================
+          Caddy Reverse Proxy Setup
+          ================================================
+          Environment: {{ environment }}
+          Domain: {{ domain }}
+          Gateway: {{ gateway_domain }}
+          Auth: {{ auth_domain }}
+          Grafana: {{ grafana_domain }}
+          {% if environment == 'production' %}
+          App: {{ app_domain }}
+          WWW: {{ www_domain }}
+          {% endif %}
+          SSL Email: {{ ssl_email }}
+          SSL Staging: {{ ssl_staging }}
+          ================================================
+
+    - name: Create Caddy config directory
+      file:
+        path: '{{ caddy_config_dir }}'
+        state: directory
+        mode: '0755'
+
+    - name: Create Caddy log directory
+      file:
+        path: '{{ caddy_log_dir }}'
+        state: directory
+        mode: '0755'
+
+    - name: Generate Caddyfile from template
+      template:
+        src: templates/Caddyfile.j2
+        dest: '{{ caddy_config_dir }}/Caddyfile'
+        mode: '0644'
+      register: caddyfile_changed
+
+    - name: Validate Caddyfile syntax
+      command: docker run --rm -v {{ caddy_config_dir }}:/etc/caddy:ro caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile
+      when: caddyfile_changed.changed
+      register: validation_result
+      failed_when: validation_result.rc != 0
+
+    - name: Reload Caddy if configuration changed
+      command: docker exec gateway-caddy caddy reload --config /etc/caddy/Caddyfile
+      when:
+        - caddyfile_changed.changed
+        - validation_result.rc == 0
+      ignore_errors: yes
+      register: reload_result
+
+    - name: Restart Caddy if reload failed
+      command: docker restart gateway-caddy
+      when:
+        - caddyfile_changed.changed
+        - reload_result.failed | default(false)
+
+    - name: Wait for Caddy to be healthy
+      uri:
+        url: 'http://localhost:{{ caddy_http_port }}/health'
+        status_code: 200
+      register: health_check
+      retries: 10
+      delay: 3
+      until: health_check.status == 200
+
+    - name: Print Caddy status
+      debug:
+        msg: |
+          ✓ Caddy configured successfully
+
+          Configuration: {{ caddy_config_dir }}/Caddyfile
+          Health endpoint: http://localhost:{{ caddy_http_port }}/health
+          Admin API: http://localhost:{{ caddy_admin_port }}
+
+          Public URLs (after DNS propagation):
+          - https://{{ domain }}
+          - https://{{ www_domain }}
+          - https://{{ gateway_domain }}
+          - https://{{ auth_domain }}
+          - https://{{ grafana_domain }}
+          {% if environment == 'production' %}
+          - https://{{ app_domain }}
+          {% endif %}
+
+          Next steps:
+          1. Configure DNS records (see docs/operations/PRODUCTION_STATUS.md)
+          2. Wait 5-10 minutes for SSL certificates
+          3. Test: curl https://{{ gateway_domain }}/health

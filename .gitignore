@@ -16,6 +16,12 @@ coverage/
 *.key
 *.pem
 secrets.json
+ansible/secrets.env
+ansible/secrets.env.backup.*
+ansible/production.env
+ansible/staging.env
+.vault_pass
+~/secrets/
 
 # Generated configuration files
 watt.json

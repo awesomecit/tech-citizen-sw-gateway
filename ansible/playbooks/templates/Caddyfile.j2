@@ -1,0 +1,105 @@
+# Caddyfile - Tech Citizen Gateway
+# Environment: {{ environment }}
+# Generated: {{ ansible_date_time.iso8601 }}
+
+# Global options
+{
+    email {{ ssl_email }}
+{% if ssl_staging %}
+    acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+{% endif %}
+    admin localhost:{{ caddy_admin_port }}
+    log {
+        output file /var/log/caddy/access.log
+        format json
+    }
+}
+
+# Root domain - Redirect to www
+{{ domain }} {
+    redir https://{{ www_domain }}{uri} permanent
+}
+
+# WWW domain - Main frontend (placeholder)
+{{ www_domain }} {
+    respond "Tech Citizen Gateway - Coming Soon" 200
+    log {
+        output file /var/log/caddy/www.log
+        format json
+    }
+}
+
+# Gateway API
+{{ gateway_domain }} {
+    reverse_proxy localhost:{{ gateway_port }} {
+        health_uri /health
+        health_interval 10s
+        health_timeout 5s
+    }
+    
+    log {
+        output file /var/log/caddy/gateway.log
+        format json
+    }
+    
+    # CORS headers
+    header {
+        Access-Control-Allow-Origin "*"
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Authorization, Content-Type"
+    }
+}
+
+# Keycloak Authentication
+{{ auth_domain }} {
+    reverse_proxy localhost:{{ keycloak_port }} {
+        health_uri /health
+        health_interval 30s
+        health_timeout 10s
+    }
+    
+    log {
+        output file /var/log/caddy/auth.log
+        format json
+    }
+}
+
+# Grafana Monitoring Dashboard
+{{ grafana_domain }} {
+    reverse_proxy localhost:{{ grafana_port }} {
+        health_uri /api/health
+        health_interval 10s
+        health_timeout 5s
+    }
+    
+    log {
+        output file /var/log/caddy/grafana.log
+        format json
+    }
+}
+
+{% if environment == 'production' %}
+# Frontend Application (production only)
+{{ app_domain }} {
+    reverse_proxy localhost:3000 {
+        health_uri /health
+        health_interval 10s
+        health_timeout 5s
+    }
+    
+    log {
+        output file /var/log/caddy/app.log
+        format json
+    }
+}
+{% endif %}
+
+# Health check endpoint (internal)
+:{{ caddy_http_port }} {
+    respond /health "OK" 200
+    
+    log {
+        output file /var/log/caddy/health.log
+        format json
+    }
+}

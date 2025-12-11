@@ -1,0 +1,436 @@
+---
+# Bootstrap playbook - Complete server setup from scratch
+# Usage:
+#   ansible-playbook -i inventory/hosts.ini playbooks/bootstrap.yml --limit=production
+#
+# Options:
+#   --skip-tags=discovery    Skip server discovery
+#   --skip-tags=security     Skip security hardening
+#   --skip-tags=docker       Skip Docker installation
+#   --skip-tags=deploy       Skip Gateway deployment
+#   --skip-tags=audit        Skip security audit
+#
+# Example - re-deploy only:
+#   ansible-playbook -i inventory/hosts.ini playbooks/bootstrap.yml --limit=production --tags=deploy
+
+- name: 'Bootstrap - Tech Citizen Gateway Production Server'
+  hosts: production
+  become: yes
+  gather_facts: yes
+
+  vars:
+    bootstrap_timestamp: '{{ ansible_date_time.iso8601 }}'
+    bootstrap_log_file: '/var/log/gateway-bootstrap-{{ ansible_date_time.epoch }}.log'
+
+  pre_tasks:
+    - name: Print bootstrap banner
+      debug:
+        msg: |
+          ================================================
+          Tech Citizen Gateway - Production Bootstrap
+          ================================================
+          Server: {{ inventory_hostname }}
+          IP: {{ ansible_host }}
+          User: {{ ansible_user }}
+          Date: {{ bootstrap_timestamp }}
+          Log: {{ bootstrap_log_file }}
+          ================================================
+      tags: always
+
+    - name: Set domain from environment if not defined
+      set_fact:
+        domain: "{{ lookup('env', 'DOMAIN') | default('tech-citizen.me', true) }}"
+      when: domain is not defined
+      tags: always
+
+    - name: Validate required variables
+      assert:
+        that:
+          - ansible_host is defined
+          - ansible_host != "HETZNER_IP_HERE"
+          - ansible_host != "REPLACE_WITH_IP"
+          - domain is defined
+        fail_msg: |
+          ERROR: Missing required variables!
+
+          Please set environment variables:
+          - PRODUCTION_SERVER_IP (server IP)
+          - DOMAIN (your domain)
+          - domain (your domain name)
+
+          Note: cloudflare_zone_id is optional (configure DNS manually if not provided)
+
+          See docs/operations/PRODUCTION_SETUP.md for details
+        success_msg: '✓ Required variables validated'
+      tags: always
+
+    - name: Check secrets file exists
+      stat:
+        path: '{{ playbook_dir }}/../secrets.env'
+      register: secrets_file
+      delegate_to: localhost
+      become: no
+      tags: always
+
+    - name: Fail if secrets not generated
+      fail:
+        msg: |
+          ERROR: Secrets file not found!
+
+          Run: bash scripts/generate-secrets.sh
+
+          This will create ansible/secrets.env with:
+          - JWT_SECRET
+          - SESSION_SECRET
+          - REDIS_PASSWORD
+          - RABBITMQ_PASSWORD
+          - KEYCLOAK_ADMIN_PASSWORD
+          - POSTGRES_PASSWORD
+          - GRAFANA_ADMIN_PASSWORD
+      when: not secrets_file.stat.exists
+      tags: always
+
+    - name: Load secrets from file
+      include_vars:
+        file: '{{ playbook_dir }}/../secrets.env'
+      no_log: true
+      tags: always
+
+    - name: Create bootstrap log file
+      copy:
+        content: |
+          Tech Citizen Gateway - Bootstrap Log
+          Started: {{ bootstrap_timestamp }}
+          Server: {{ ansible_host }}
+          Hostname: {{ inventory_hostname }}
+
+        dest: '{{ bootstrap_log_file }}'
+        mode: '0600'
+      tags: always
+
+  tasks:
+    # ========================================
+    # STEP 1: SECURITY BASELINE
+    # ========================================
+    - name: 'STEP 1/4 - Security Hardening'
+      block:
+        - name: Log security hardening start
+          lineinfile:
+            path: '{{ bootstrap_log_file }}'
+            line: '[{{ ansible_date_time.iso8601 }}] Starting security hardening...'
+
+        - name: Update apt cache
+          apt:
+            update_cache: yes
+            cache_valid_time: 3600
+
+        - name: Install essential packages
+          apt:
+            name:
+              - ufw
+              - fail2ban
+              - unattended-upgrades
+              - apt-listchanges
+            state: present
+
+        - name: Configure UFW default policies
+          ufw:
+            state: enabled
+            policy: deny
+            direction: incoming
+
+        - name: Configure UFW - Allow SSH (before enabling!)
+          ufw:
+            rule: allow
+            port: '22'
+            proto: tcp
+            comment: 'SSH access'
+
+        - name: Configure UFW - Allow HTTP
+          ufw:
+            rule: allow
+            port: '80'
+            proto: tcp
+            comment: 'HTTP'
+
+        - name: Configure UFW - Allow HTTPS
+          ufw:
+            rule: allow
+            port: '443'
+            proto: tcp
+            comment: 'HTTPS'
+
+        - name: Configure UFW - Allow Grafana
+          ufw:
+            rule: allow
+            port: '3001'
+            proto: tcp
+            comment: 'Grafana dashboard'
+
+        - name: Configure UFW - Allow Prometheus
+          ufw:
+            rule: allow
+            port: '9090'
+            proto: tcp
+            comment: 'Prometheus metrics'
+
+        - name: Reload UFW
+          ufw:
+            state: reloaded
+
+        - name: Start and enable fail2ban
+          systemd:
+            name: fail2ban
+            state: started
+            enabled: yes
+
+        - name: Log security hardening complete
+          lineinfile:
+            path: '{{ bootstrap_log_file }}'
+            line: '[{{ ansible_date_time.iso8601 }}] Security hardening complete'
+      tags:
+        - security
+
+    # ========================================
+    # STEP 2: DOCKER INSTALLATION
+    # ========================================
+    - name: 'STEP 2/4 - Docker Installation'
+      block:
+        - name: Log Docker installation start
+          lineinfile:
+            path: '{{ bootstrap_log_file }}'
+            line: '[{{ ansible_date_time.iso8601 }}] Starting Docker installation...'
+
+        - name: Install Docker prerequisites
+          apt:
+            name:
+              - ca-certificates
+              - curl
+              - gnupg
+              - lsb-release
+            state: present
+
+        - name: Create keyrings directory
+          file:
+            path: /etc/apt/keyrings
+            state: directory
+            mode: '0755'
+
+        - name: Download Docker GPG key
+          shell: |
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            chmod a+r /etc/apt/keyrings/docker.gpg
+          args:
+            creates: /etc/apt/keyrings/docker.gpg
+
+        - name: Add Docker repository
+          shell: |
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+          args:
+            creates: /etc/apt/sources.list.d/docker.list
+
+        - name: Install Docker
+          apt:
+            name:
+              - docker-ce
+              - docker-ce-cli
+              - containerd.io
+              - docker-compose-plugin
+            state: present
+            update_cache: yes
+
+        - name: Start and enable Docker
+          systemd:
+            name: docker
+            state: started
+            enabled: yes
+
+        - name: Log Docker installation complete
+          lineinfile:
+            path: '{{ bootstrap_log_file }}'
+            line: '[{{ ansible_date_time.iso8601 }}] Docker installation complete'
+      tags:
+        - docker
+
+    # ========================================
+    # STEP 3: GATEWAY DEPLOYMENT
+    # ========================================
+    - name: 'STEP 3/4 - Gateway Deployment'
+      block:
+        - name: Log deployment start
+          lineinfile:
+            path: '{{ bootstrap_log_file }}'
+            line: '[{{ ansible_date_time.iso8601 }}] Starting Gateway deployment...'
+
+        - name: Create deployment directory
+          file:
+            path: /opt/gateway
+            state: directory
+            mode: '0755'
+
+        - name: Create .env file from secrets
+          template:
+            src: '{{ playbook_dir }}/../secrets.env'
+            dest: /opt/gateway/.env
+            mode: '0600'
+
+        - name: Copy docker-compose.yml
+          copy:
+            src: '{{ playbook_dir }}/../../docker-compose.yml'
+            dest: /opt/gateway/docker-compose.yml
+            mode: '0644'
+
+        - name: Copy infrastructure configurations
+          synchronize:
+            src: '{{ playbook_dir }}/../../infrastructure/'
+            dest: /opt/gateway/infrastructure/
+            rsync_opts:
+              - '--exclude=.git'
+              - '--exclude=*.log'
+
+        - name: Pull Docker images
+          command: docker compose pull
+          args:
+            chdir: /opt/gateway
+
+        - name: Start Gateway services
+          command: docker compose up -d
+          args:
+            chdir: /opt/gateway
+
+        - name: Wait for infrastructure services (Caddy, Prometheus, Grafana)
+          pause:
+            seconds: 10
+            prompt: 'Waiting for containers to start...'
+
+        - name: Check Caddy health
+          uri:
+            url: 'http://localhost:8080/health'
+            status_code: 200
+          register: caddy_health
+          retries: 10
+          delay: 3
+          ignore_errors: yes
+
+        - name: Check Prometheus health
+          uri:
+            url: 'http://localhost:19090/-/healthy'
+            return_content: yes
+          register: prometheus_health
+          retries: 10
+          delay: 3
+          ignore_errors: yes
+
+        - name: Check Grafana health
+          uri:
+            url: 'http://localhost:3000/api/health'
+            return_content: yes
+          register: grafana_health
+          retries: 10
+          delay: 3
+          ignore_errors: yes
+
+        - name: Get container status
+          command: docker compose ps --format json
+          args:
+            chdir: /opt/gateway
+          register: container_status
+
+        - name: Log deployment complete
+          lineinfile:
+            path: '{{ bootstrap_log_file }}'
+            line: '[{{ ansible_date_time.iso8601 }}] Gateway deployment complete'
+
+        - name: Print deployment summary
+          debug:
+            msg: |
+              ================================================
+              Deployment Summary
+              ================================================
+              Caddy: {{ 'OK' if caddy_health.status|default(0) == 200 else 'NOT READY (expected, no DNS configured)' }}
+              Prometheus: {{ 'OK' if 'Healthy' in prometheus_health.content|default('') else 'FAILED' }}
+              Grafana: {{ 'OK' if 'ok' in grafana_health.content|default('') else 'FAILED' }}
+
+              Containers: {{ container_status.stdout_lines | length }} running
+
+              Next Steps:
+              1. Configure DNS (6 A records pointing to {{ ansible_host }})
+              2. Run: bash scripts/ansible-production.sh caddy
+              3. Test: curl https://gateway.{{ domain }}/health
+              ================================================
+      tags:
+        - deploy
+
+    # ========================================
+    # STEP 4: VERIFICATION
+    # ========================================
+    - name: 'STEP 4/4 - Verify Deployment'
+      block:
+        - name: Check Docker containers status
+          command: docker compose ps
+          args:
+            chdir: /opt/gateway
+          register: docker_ps
+
+        - name: Display container status
+          debug:
+            var: docker_ps.stdout_lines
+
+        # Gateway app health check disabled - app not deployed yet
+        # Only infrastructure (Caddy, Prometheus, Grafana) deployed
+        - name: Note about Gateway app
+          debug:
+            msg: |
+              NOTE: Gateway application (Platformatic Watt) not deployed yet.
+              Infrastructure only: Caddy, Prometheus, Grafana.
+
+              To deploy full Gateway app:
+                bash scripts/deploy-gateway-app.sh
+
+        - name: Test Gateway health endpoint (optional)
+          uri:
+            url: 'http://localhost:3042/health'
+            return_content: yes
+          register: health_response
+          ignore_errors: yes
+
+        - name: Display health check response
+          debug:
+            var: health_response.json
+      tags:
+        - always
+
+  post_tasks:
+    - name: Print bootstrap summary
+      debug:
+        msg: |
+          ================================================
+          Bootstrap Completed Successfully!
+          ================================================
+
+          Gateway URL: https://{{ domain }}
+          Metrics: https://{{ domain }}/metrics
+          Grafana: https://{{ domain }}:3001
+
+          Credentials (from secrets.env):
+          - Grafana Admin: admin / {{ grafana_admin_password }}
+          - Keycloak Admin: admin / {{ keycloak_admin_password }}
+
+          Next steps:
+          1. Test health endpoint: curl https://{{ domain }}/health
+          2. Access Grafana: https://{{ domain }}:3001
+          3. Review logs: {{ bootstrap_log_file }}
+          4. Run security audit: ./scripts/ansible.sh production audit
+
+          ================================================
+      tags: always
+
+    - name: Save bootstrap completion marker
+      copy:
+        content: |
+          Bootstrap completed successfully
+          Timestamp: {{ bootstrap_timestamp }}
+          Playbook version: 1.0.0
+        dest: /etc/gateway-bootstrap-complete
+        mode: '0644'
+      tags: always
