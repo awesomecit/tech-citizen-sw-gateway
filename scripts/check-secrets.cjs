@@ -31,8 +31,12 @@ const IGNORED_PATTERNS = loadLines(
 
 // Load safe values and file skip patterns from .secretsafe
 const secretSafeLines = loadLines(path.join(PROJECT_ROOT, '.secretsafe'));
-const SAFE_VALUES = secretSafeLines.filter(line => !line.includes('/') && !line.includes('.'));
-const SKIPPED_FILES = secretSafeLines.filter(line => line.includes('/') || line.includes('.'));
+const SAFE_VALUES = secretSafeLines.filter(
+  line => !line.includes('/') && !line.includes('.'),
+);
+const SKIPPED_FILES = secretSafeLines.filter(
+  line => line.includes('/') || line.includes('.'),
+);
 
 // Patterns to detect (high entropy strings, common secret formats)
 const SECRET_PATTERNS = [
@@ -126,12 +130,16 @@ function shouldExcludeFile(filePath) {
   if (IGNORED_PATTERNS.some(pattern => pattern.test(filePath))) {
     return true;
   }
-  
+
   // Check .secretsafe file skip list
-  if (SKIPPED_FILES.some(skipped => filePath.includes(skipped) || filePath === skipped)) {
+  if (
+    SKIPPED_FILES.some(
+      skipped => filePath.includes(skipped) || filePath === skipped,
+    )
+  ) {
     return true;
   }
-  
+
   return false;
 }
 

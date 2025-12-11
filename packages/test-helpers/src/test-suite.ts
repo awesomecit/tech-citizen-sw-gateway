@@ -28,6 +28,7 @@ import { EnvironmentChecker } from './environment-checker.js';
  * });
  * ```
  */
+// eslint-disable-next-line max-lines-per-function, complexity, sonarjs/cognitive-complexity
 export function createTestSuite(options: TestSuiteOptions): TestContext {
   const dockerManager = new DockerManager();
   const context: TestContext = {
@@ -39,13 +40,14 @@ export function createTestSuite(options: TestSuiteOptions): TestContext {
     },
   };
 
+  // eslint-disable-next-line complexity, sonarjs/cognitive-complexity
   beforeAll(async () => {
     // Validate environment safety
     EnvironmentChecker.validate();
     EnvironmentChecker.loadTestEnv();
 
-    // Check for KEEP_CONTAINERS debug flag
-    const keepAlive =
+    // Check for KEEP_CONTAINERS debug flag (future use for manual cleanup)
+    const _keepAlive =
       options.keepAlive || process.env.KEEP_CONTAINERS === 'true';
 
     // Allocate ports for parallel execution

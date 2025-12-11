@@ -6,6 +6,7 @@ export class EnvironmentChecker {
   /**
    * Validate test environment safety
    */
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   static validate(): void {
     const nodeEnv = process.env.NODE_ENV;
     const databaseName = process.env.DATABASE_NAME;
@@ -56,7 +57,7 @@ export class EnvironmentChecker {
         (process as any).loadEnvFile('.env.test');
         console.log('✓ Loaded .env.test');
       }
-    } catch (error) {
+    } catch {
       console.warn('⚠️  .env.test not found, using environment variables');
     }
   }

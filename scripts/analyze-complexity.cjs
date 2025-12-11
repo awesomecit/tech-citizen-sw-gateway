@@ -24,6 +24,7 @@
 const { ESLint } = require('eslint');
 const fs = require('fs');
 const path = require('path');
+const glob = require('glob');
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -45,8 +46,21 @@ const RULES = {
 
 async function analyzeComplexity() {
   try {
-    const eslint = new ESLint();
-    const results = await eslint.lintFiles(['src/**/*.ts']);
+    // Use ESLint CLI directly via child_process to properly use flat config
+    const { execSync } = require('child_process');
+
+    const pattern = '{packages,services}/*/src/**/*.ts';
+    const eslintOutput = execSync(`npx eslint "${pattern}" --format json`, {
+      encoding: 'utf8',
+      cwd: process.cwd(),
+    });
+
+    const results = JSON.parse(eslintOutput);
+
+    if (!results || results.length === 0) {
+      console.error('Error analyzing complexity: No TypeScript files found.');
+      process.exit(1);
+    }
 
     // Filter issues based on analysis type
     const issues = results.flatMap(result => {
