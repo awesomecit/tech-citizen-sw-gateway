@@ -8,6 +8,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# Set environment suffix for test containers
+export COMPOSE_ENV_SUFFIX="-test"
+# Use project name for network/volume isolation (Docker Compose standard)
+export COMPOSE_PROJECT_NAME="keycloak-test"
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -35,13 +40,15 @@ log_info "Starting test infrastructure: $SERVICES"
 for SERVICE in $SERVICES; do
   case "$SERVICE" in
     keycloak)
-      log_info "Starting Keycloak on port 8090..."
+      log_info "Starting Keycloak + Redis on ports 8090/6379..."
       cd "$PROJECT_ROOT/infrastructure/keycloak"
-      docker compose -f docker-compose.keycloak.yml up -d --force-recreate
+      docker compose -f docker-compose.keycloak.yml up -d --force-recreate --remove-orphans
       
-      # Monitor logs in background
-      docker logs -f tech-citizen-keycloak 2>&1 | sed 's/^/[keycloak] /' &
+      # Monitor both containers logs in parallel
+      docker logs -f "tech-citizen-keycloak${COMPOSE_ENV_SUFFIX}" 2>&1 | sed 's/^/[keycloak] /' &
       KEYCLOAK_LOG_PID=$!
+      docker logs -f "tech-citizen-redis-session${COMPOSE_ENV_SUFFIX}" 2>&1 | sed 's/^/[redis] /' &
+      REDIS_LOG_PID=$!
       
       # Wait for Keycloak ready (can take 90-120s)
       log_info "Waiting for Keycloak health check (max 120s)..."
@@ -49,13 +56,17 @@ for SERVICE in $SERVICES; do
         if curl -sf http://localhost:8090/health/ready > /dev/null 2>&1; then
           log_info "Keycloak ready after ${i}s!"
           kill $KEYCLOAK_LOG_PID 2>/dev/null || true
+          kill $REDIS_LOG_PID 2>/dev/null || true
           break
         fi
         if [ "$i" -eq 120 ]; then
           kill $KEYCLOAK_LOG_PID 2>/dev/null || true
+          kill $REDIS_LOG_PID 2>/dev/null || true
           log_error "Keycloak failed to start within 120s"
-          log_error "Last 50 lines of logs:"
-          docker logs --tail 50 tech-citizen-keycloak 2>&1
+          log_error "Last 50 lines of Keycloak logs:"
+          docker logs --tail 50 "tech-citizen-keycloak${COMPOSE_ENV_SUFFIX}" 2>&1
+          log_error "Last 20 lines of Redis logs:"
+          docker logs --tail 20 "tech-citizen-redis-session${COMPOSE_ENV_SUFFIX}" 2>&1
           exit 1
         fi
         sleep 1

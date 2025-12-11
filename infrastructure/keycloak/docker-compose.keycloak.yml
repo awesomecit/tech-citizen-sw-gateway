@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:23.0
-    container_name: tech-citizen-keycloak
+    container_name: tech-citizen-keycloak${COMPOSE_ENV_SUFFIX:-}
     environment:
       # Admin credentials (CHANGE IN PRODUCTION!)
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
@@ -49,7 +47,7 @@ services:
   # Redis for session storage (shared with gateway)
   redis-session:
     image: redis:7-alpine
-    container_name: tech-citizen-redis-session
+    container_name: tech-citizen-redis-session${COMPOSE_ENV_SUFFIX:-}
     ports:
       - '${REDIS_PORT:-6379}:6379'
     volumes:

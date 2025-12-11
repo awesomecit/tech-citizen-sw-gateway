@@ -20,11 +20,20 @@ describe('Smoke Test: Platformatic Watt Startup', () => {
 
   afterEach(async () => {
     if (wattProcess) {
+      // Remove all listeners to prevent memory leaks
+      wattProcess.stdout?.removeAllListeners();
+      wattProcess.stderr?.removeAllListeners();
+      wattProcess.removeAllListeners();
+
+      // Kill process
       wattProcess.kill('SIGTERM');
       await setTimeout(2000); // Grace period
       if (!wattProcess.killed) {
         wattProcess.kill('SIGKILL');
       }
+
+      // Ensure process is fully cleaned up
+      await setTimeout(500);
     }
   });
 
@@ -35,7 +44,7 @@ describe('Smoke Test: Platformatic Watt Startup', () => {
 
     wattProcess = spawn('npm', ['run', 'dev'], {
       cwd: process.cwd(),
-      env: { ...process.env, NODE_ENV: 'development' },
+      env: { ...process.env, NODE_ENV: 'test' },
     });
 
     wattProcess.stdout?.on('data', data => {
@@ -66,7 +75,7 @@ describe('Smoke Test: Platformatic Watt Startup', () => {
   it('should respond to health check', async () => {
     wattProcess = spawn('npm', ['run', 'dev'], {
       cwd: process.cwd(),
-      env: { ...process.env, NODE_ENV: 'development' },
+      env: { ...process.env, NODE_ENV: 'test' },
     });
 
     // Wait for startup
@@ -83,40 +92,35 @@ describe('Smoke Test: Platformatic Watt Startup', () => {
     });
   }, 20000);
 
-  it.skip('should gracefully shutdown on SIGTERM', async () => {
-    // TODO: Fix exit event handling - process.on('exit') not firing reliably in Jest spawn
-    // Issue: exitCode remains null, test times out at 22s
+  it('should gracefully shutdown on SIGTERM', async () => {
+    let exitCode: number | null = null;
+
     wattProcess = spawn('npm', ['run', 'dev'], {
       cwd: process.cwd(),
-      env: { ...process.env, NODE_ENV: 'development' },
+      env: { ...process.env, NODE_ENV: 'test' },
       stdio: 'pipe',
+    });
+
+    // Capture exit code
+    wattProcess.on('exit', code => {
+      exitCode = code;
     });
 
     // Wait for startup
     await setTimeout(STARTUP_TIMEOUT);
 
-    // Send SIGTERM and wait for process exit
-    const exitPromise = new Promise<number | null>(resolve => {
-      wattProcess.on('exit', code => resolve(code));
-    });
-
+    // Send SIGTERM
     wattProcess.kill('SIGTERM');
 
-    // Wait max 5s for graceful shutdown
-    const exitCode = await Promise.race([
-      exitPromise,
-      setTimeout(5000).then(() => null),
-    ]);
-
-    // Cleanup
-    if (wattProcess && !wattProcess.killed) {
-      wattProcess.kill('SIGKILL');
+    // Wait for process to exit (max 5s)
+    let waited = 0;
+    while (exitCode === null && waited < 5000) {
+      await setTimeout(100);
+      waited += 100;
     }
-    wattProcess.stdout?.removeAllListeners();
-    wattProcess.stderr?.removeAllListeners();
-    wattProcess.removeAllListeners();
 
-    // Verify graceful shutdown (exit code 0 or null/128 from SIGTERM)
-    expect(exitCode).not.toBe(1); // Not a crash
+    // Verify graceful shutdown (exit code 0, null, or 143 from SIGTERM are acceptable)
+    // Exit code 1 would indicate a crash
+    expect(exitCode).not.toBe(1);
   }, 25000);
 });

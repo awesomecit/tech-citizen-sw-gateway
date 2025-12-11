@@ -8,6 +8,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# Set environment suffix for test containers (same as start script)
+export COMPOSE_ENV_SUFFIX="-test"
+# Use project name for network/volume isolation (Docker Compose standard)
+export COMPOSE_PROJECT_NAME="keycloak-test"
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -33,7 +38,11 @@ for SERVICE in $SERVICES; do
     keycloak)
       log_info "Stopping Keycloak..."
       cd "$PROJECT_ROOT/infrastructure/keycloak"
-      docker compose -f docker-compose.keycloak.yml down -v || true
+      # First, force stop and remove containers by name (bypass compose project context)
+      docker stop "tech-citizen-keycloak${COMPOSE_ENV_SUFFIX}" "tech-citizen-redis-session${COMPOSE_ENV_SUFFIX}" 2>/dev/null || true
+      docker rm "tech-citizen-keycloak${COMPOSE_ENV_SUFFIX}" "tech-citizen-redis-session${COMPOSE_ENV_SUFFIX}" 2>/dev/null || true
+      # Then cleanup networks and volumes via compose
+      docker compose -f docker-compose.keycloak.yml down -v --remove-orphans || true
       ;;
       
     redis)
