@@ -530,8 +530,51 @@ Epic 5 → Epic 7 (events need service mesh)
 
 ---
 
+## Technical Debt Register
+
+### Coverage Gaps (v1.7.0 - Dec 2025)
+
+**Status**: 70% global coverage (409/582 lines) ✅ Baseline established
+
+**Files at 0% Coverage** (5 files identified):
+
+1. **`packages/auth/src/plugins/keycloak.ts`** - Fastify plugin for Keycloak authentication
+   - Priority: P1 (critical auth path)
+   - Blocker: Requires Keycloak integration test setup
+   - Target: v1.8.0 (add integration tests)
+
+2. **`packages/auth/src/plugins/session.ts`** - Fastify plugin for session management
+   - Priority: P1 (user sessions)
+   - Blocker: Requires Redis session storage tests
+   - Target: v1.8.0 (add integration tests)
+
+3. **`packages/auth/src/schemas/token.ts`** - JWT token validation schemas
+   - Priority: P2 (validation layer)
+   - Blocker: Schema-only file, needs property-based tests
+   - Target: v1.9.0 (add schema validation tests)
+
+4. **`packages/auth/src/schemas/user.ts`** - User object validation schemas
+   - Priority: P2 (validation layer)
+   - Blocker: Schema-only file, needs property-based tests
+   - Target: v1.9.0 (add schema validation tests)
+
+5. **`services/gateway/src/index.ts`** - Gateway entry point (125 lines)
+   - Priority: P0 (critical path)
+   - Blocker: Requires E2E/integration tests with full stack
+   - Target: v1.8.0 (add E2E tests with request flow)
+
+**Coverage Milestones**:
+
+- ✅ **v1.7.0**: 70% baseline established (v8 provider migration)
+- 🎯 **v1.8.0 Target**: 80% coverage (P0+P1 files tested)
+- 🎯 **v1.9.0 Target**: 85% coverage (P2 files tested)
+- 🎯 **v2.0.0 Target**: 90% coverage (production-ready)
+
+---
+
 ## Revision History
 
+- **2025-12-11**: v1.7.0 released - Coverage analysis baseline (70%), 5 files at 0% documented as technical debt
 - **2025-12-10**: Added Epic 10 Learning Path (EPIC-010) with 5 user stories for course documentation
 - **2025-12-09**: Added Epic 3 Production Server Setup (EPIC-008) with 6 user stories, blocked until server credentials available
 - **2025-12-08**: Initial roadmap created, Epic 1 60% complete
