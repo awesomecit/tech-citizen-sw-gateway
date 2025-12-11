@@ -565,6 +565,148 @@
 
 ---
 
+#### EPIC-012: Test Coverage P0 Gaps (v1.8.0) 🔴 CRITICAL
+
+**Goal**: Close critical test coverage gaps identified in TEST_COVERAGE_ANALYSIS.md
+
+**Status**: Not started (Priority: Sprint 3)
+
+**Story Points**: 7 SP total
+
+**Prerequisites**:
+
+- Test infrastructure working (✅ Done in v1.7.0)
+- Auth package integration tests baseline (✅ 37 tests passing)
+
+**User Stories**:
+
+- [ ] **US-054**: As a Developer, I want Gateway routing E2E tests so I verify request orchestration works end-to-end
+  - **Priority**: 🔴 P0 (Gateway index.ts at 0% coverage - 125 lines)
+  - **Acceptance Criteria** (BDD):
+
+    ```gherkin
+    Given the gateway is running with auth plugin
+    When I GET /health without token
+    Then response status is 200
+    And response includes correlation-id header
+
+    When I GET /api/protected without token
+    Then response status is 401
+
+    When I GET /api/protected with invalid token
+    Then response status is 403
+
+    When I OPTIONS /api/protected (CORS preflight)
+    Then response status is 204
+    And CORS headers are present
+    ```
+
+  - **Tasks**:
+    1. Create `e2e/gateway/routing.e2e.test.ts`
+    2. Test auth plugin registration
+    3. Test correlation-id middleware
+    4. Test protected route with JWT validation
+    5. Test CORS preflight handling
+  - **Files**:
+    - `e2e/gateway/routing.e2e.test.ts` (NEW)
+    - `services/gateway/src/index.ts` (0% → 70% coverage)
+  - **Estimate**: 3 SP (~3h)
+  - **Definition of Done**:
+    - [ ] 6+ E2E scenarios passing
+    - [ ] Gateway index.ts coverage > 70%
+    - [ ] Test runs in < 60s
+    - [ ] No flaky tests (3 consecutive runs)
+
+- [ ] **US-055**: As a Developer, I want Session plugin integration tests so I verify Redis session management works
+  - **Priority**: 🔴 P0 (session.ts at 0% coverage - 67 lines)
+  - **Acceptance Criteria** (BDD):
+
+    ```gherkin
+    Given Redis is running
+    When I create a session with user data
+    Then session is stored in Redis with TTL
+
+    When I retrieve session by session ID
+    Then user data is returned correctly
+
+    When I destroy a session
+    Then session is removed from Redis
+
+    When session expires (TTL)
+    Then session is automatically deleted
+
+    When Redis is unavailable
+    Then plugin degrades gracefully with error
+    ```
+
+  - **Tasks**:
+    1. Create `packages/auth/test/session.integration.test.ts`
+    2. Test session create/retrieve/destroy
+    3. Test session TTL expiration
+    4. Test Redis connection failure handling
+    5. Test session ID regeneration on login
+  - **Files**:
+    - `packages/auth/test/session.integration.test.ts` (NEW)
+    - `packages/auth/src/plugins/session.ts` (0% → 80% coverage)
+  - **Estimate**: 2 SP (~2h)
+  - **Definition of Done**:
+    - [ ] 8+ integration test cases passing
+    - [ ] session.ts coverage > 80%
+    - [ ] Tests run with auto-managed Redis container
+    - [ ] Proper cleanup in afterEach hooks
+
+- [ ] **US-056**: As a Developer, I want Keycloak plugin integration tests so I verify plugin registration and OIDC flows work
+  - **Priority**: 🔴 P0 (keycloak.ts at 0% coverage - 89 lines)
+  - **Acceptance Criteria** (BDD):
+
+    ```gherkin
+    Given Keycloak is running
+    When I register keycloak plugin in Fastify
+    Then plugin decorates app with keycloak methods
+    And /auth/login route is registered
+    And /auth/callback route is registered
+    And /auth/logout route is registered
+
+    When Keycloak is unreachable during startup
+    Then plugin fails fast with clear error
+
+    When I call OIDC discovery endpoint
+    Then plugin retrieves realm configuration
+    ```
+
+  - **Tasks**:
+    1. Create `packages/auth/test/keycloak-plugin.integration.test.ts`
+    2. Test plugin registration as fastify-plugin
+    3. Test Fastify decorators (keycloak methods)
+    4. Test route registration (/auth/\*)
+    5. Test OIDC discovery at startup
+    6. Test fail-fast on Keycloak unavailable
+  - **Files**:
+    - `packages/auth/test/keycloak-plugin.integration.test.ts` (NEW)
+    - `packages/auth/src/plugins/keycloak.ts` (0% → 80% coverage)
+  - **Estimate**: 2 SP (~2h)
+  - **Definition of Done**:
+    - [ ] 6+ integration test cases passing
+    - [ ] keycloak.ts coverage > 80%
+    - [ ] Plugin registration verified with real Fastify app
+    - [ ] Routes accessible in test app
+
+**Epic Estimate**: 7 SP total (US-054: 3 SP + US-055: 2 SP + US-056: 2 SP)
+
+**Expected Impact**:
+
+- Coverage: 70% → 80% (+10%)
+- Critical paths tested: Gateway routing, Sessions, Auth plugin
+- Production confidence: 🔴 Low → 🟢 High
+
+**Dependencies**:
+
+- Test infrastructure (✅ Done)
+- Keycloak integration helpers (✅ Done in v1.7.0)
+- Redis test helpers (✅ Done in v1.7.0)
+
+---
+
 #### EPIC-005: Centralized Authentication with Keycloak
 
 **Goal**: Implement user registration, authentication, and centralized session management
