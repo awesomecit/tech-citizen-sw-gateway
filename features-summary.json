@@ -1,0 +1,384 @@
+{
+  "$schema": "./features-summary.schema.json",
+  "version": "1.7.0",
+  "lastUpdated": "2025-12-11T17:30:00Z",
+  "summary": {
+    "totalFeatures": 5,
+    "active": 2,
+    "blocked": 2,
+    "planned": 1,
+    "completed": 0,
+    "globalProgress": 21,
+    "coverage": {
+      "percentage": 70,
+      "lines": {
+        "covered": 409,
+        "total": 582
+      },
+      "filesAtZero": 5
+    },
+    "tests": {
+      "total": 68,
+      "passing": 68,
+      "failing": 0,
+      "suites": {
+        "unit": 28,
+        "integration": 37,
+        "e2e": 3
+      }
+    }
+  },
+  "features": [
+    {
+      "id": "auth-package",
+      "epicId": "EPIC-009",
+      "name": "Reusable Auth Package",
+      "description": "Modular authentication package for mono-repo services",
+      "status": "in-progress",
+      "priority": "high",
+      "progress": {
+        "percentage": 47,
+        "userStories": {
+          "total": 6,
+          "completed": 3,
+          "inProgress": 0,
+          "todo": 3
+        }
+      },
+      "environment": {
+        "dev": true,
+        "test": true,
+        "staging": false,
+        "production": false
+      },
+      "userStories": [
+        {
+          "id": "US-037",
+          "name": "Auth package structure",
+          "status": "done",
+          "coverage": 100,
+          "tests": {
+            "total": 7,
+            "passing": 7
+          }
+        },
+        {
+          "id": "US-038",
+          "name": "JWT validation plugin",
+          "status": "done",
+          "coverage": 100,
+          "tests": {
+            "total": 7,
+            "passing": 7
+          },
+          "bdd": {
+            "file": "e2e/features/auth-jwt-validation.feature",
+            "scenarios": 7
+          }
+        },
+        {
+          "id": "US-039",
+          "name": "Keycloak integration plugin",
+          "status": "in-progress",
+          "bdd": {
+            "file": "e2e/features/auth-keycloak-integration.feature"
+          }
+        },
+        {
+          "id": "US-040",
+          "name": "Session management plugin",
+          "status": "in-progress",
+          "bdd": {
+            "file": "e2e/features/auth-session-management.feature"
+          }
+        },
+        {
+          "id": "US-041",
+          "name": "TypeBox schemas",
+          "status": "todo",
+          "bdd": {
+            "file": "e2e/features/auth-schema-validation.feature"
+          }
+        },
+        {
+          "id": "US-042",
+          "name": "Main auth plugin composition",
+          "status": "todo",
+          "bdd": {
+            "file": "e2e/features/auth-plugin-registration.feature"
+          }
+        }
+      ],
+      "metrics": {
+        "estimatedHours": 15,
+        "actualHours": 4,
+        "remainingHours": 11,
+        "velocity": 1
+      },
+      "releaseTarget": "1.8.0"
+    },
+    {
+      "id": "infrastructure-foundation",
+      "epicId": "EPIC-001",
+      "name": "Infrastructure Foundation",
+      "description": "Minimal production-ready infrastructure with Docker Compose, monitoring, and graceful shutdown",
+      "status": "in-progress",
+      "priority": "high",
+      "progress": {
+        "percentage": 60,
+        "userStories": {
+          "total": 7,
+          "completed": 5,
+          "inProgress": 0,
+          "todo": 2
+        }
+      },
+      "environment": {
+        "dev": true,
+        "test": true,
+        "staging": true,
+        "production": false
+      },
+      "metrics": {
+        "estimatedHours": 13,
+        "actualHours": 10,
+        "remainingHours": 3
+      },
+      "releaseTarget": "1.0.0"
+    },
+    {
+      "id": "production-deployment",
+      "epicId": "EPIC-008",
+      "name": "Production Server Setup",
+      "description": "Ansible-based production deployment with security hardening",
+      "status": "blocked",
+      "priority": "medium",
+      "progress": {
+        "percentage": 0,
+        "userStories": {
+          "total": 6,
+          "completed": 0,
+          "inProgress": 0,
+          "todo": 6
+        }
+      },
+      "blockers": [
+        {
+          "type": "external",
+          "description": "Awaiting Hetzner server credentials",
+          "severity": "critical"
+        },
+        {
+          "type": "external",
+          "description": "Cloudflare Zone ID required",
+          "severity": "high"
+        }
+      ],
+      "environment": {
+        "dev": false,
+        "test": false,
+        "staging": false,
+        "production": false
+      },
+      "metrics": {
+        "estimatedHours": 18,
+        "actualHours": 0,
+        "remainingHours": 18
+      },
+      "releaseTarget": "1.2.0"
+    },
+    {
+      "id": "docker-versioning",
+      "epicId": "EPIC-011",
+      "name": "Docker Image Versioning",
+      "description": "Automated Docker image tagging synchronized with package.json version and git tags",
+      "status": "todo",
+      "priority": "low",
+      "progress": {
+        "percentage": 0,
+        "userStories": {
+          "total": 3,
+          "completed": 0,
+          "inProgress": 0,
+          "todo": 3
+        }
+      },
+      "environment": {
+        "dev": false,
+        "test": false,
+        "staging": false,
+        "production": false
+      },
+      "metrics": {
+        "estimatedHours": 8,
+        "actualHours": 0,
+        "remainingHours": 8
+      },
+      "releaseTarget": "1.6.0"
+    },
+    {
+      "id": "centralized-auth",
+      "epicId": "EPIC-005",
+      "name": "Centralized Authentication",
+      "description": "Keycloak-based authentication with auth microservice",
+      "status": "blocked",
+      "priority": "high",
+      "progress": {
+        "percentage": 0,
+        "userStories": {
+          "total": 7,
+          "completed": 0,
+          "inProgress": 0,
+          "todo": 7
+        }
+      },
+      "blockers": [
+        {
+          "type": "dependency",
+          "description": "EPIC-009 must complete first (auth package foundation)",
+          "severity": "critical",
+          "blockedBy": "auth-package"
+        }
+      ],
+      "dependencies": ["auth-package"],
+      "environment": {
+        "dev": false,
+        "test": false,
+        "staging": false,
+        "production": false
+      },
+      "metrics": {
+        "estimatedHours": 15,
+        "actualHours": 0,
+        "remainingHours": 15
+      },
+      "releaseTarget": "1.3.0"
+    }
+  ],
+  "bddScenarios": {
+    "total": 6,
+    "files": [
+      {
+        "file": "e2e/features/auth-jwt-validation.feature",
+        "userStory": "US-038",
+        "scenarios": 7,
+        "status": "implemented"
+      },
+      {
+        "file": "e2e/features/auth-keycloak-integration.feature",
+        "userStory": "US-039",
+        "status": "in-progress"
+      },
+      {
+        "file": "e2e/features/auth-session-management.feature",
+        "userStory": "US-040",
+        "status": "in-progress"
+      },
+      {
+        "file": "e2e/features/auth-schema-validation.feature",
+        "userStory": "US-041",
+        "status": "todo"
+      },
+      {
+        "file": "e2e/features/auth-plugin-registration.feature",
+        "userStory": "US-042",
+        "status": "todo"
+      },
+      {
+        "file": "e2e/features/keycloak-oidc-auth.feature",
+        "userStory": "US-039",
+        "status": "in-progress"
+      }
+    ]
+  },
+  "technicalDebt": {
+    "coverage": {
+      "filesAtZero": [
+        {
+          "file": "services/gateway/src/index.ts",
+          "priority": "P0",
+          "lines": 125,
+          "target": "v1.8.0",
+          "blocker": "Need E2E tests with request flow through gateway"
+        },
+        {
+          "file": "packages/auth/src/plugins/keycloak.ts",
+          "priority": "P1",
+          "lines": 89,
+          "target": "v1.8.0",
+          "blocker": "Integration tests with Keycloak required"
+        },
+        {
+          "file": "packages/auth/src/plugins/session.ts",
+          "priority": "P1",
+          "lines": 67,
+          "target": "v1.8.0",
+          "blocker": "Integration tests with Redis required"
+        },
+        {
+          "file": "packages/auth/src/schemas/token.ts",
+          "priority": "P2",
+          "lines": 45,
+          "target": "v1.9.0",
+          "blocker": "Schema validation tests needed"
+        },
+        {
+          "file": "packages/auth/src/schemas/user.ts",
+          "priority": "P2",
+          "lines": 38,
+          "target": "v1.9.0",
+          "blocker": "Schema validation tests needed"
+        }
+      ]
+    },
+    "security": {
+      "npmAudit": {
+        "vulnerabilities": {
+          "critical": 0,
+          "high": 0,
+          "moderate": 0,
+          "low": 4
+        },
+        "details": "ioredis-mock dependencies (tmp, fengari) - non-blocking"
+      }
+    }
+  },
+  "milestones": [
+    {
+      "version": "v1.8.0",
+      "target": "2025-12-20",
+      "goals": [
+        "Complete Auth Package (US-040, US-041, US-042)",
+        "80% test coverage",
+        "P0 + P1 coverage debt resolved"
+      ],
+      "status": "in-progress"
+    },
+    {
+      "version": "v1.9.0",
+      "target": "2026-01-15",
+      "goals": [
+        "85% test coverage",
+        "P2 coverage debt resolved",
+        "Production deployment automation complete"
+      ],
+      "status": "planned"
+    },
+    {
+      "version": "v2.0.0",
+      "target": "2026-02-01",
+      "goals": [
+        "90% test coverage",
+        "Centralized Auth service complete",
+        "Production deployment live"
+      ],
+      "status": "planned"
+    }
+  ],
+  "quickCommands": {
+    "queryFeatures": "cat features-summary.json | jq '.features[] | {id, name, status, progress: .progress.percentage}'",
+    "queryBDD": "cat features-summary.json | jq '.bddScenarios.files[] | {file, userStory, status}'",
+    "queryDebt": "cat features-summary.json | jq '.technicalDebt.coverage.filesAtZero[] | {file, priority, target}'",
+    "queryMilestones": "cat features-summary.json | jq '.milestones[] | {version, target, status}'"
+  }
+}
