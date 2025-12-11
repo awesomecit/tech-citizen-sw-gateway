@@ -563,7 +563,7 @@ class AutoRelease {
     }
 
     console.log('🧪 Running tests...');
-    this.execCommand('npm run test:coverage:check');
+    this.execCommand('npm run test:cov');
     if (!this.options.dryRun) {
       console.log('   ✅ Tests passed');
     }
