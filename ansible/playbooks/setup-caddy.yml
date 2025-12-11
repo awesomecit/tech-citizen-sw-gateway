@@ -50,8 +50,8 @@
         keycloak_port: 8090
         grafana_port: 3001
         prometheus_port: 19090
-        caddy_http_port: 8080
-        caddy_https_port: 8443
+        caddy_http_port: 80
+        caddy_https_port: 443
         caddy_admin_port: 2019
 
   tasks:
@@ -115,7 +115,7 @@
 
     - name: Wait for Caddy to be healthy
       uri:
-        url: 'http://localhost:18080/health'
+        url: 'http://localhost:80/health'
         status_code: 200
       register: health_check
       retries: 10
@@ -128,8 +128,8 @@
           ✓ Caddy configured successfully
 
           Configuration: {{ caddy_config_dir }}/Caddyfile
-          Health endpoint: http://localhost:18080/health (external port)
-          Admin API: http://localhost:12019 (external port)
+          Health endpoint: http://localhost:80/health
+          Admin API: http://localhost:2019
 
           Public URLs (after DNS propagation):
           - https://{{ domain }}

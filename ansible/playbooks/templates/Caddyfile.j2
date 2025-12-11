@@ -94,8 +94,8 @@
 }
 {% endif %}
 
-# Health check endpoint (internal)
-:{{ caddy_http_port }} {
+# Health check endpoint (HTTP)
+:80 {
     respond /health "OK" 200
     
     log {

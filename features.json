@@ -1,7 +1,7 @@
 {
   "$schema": "./features.schema.json",
   "version": "1.7.0",
-  "lastUpdated": "2025-12-11T23:17:16.963Z",
+  "lastUpdated": "2025-12-11T23:27:42.272Z",
   "project": {
     "name": "tech-citizen-sw-gateway",
     "repository": "github.com/awesomecit/tech-citizen-sw-gateway"
@@ -9,10 +9,10 @@
   "release": {
     "current": "1.7.0",
     "nextSuggested": "1.8.0",
-    "lastCommit": "7cced24",
+    "lastCommit": "90032c6",
     "unreleased": {
       "feat": 4,
-      "fix": 1,
+      "fix": 2,
       "breaking": 0
     }
   },
@@ -284,6 +284,14 @@
           "subject": "add hybrid bash/Node test infrastructure with separated test suites",
           "timestamp": "2025-12-11T15:52:08.000Z",
           "userStory": null
+        },
+        {
+          "hash": "90032c6",
+          "type": "fix",
+          "scope": "infra",
+          "subject": "caddy setup variable loading and health check port",
+          "timestamp": "2025-12-11T23:17:16.000Z",
+          "userStory": null
         }
       ]
     },
@@ -377,6 +385,14 @@
           "scope": "infra",
           "subject": "add hybrid bash/Node test infrastructure with separated test suites",
           "timestamp": "2025-12-11T15:52:08.000Z",
+          "userStory": null
+        },
+        {
+          "hash": "90032c6",
+          "type": "fix",
+          "scope": "infra",
+          "subject": "caddy setup variable loading and health check port",
+          "timestamp": "2025-12-11T23:17:16.000Z",
           "userStory": null
         }
       ],
