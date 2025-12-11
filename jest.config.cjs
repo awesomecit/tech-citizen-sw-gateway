@@ -28,10 +28,13 @@ module.exports = {
     '/node_modules/',
     '/reference/',
     '\\.integration\\.spec\\.ts$',
-    '\\.integration\\.test\\.ts$', // Added
+    '\\.integration\\.test\\.ts$',
     '\\.e2e\\.spec\\.ts$',
-    '\\.e2e\\.test\\.ts$', // Added
+    '\\.e2e\\.test\\.ts$',
     'session-manager\\.spec\\.ts$', // Requires Redis
+    'routes\\.test\\.ts$', // Gateway routes require Redis
+    'quick-wins\\.test\\.ts$', // Metrics endpoint requires Redis
+    'e2e-login\\.test\\.ts$', // E2E test requiring full stack
   ],
 
   // Moduli da trasformare con TypeScript

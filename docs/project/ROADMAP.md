@@ -504,29 +504,100 @@ Epic 5 → Epic 7 (events need service mesh)
 
 ## Release Plan
 
-### v0.1.0 - Foundation (End Sprint 2)
+**Based on**: Semantic versioning + conventional commits  
+**Source**: `features-summary.json` (auto-generated)  
+**Updated**: 2025-12-11
 
-- Infrastructure setup complete
-- Basic monitoring
-- Security baseline
+### v1.7.0 - Current Release (2025-12-11) ✅
 
-### v0.2.0 - Core Gateway (End Sprint 6)
+**Released Features**:
 
-- Service routing working
-- Circuit breaker tested
-- Production-ready observability
+- ✅ Auth Package foundation (JWT validation, Keycloak OIDC, Sessions)
+- ✅ Gateway routing with Platformatic Watt
+- ✅ DX tooling complete (ESLint, Prettier, Husky, semantic-release)
+- ✅ Test infrastructure (68 tests: 28 unit + 37 integration + 3 E2E)
+- ✅ Coverage baseline established (70%, v8 provider)
+- ✅ Infrastructure Foundation (77% complete)
 
-### v0.3.0 - Performance (End Sprint 10)
+**Metrics**:
 
-- Caching layer (if needed)
-- Events system (if needed)
-- P95 < 200ms target
+- Test Coverage: 70.27% (409/582 lines)
+- Tests Passing: 68/68 (100%)
+- Quality Gates: All passing (lint, format, complexity, security)
 
-### v1.0.0 - Production MVP (End Q1 2026)
+---
 
-- All Phase 2 epics complete
-- CI/CD automated
-- DR tested
+### v1.8.0 - Auth Package Complete (Target: Sprint 3, ~2025-12-20)
+
+**Epic Focus**: EPIC-009 Auth Package (complete remaining 53%)
+
+**Deliverables**:
+
+- Complete US-041: TypeBox validation schemas (token.ts, user.ts)
+- Complete US-042: Auth composition plugin (fastify-plugin wrapper)
+- Add E2E tests for gateway index.ts (P0 coverage debt)
+- Add integration tests for Keycloak + Session plugins (P1 coverage debt)
+
+**Success Metrics**:
+
+- Auth Package: 100% complete (6/6 user stories)
+- Test Coverage: 80% (target: 466/582 lines)
+- P0 + P1 coverage debt resolved (3 files)
+- All BDD scenarios passing (6 .feature files)
+
+**Breaking Changes**: None expected
+
+---
+
+### v1.9.0 - Production Deployment (Target: Sprint 5, ~2026-01-15)
+
+**Epic Focus**: EPIC-008 Production Server Setup
+
+**Prerequisites** (BLOCKERS):
+
+- ⚠️ Hetzner server credentials (IP, SSH, password/key)
+- ⚠️ Cloudflare Zone ID + API Token
+- ⚠️ Domain confirmation (techcitizen.it)
+
+**Deliverables**:
+
+- Production deployment automation (Ansible playbooks)
+- Cloudflare security (WAF, rate limiting, SSL Full Strict)
+- Observability baseline (Prometheus alerts, Grafana dashboards)
+- Complete US-043 - US-048 (production user stories)
+- P2 coverage debt resolved (schema validation tests)
+
+**Success Metrics**:
+
+- Test Coverage: 85% (target: 494/582 lines)
+- CIS Benchmark Level 1 compliance
+- `https://api.techcitizen.it/health` returns 200
+- Zero downtime deployments verified
+
+**Breaking Changes**: None expected
+
+---
+
+### v2.0.0 - Enterprise Ready (Target: Q1 2026, ~2026-02-01)
+
+**Epic Focus**: EPIC-005 Centralized Authentication + Multi-service routing
+
+**Deliverables**:
+
+- Centralized Auth microservice (depends on EPIC-009 complete)
+- Multi-service routing (patient-api, appointment-api stubs)
+- Event-driven architecture foundation (RabbitMQ + CloudEvents)
+- Production monitoring (90%+ uptime, P95 < 300ms)
+- Full E2E coverage (all user journeys tested)
+
+**Success Metrics**:
+
+- Test Coverage: 90% (target: 523/582 lines)
+- All 5 features enabled in production
+- SLA compliance: 99.9% uptime
+- Security audit: Zero critical vulnerabilities
+
+**Breaking Changes**: Possible (auth API contract changes)
 
 ---
 
