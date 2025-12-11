@@ -22,6 +22,21 @@ module.exports = {
   // Moduli da trasformare con TypeScript
   preset: 'ts-jest',
 
+  // ESM support (same as jest.config.cjs)
+  extensionsToTreatAsEsm: ['.ts'],
+  transform: {
+    '^.+\\.ts$': [
+      'ts-jest',
+      {
+        useESM: true,
+        tsconfig: {
+          module: 'ESNext',
+          moduleResolution: 'node',
+        },
+      },
+    ],
+  },
+
   // Setup files commented out - create later if needed
   // setupFilesAfterEnv: ['<rootDir>/test/setup.integration.ts'],
 
@@ -31,15 +46,24 @@ module.exports = {
 
   // Mapping dei moduli per import relativi
   moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1', // Map .js imports to .ts
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@test/(.*)$': '<rootDir>/test/$1',
+    '^@tech-citizen/test-helpers$': '<rootDir>/packages/test-helpers/src/index.ts',
+    '^@tech-citizen/auth$': '<rootDir>/packages/auth/src/index.ts',
+    '^@tech-citizen/cache$': '<rootDir>/packages/cache/src/index.ts',
+    '^@tech-citizen/events$': '<rootDir>/packages/events/src/index.ts',
+    '^@tech-citizen/telemetry$': '<rootDir>/packages/telemetry/src/index.ts',
   },
 
   // Coverage per test integration
   collectCoverage: false, // Disabilitato per performance durante development
 
-  // Ignora i moduli node_modules tranne testcontainers
-  transformIgnorePatterns: ['node_modules/(?!(testcontainers)/)'],
+  // Ignora i moduli node_modules tranne testcontainers e get-port (ESM), trasforma workspace packages
+  transformIgnorePatterns: [
+    'node_modules/(?!(testcontainers|get-port)/)',
+    '!<rootDir>/packages/', // Transform workspace packages
+  ],
 
   // Environment variables per test
   testEnvironmentOptions: {

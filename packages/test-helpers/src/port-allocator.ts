@@ -1,4 +1,4 @@
-import getPort from 'get-port';
+import { createServer } from 'node:net';
 
 /**
  * Port allocation for parallel test execution
@@ -8,12 +8,27 @@ export class PortAllocator {
   private allocatedPorts: Set<number> = new Set();
 
   /**
-   * Allocate random available port
+   * Allocate random available port (workaround for get-port ESM incompatibility with jest)
    */
   async allocate(preferredPort?: number): Promise<number> {
-    const port = await getPort({ port: preferredPort });
-    this.allocatedPorts.add(port);
-    return port;
+    if (preferredPort) {
+      this.allocatedPorts.add(preferredPort);
+      return preferredPort;
+    }
+
+    // Find available port by trying to bind to random port
+    return new Promise((resolve, reject) => {
+      const server = createServer();
+      server.unref();
+      server.on('error', reject);
+      server.listen(0, () => {
+        const { port } = server.address() as { port: number };
+        server.close(() => {
+          this.allocatedPorts.add(port);
+          resolve(port);
+        });
+      });
+    });
   }
 
   /**

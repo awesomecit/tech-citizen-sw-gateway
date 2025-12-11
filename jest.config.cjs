@@ -27,7 +27,10 @@ module.exports = {
     '/node_modules/',
     '/reference/',
     '\\.integration\\.spec\\.ts$',
+    '\\.integration\\.test\\.ts$', // Added
     '\\.e2e\\.spec\\.ts$',
+    '\\.e2e\\.test\\.ts$', // Added
+    'session-manager\\.spec\\.ts$', // Requires Redis
   ],
 
   // Moduli da trasformare con TypeScript

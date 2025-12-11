@@ -13,7 +13,15 @@
     "outDir": "dist",
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@tech-citizen/test-helpers": ["./packages/test-helpers/src"],
+      "@tech-citizen/auth": ["./packages/auth/src"],
+      "@tech-citizen/cache": ["./packages/cache/src"],
+      "@tech-citizen/events": ["./packages/events/src"],
+      "@tech-citizen/telemetry": ["./packages/telemetry/src"]
+    }
   },
   "include": ["services/**/*.ts", "packages/**/*.ts"],
   "exclude": ["node_modules", "dist"]

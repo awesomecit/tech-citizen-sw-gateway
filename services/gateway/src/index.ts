@@ -77,7 +77,7 @@ export async function plugin(app: FastifyInstance): Promise<void> {
     clientSecret:
       process.env.KEYCLOAK_CLIENT_SECRET ||
       'gateway-client-secret-change-in-production',
-    redisUrl: process.env.REDIS_URL || 'redis://localhost:6380',
+    redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
     enableRoutes: true,
   });
 

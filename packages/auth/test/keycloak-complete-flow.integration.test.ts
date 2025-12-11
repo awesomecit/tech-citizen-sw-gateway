@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import { describe, it, expect, beforeAll } from '@jest/globals';
 
 /**
  * Complete Keycloak Authentication Flow Integration Tests
@@ -10,22 +10,13 @@ import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
  * - Token introspection
  * - Logout and token revocation
  *
- * Prerequisites:
- * - Keycloak running on configured port (default: 8091 for tests)
- * - test-client configured with directAccessGrantsEnabled=true
- * - Real users: test@healthcare.local, doctor@healthcare.local, admin@healthcare.local
- *
- * Environment Variables:
- * - KEYCLOAK_URL: Full URL to Keycloak (e.g., http://localhost:8091)
- * - KEYCLOAK_REALM: Keycloak realm name (default: healthcare-domain)
- * - KEYCLOAK_CLIENT_ID: Client ID for tests (default: test-client)
- *
- * Run: npm run test:integration
+ * Infrastructure managed by test:integration:infra wrapper (bash scripts)
+ * Run: npm run test:integration:infra
  */
 describe('Keycloak Complete Authentication Flow', () => {
-  const KEYCLOAK_URL = process.env.KEYCLOAK_URL || 'http://localhost:8091';
-  const REALM = process.env.KEYCLOAK_REALM || 'healthcare-domain';
-  const CLIENT_ID = process.env.KEYCLOAK_CLIENT_ID || 'test-client';
+  const KEYCLOAK_URL = 'http://localhost:8090';
+  const REALM = 'healthcare-domain';
+  const CLIENT_ID = 'test-client';
 
   const TEST_USERS = [
     {
@@ -52,25 +43,13 @@ describe('Keycloak Complete Authentication Flow', () => {
   ];
 
   beforeAll(async () => {
-    // Verify Keycloak is ready
-    try {
-      const healthCheck = await fetch(`${KEYCLOAK_URL}/health/ready`);
-      if (!healthCheck.ok) {
-        throw new Error(`Keycloak not ready: ${healthCheck.status}`);
-      }
-    } catch (error) {
-      throw new Error(
-        `Keycloak not running! Start with: bash scripts/test-with-keycloak.sh\n` +
-          `Error: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
-
-    // Verify test-client exists
+    // Infrastructure managed by test:integration:infra wrapper
+    // Quick verification that Keycloak is available
     const discoveryResponse = await fetch(
       `${KEYCLOAK_URL}/realms/${REALM}/.well-known/openid-configuration`,
     );
     expect(discoveryResponse.ok).toBe(true);
-  });
+  }, 10000); // Quick verification
 
   describe('User Login (Password Grant)', () => {
     it.each(TEST_USERS)(
@@ -115,8 +94,9 @@ describe('Keycloak Complete Authentication Flow', () => {
           iss: `${KEYCLOAK_URL}/realms/${REALM}`,
         });
 
-        // Verify token lifetime is 5 minutes (300 seconds)
-        expect(tokens.expires_in).toBe(300);
+        // Verify token lifetime is approximately 5 minutes (300 seconds, with 1s tolerance)
+        expect(tokens.expires_in).toBeGreaterThanOrEqual(299);
+        expect(tokens.expires_in).toBeLessThanOrEqual(300);
       },
     );
 

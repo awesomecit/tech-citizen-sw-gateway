@@ -1,47 +1,31 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import Fastify, { FastifyInstance } from 'fastify';
-import { keycloakPlugin, KeycloakPluginOptions } from '../src/keycloak.js';
+import { keycloakPlugin, KeycloakPluginOptions } from '../src/keycloak';
 
 /**
  * Integration Tests for Keycloak OIDC Plugin
  *
- * Prerequisites:
- * - Keycloak running: docker compose -f infrastructure/keycloak/docker-compose.keycloak.yml up -d
- * - Redis running: included in docker-compose.keycloak.yml
- *
- * These tests validate integration with REAL Keycloak instance (no mocks).
+ * Infrastructure managed by test:integration:infra wrapper (bash scripts)
+ * Run: npm run test:integration:infra
  */
 describe('Keycloak Integration (Real Instance)', () => {
   let app: FastifyInstance;
 
   const keycloakConfig: KeycloakPluginOptions = {
-    keycloakUrl: process.env.KEYCLOAK_URL || 'http://localhost:8091',
+    keycloakUrl: 'http://localhost:8090',
     realm: 'healthcare-domain',
     clientId: 'gateway-client',
     clientSecret: 'gateway-client-secret-change-in-production',
     callbackUrl: 'http://localhost:3001/auth/callback',
     redis: {
       host: 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6381', 10),
-      password: process.env.REDIS_PASSWORD || 'dev-redis-password',
+      port: 6379, // Redis da keycloak compose (REDIS_PORT default)
+      password: 'dev-redis-password',
     },
   };
 
   beforeAll(async () => {
-    // Verify Keycloak is running
-    try {
-      const healthCheck = await fetch(
-        `${keycloakConfig.keycloakUrl}/health/ready`,
-      );
-      if (!healthCheck.ok) {
-        throw new Error(`Keycloak health check failed: ${healthCheck.status}`);
-      }
-    } catch (error) {
-      throw new Error(
-        `Keycloak not running! Start with: cd infrastructure/keycloak && docker compose -f docker-compose.keycloak.yml up -d\n` +
-          `Error: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
+    // Infrastructure managed by test:integration:infra wrapper
 
     // Initialize Fastify app with Keycloak plugin
     app = Fastify({ logger: false });
