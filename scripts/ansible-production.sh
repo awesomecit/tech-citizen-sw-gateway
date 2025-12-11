@@ -102,7 +102,9 @@ case "$ACTION" in
   caddy)
     ansible-playbook -i "$INVENTORY_TMP" \
       "$PROJECT_ROOT/ansible/playbooks/setup-caddy.yml" \
-      --limit=production
+      --limit=production \
+      -e "domain=$DOMAIN" \
+      -e "ssl_email=${SSL_EMAIL:-admin@$DOMAIN}"
     ;;
     
   audit)

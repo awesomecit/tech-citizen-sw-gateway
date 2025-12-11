@@ -8,8 +8,51 @@
   gather_facts: yes
 
   vars:
-    caddy_config_dir: '{{ infrastructure_dir }}/caddy'
     caddy_log_dir: /var/log/caddy
+
+  pre_tasks:
+    - name: Set domain from environment if not defined
+      set_fact:
+        domain: "{{ lookup('env', 'DOMAIN') | default('tech-citizen.me', true) }}"
+      when: domain is not defined
+
+    - name: Set environment from group_vars or default
+      set_fact:
+        environment: "{{ environment | default('production') }}"
+
+    - name: Set infrastructure_dir
+      set_fact:
+        infrastructure_dir: /opt/gateway/infrastructure
+
+    - name: Set caddy_config_dir
+      set_fact:
+        caddy_config_dir: '{{ infrastructure_dir }}/caddy'
+
+    - name: Set subdomains
+      set_fact:
+        gateway_domain: 'gateway.{{ domain }}'
+        auth_domain: 'auth.{{ domain }}'
+        grafana_domain: 'grafana.{{ domain }}'
+        app_domain: 'app.{{ domain }}'
+        www_domain: 'www.{{ domain }}'
+
+    - name: Set SSL email
+      set_fact:
+        ssl_email: "{{ lookup('env', 'SSL_EMAIL') | default('admin@' + domain, true) }}"
+
+    - name: Set ssl_staging
+      set_fact:
+        ssl_staging: false
+
+    - name: Set service ports
+      set_fact:
+        gateway_port: 3042
+        keycloak_port: 8090
+        grafana_port: 3001
+        prometheus_port: 19090
+        caddy_http_port: 8080
+        caddy_https_port: 8443
+        caddy_admin_port: 2019
 
   tasks:
     - name: Print Caddy setup banner
@@ -72,7 +115,7 @@
 
     - name: Wait for Caddy to be healthy
       uri:
-        url: 'http://localhost:{{ caddy_http_port }}/health'
+        url: 'http://localhost:18080/health'
         status_code: 200
       register: health_check
       retries: 10
@@ -85,8 +128,8 @@
           ✓ Caddy configured successfully
 
           Configuration: {{ caddy_config_dir }}/Caddyfile
-          Health endpoint: http://localhost:{{ caddy_http_port }}/health
-          Admin API: http://localhost:{{ caddy_admin_port }}
+          Health endpoint: http://localhost:18080/health (external port)
+          Admin API: http://localhost:12019 (external port)
 
           Public URLs (after DNS propagation):
           - https://{{ domain }}
