@@ -19,20 +19,30 @@ describe('Smoke Test: Platformatic Watt Startup', () => {
   const HEALTH_CHECK_URL = 'http://localhost:3042/health';
 
   afterEach(async () => {
-    if (wattProcess) {
+    if (wattProcess && wattProcess.pid) {
       // Remove all listeners to prevent memory leaks
       wattProcess.stdout?.removeAllListeners();
       wattProcess.stderr?.removeAllListeners();
       wattProcess.removeAllListeners();
 
-      // Kill process
-      wattProcess.kill('SIGTERM');
-      await setTimeout(2000); // Grace period
-      if (!wattProcess.killed) {
+      try {
+        // Kill entire process group (negative PID kills all children)
+        // This is necessary because 'npm run dev' spawns child processes
+        process.kill(-wattProcess.pid, 'SIGTERM');
+        await setTimeout(2000); // Grace period for graceful shutdown
+
+        // Force kill if still running
+        try {
+          process.kill(-wattProcess.pid, 'SIGKILL');
+        } catch {
+          // Process already dead, ignore
+        }
+      } catch (error) {
+        // Process already dead or not in process group
         wattProcess.kill('SIGKILL');
       }
 
-      // Ensure process is fully cleaned up
+      // Ensure cleanup
       await setTimeout(500);
     }
   });
@@ -45,14 +55,19 @@ describe('Smoke Test: Platformatic Watt Startup', () => {
     wattProcess = spawn('npm', ['run', 'dev'], {
       cwd: process.cwd(),
       env: { ...process.env, NODE_ENV: 'test' },
+      detached: true,
     });
 
     wattProcess.stdout?.on('data', data => {
-      stdout += data.toString();
+      const output = data.toString();
+      stdout += output;
+      process.stdout.write(output); // Show in real-time
     });
 
     wattProcess.stderr?.on('data', data => {
-      stderr += data.toString();
+      const output = data.toString();
+      stderr += output;
+      process.stderr.write(output); // Show in real-time
     });
 
     wattProcess.on('exit', code => {
@@ -76,6 +91,7 @@ describe('Smoke Test: Platformatic Watt Startup', () => {
     wattProcess = spawn('npm', ['run', 'dev'], {
       cwd: process.cwd(),
       env: { ...process.env, NODE_ENV: 'test' },
+      detached: true,
     });
 
     // Wait for startup
@@ -99,6 +115,7 @@ describe('Smoke Test: Platformatic Watt Startup', () => {
       cwd: process.cwd(),
       env: { ...process.env, NODE_ENV: 'test' },
       stdio: 'pipe',
+      detached: true,
     });
 
     // Capture exit code

@@ -42,9 +42,22 @@ for SERVICE in $SERVICES; do
     keycloak)
       log_info "Starting Keycloak + Redis on ports 8090/6379..."
       cd "$PROJECT_ROOT/infrastructure/keycloak"
-      docker compose -f docker-compose.keycloak.yml up -d --force-recreate --remove-orphans
       
-      # Monitor both containers logs in parallel
+      # Check if already running and healthy
+      if docker ps --filter "name=tech-citizen-keycloak${COMPOSE_ENV_SUFFIX}" --filter "status=running" --format '{{.Names}}' | grep -q "tech-citizen-keycloak${COMPOSE_ENV_SUFFIX}"; then
+        if curl -sf http://localhost:8090/health/ready > /dev/null 2>&1; then
+          log_info "Keycloak already running and healthy, skipping startup"
+          return 0
+        else
+          log_info "Keycloak running but not ready, restarting..."
+          docker compose -f docker-compose.keycloak.yml restart
+        fi
+      else
+        log_info "Starting containers..."
+        docker compose -f docker-compose.keycloak.yml up -d --remove-orphans
+      fi
+      
+      # Monitor both containers logs in parallel (only if starting fresh)
       docker logs -f "tech-citizen-keycloak${COMPOSE_ENV_SUFFIX}" 2>&1 | sed 's/^/[keycloak] /' &
       KEYCLOAK_LOG_PID=$!
       docker logs -f "tech-citizen-redis-session${COMPOSE_ENV_SUFFIX}" 2>&1 | sed 's/^/[redis] /' &
