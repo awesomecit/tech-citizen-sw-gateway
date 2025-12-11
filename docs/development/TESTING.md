@@ -250,7 +250,7 @@ npm run test:integration:infra
 npm run test:e2e:infra
 
 # Full suite (unit → integration → e2e)
-npm run test:all
+npm test
 ```
 
 ### Process Cleanup (E2E)

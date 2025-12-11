@@ -515,7 +515,7 @@ npm run test             # Unit tests (no infrastructure)
 npm run test:unit        # Alias for test
 npm run test:integration:infra # Integration with Keycloak+Redis (auto-managed infra)
 npm run test:e2e:infra   # E2E tests with full stack (auto-managed infra)
-npm run test:all         # Full suite: unit → integration → e2e
+npm test                 # Full suite: unit → integration → e2e
 npm run test:cov         # Coverage report
 
 # Test Infrastructure Scripts

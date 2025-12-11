@@ -193,7 +193,7 @@ ls -1 e2e/features/*.feature
 npm run test              # Unit only (28 tests)
 npm run test:integration:infra  # Integration (37 tests)
 npm run test:e2e:infra    # E2E (3 tests)
-npm run test:all          # All suites (68 tests)
+npm test                  # All suites (68 tests)
 
 # Check coverage
 npm run test:cov          # 70% global

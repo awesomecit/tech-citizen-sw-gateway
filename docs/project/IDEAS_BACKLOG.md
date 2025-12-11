@@ -315,7 +315,7 @@ npm run test:stack:full
 
 #### Fase 4: Testing & Validation (2 ore)
 
-- [ ] Run `npm run test:all` da CI/CD (GitHub Actions?)
+- [ ] Run `npm test` da CI/CD (GitHub Actions?)
 - [ ] Smoke test su `https://staging.tech-citizen.example/health`
 - [ ] Accesso dashboard Grafana
 - [ ] Verifica logs in Loki
