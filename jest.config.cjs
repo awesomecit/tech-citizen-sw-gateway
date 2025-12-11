@@ -37,6 +37,11 @@ module.exports = {
   extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^@tech-citizen/test-helpers$': '<rootDir>/packages/test-helpers/src/index.ts',
+    '^@tech-citizen/auth$': '<rootDir>/packages/auth/src/index.ts',
+    '^@tech-citizen/cache$': '<rootDir>/packages/cache/src/index.ts',
+    '^@tech-citizen/events$': '<rootDir>/packages/events/src/index.ts',
+    '^@tech-citizen/telemetry$': '<rootDir>/packages/telemetry/src/index.ts',
   },
   transform: {
     '^.+\\.ts$': [
