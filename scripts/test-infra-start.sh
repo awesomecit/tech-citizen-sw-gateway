@@ -47,7 +47,7 @@ for SERVICE in $SERVICES; do
       if docker ps --filter "name=tech-citizen-keycloak${COMPOSE_ENV_SUFFIX}" --filter "status=running" --format '{{.Names}}' | grep -q "tech-citizen-keycloak${COMPOSE_ENV_SUFFIX}"; then
         if curl -sf http://localhost:8090/health/ready > /dev/null 2>&1; then
           log_info "Keycloak already running and healthy, skipping startup"
-          return 0
+          continue  # Skip to next service
         else
           log_info "Keycloak running but not ready, restarting..."
           docker compose -f docker-compose.keycloak.yml restart
