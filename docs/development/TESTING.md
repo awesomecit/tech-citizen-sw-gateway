@@ -182,4 +182,110 @@ Se hai risposto **sì** a qualcuna, hai un potenziale flaky test.
 
 ---
 
-_"Un test che fallisce a caso è peggio di nessun test."_
+## Test Infrastructure (Dicembre 2025)
+
+### Hybrid Bash/Node Architecture
+
+L'infrastruttura di test utilizza un approccio ibrido:
+
+- **Bash scripts** gestiscono Docker Compose (orchestrazione container)
+- **Node wrappers** espongono API per test TypeScript/Jest
+- **Isolamento completo** tra ambienti test/dev tramite naming convention
+
+### Container Isolation Strategy
+
+#### Environment Naming
+
+```bash
+# Test environment
+COMPOSE_ENV_SUFFIX="-test"           # Container suffix
+COMPOSE_PROJECT_NAME="keycloak-test" # Network/volume prefix
+
+# Created resources:
+tech-citizen-keycloak-test           # Container
+tech-citizen-redis-session-test      # Container
+keycloak-test_tech-citizen-network   # Network
+keycloak-test_redis-session-data     # Volume
+```
+
+#### Development environment rimane intatto
+
+```bash
+# No suffix/prefix
+tech-citizen-keycloak                # Container
+tech-citizen-redis-session           # Container
+keycloak_tech-citizen-network        # Network
+keycloak_redis-session-data          # Volume
+```
+
+### Idempotent Startup
+
+Lo script `test-infra-start.sh` è idempotente:
+
+1. **Check**: Verifica se container già running e healthy
+2. **Skip**: Se già pronto, evita restart inutili
+3. **Restart**: Solo se running ma not healthy
+4. **Create**: Solo se non esistente
+
+```bash
+# Riutilizza container esistente se healthy
+if docker ps --filter "name=tech-citizen-keycloak-test" | grep -q "keycloak-test"; then
+  if curl -sf http://localhost:8090/health/ready > /dev/null; then
+    echo "Already healthy, skipping..."
+    continue
+  fi
+fi
+```
+
+### Test Commands
+
+```bash
+# Unit tests (no infrastructure)
+npm run test:unit
+
+# Integration tests (with Keycloak + Redis)
+npm run test:integration:infra
+
+# E2E tests (with Keycloak + Redis + Gateway)
+npm run test:e2e:infra
+
+# Full suite (unit → integration → e2e)
+npm run test:all
+```
+
+### Process Cleanup (E2E)
+
+I test E2E usano **process group kill** per gestire correttamente la catena `npm → node`:
+
+```typescript
+// Spawn con process group separato
+wattProcess = spawn('npm', ['run', 'dev'], {
+  detached: true, // Crea process group
+  env: { NODE_ENV: 'test' },
+});
+
+// Kill di tutto il gruppo (npm + node children)
+process.kill(-wattProcess.pid, 'SIGTERM'); // Negative PID kills group
+```
+
+### Real-time Logging
+
+I log di infrastructure e test sono visibili in real-time grazie a `process.stdout.write()`:
+
+```typescript
+wattProcess.stdout?.on('data', data => {
+  const output = data.toString();
+  process.stdout.write(output); // No buffering
+});
+```
+
+### File Locations
+
+- **Bash orchestration**: `scripts/test-infra-start.sh`, `scripts/test-infra-stop.sh`
+- **Docker Compose**: `infrastructure/keycloak/docker-compose.keycloak.yml`
+- **E2E tests**: `e2e/smoke/startup.test.ts`
+- **Jest configs**: `jest.config.cjs`, `jest.integration.config.cjs`, `jest.e2e.config.cjs`
+
+---
+
+> **"Un test che fallisce a caso è peggio di nessun test."**

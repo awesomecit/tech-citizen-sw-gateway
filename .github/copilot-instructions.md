@@ -510,11 +510,17 @@ npm run dev              # Watt dev mode with auto-reload
 npm run start            # Production build
 npm run build            # TypeScript compilation
 
-# Testing
-npm run test             # Unit tests
-npm run test:integration # Integration tests (requires .env.test)
-npm run test:e2e         # E2E tests (BDD scenarios)
+# Testing (Hybrid Bash/Node Infrastructure - Dec 2025)
+npm run test             # Unit tests (no infrastructure)
+npm run test:unit        # Alias for test
+npm run test:integration:infra # Integration with Keycloak+Redis (auto-managed infra)
+npm run test:e2e:infra   # E2E tests with full stack (auto-managed infra)
+npm run test:all         # Full suite: unit → integration → e2e
 npm run test:cov         # Coverage report
+
+# Test Infrastructure Scripts
+bash scripts/test-infra-start.sh keycloak  # Start Keycloak + Redis (test environment)
+bash scripts/test-infra-stop.sh keycloak   # Stop and cleanup test containers
 
 # Quality
 npm run lint             # ESLint with auto-fix
