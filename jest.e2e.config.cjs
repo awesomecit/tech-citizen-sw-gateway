@@ -46,8 +46,17 @@ module.exports = {
     '^@tech-citizen/auth$': '<rootDir>/packages/auth/src/index.ts',
   },
 
-  // Coverage disabilitato per E2E (focus sulla funzionalità)
-  collectCoverage: false,
+  // Coverage abilitato per E2E (verificare copertura end-to-end)
+  collectCoverage: true,
+  collectCoverageFrom: [
+    'packages/*/src/**/*.ts',
+    'services/*/src/**/*.ts',
+    '!**/*.d.ts',
+    '!**/node_modules/**',
+    '!**/test/**',
+  ],
+  coverageDirectory: 'coverage/e2e',
+  coverageReporters: ['text', 'lcov', 'html'],
 
   // Ignora i moduli node_modules tranne testcontainers
   transformIgnorePatterns: ['node_modules/(?!(testcontainers)/)'],

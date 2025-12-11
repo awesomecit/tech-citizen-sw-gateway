@@ -57,7 +57,16 @@ module.exports = {
   },
 
   // Coverage per test integration
-  collectCoverage: false, // Disabilitato per performance durante development
+  collectCoverage: true,
+  collectCoverageFrom: [
+    'packages/*/src/**/*.ts',
+    'services/*/src/**/*.ts',
+    '!**/*.d.ts',
+    '!**/node_modules/**',
+    '!**/test/**',
+  ],
+  coverageDirectory: 'coverage/integration',
+  coverageReporters: ['text', 'lcov', 'html'],
 
   // Ignora i moduli node_modules tranne testcontainers e get-port (ESM), trasforma workspace packages
   transformIgnorePatterns: [
