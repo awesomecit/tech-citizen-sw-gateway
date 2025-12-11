@@ -1,0 +1,35 @@
+{
+  "name": "@tech-citizen/test-helpers",
+  "version": "1.0.0",
+  "description": "Test utilities with automatic environment setup/teardown",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": [
+    "test",
+    "helpers",
+    "setup",
+    "teardown",
+    "integration"
+  ],
+  "dependencies": {
+    "@jest/globals": "^29.7.0",
+    "dockerode": "^4.0.2",
+    "get-port": "^7.1.0"
+  },
+  "devDependencies": {
+    "@types/dockerode": "^3.3.31",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}

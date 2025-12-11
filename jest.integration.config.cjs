@@ -15,9 +15,8 @@ module.exports = {
 
   // Pattern dei file di test di integrazione
   testMatch: [
-    '<rootDir>/test/**/*.integration.spec.ts',
-    '<rootDir>/test/**/*.test.ts',
-    '<rootDir>/src/**/*.integration.spec.ts',
+    '<rootDir>/packages/**/test/**/*.integration.test.ts',
+    '<rootDir>/services/**/test/**/*.integration.test.ts',
   ],
 
   // Moduli da trasformare con TypeScript

@@ -37,8 +37,14 @@
     "test:integration:safe": "bash scripts/test-env-guard.sh integration",
     "test:e2e": "jest --config ./jest.e2e.config.cjs",
     "test:e2e:safe": "bash scripts/test-env-guard.sh e2e",
+    "test:stack": "bash scripts/test-stack.sh",
+    "test:environments": "bash scripts/test-environments.sh",
     "verify": "npm run format:check && npm run lint:check && npm run test && npm run build",
     "verify:full": "npm run verify && npm run test:cov",
+    "// ==== Environment ====": "",
+    "env:validate": "bash scripts/validate-env.sh",
+    "env:test": "bash scripts/test-environments.sh",
+    "env:check": "npm run env:validate && npm run env:test",
     "// ==== Infrastructure ====": "",
     "infra:start": "bash scripts/infra-start.sh development",
     "infra:start:test": "bash scripts/infra-start.sh test",
@@ -46,10 +52,10 @@
     "infra:stop:test": "bash scripts/infra-stop.sh test",
     "infra:clean": "bash scripts/infra-stop.sh development volumes",
     "// ==== Deployment ====": "",
-    "staging:deploy": "bash scripts/deploy-staging.sh",
-    "staging:start": "docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d",
-    "staging:stop": "docker compose -f docker-compose.yml -f docker-compose.staging.yml down",
-    "staging:logs": "docker compose -f docker-compose.yml -f docker-compose.staging.yml logs -f",
+    "prod:start": "docker compose -f docker-compose.prod.yml up -d",
+    "prod:stop": "docker compose -f docker-compose.prod.yml down",
+    "prod:logs": "docker compose -f docker-compose.prod.yml logs -f",
+    "prod:build": "docker compose -f docker-compose.prod.yml build",
     "// ==== Ansible ====": "",
     "ansible": "bash scripts/ansible.sh",
     "ansible:ping": "bash scripts/ansible.sh staging ping && bash scripts/ansible.sh production ping",
@@ -90,7 +96,7 @@
   },
   "lint-staged": {
     "*.{ts,js}": [
-      "eslint --fix",
+      "eslint --fix --ignore-pattern 'packages/test-helpers/**'",
       "prettier --write"
     ],
     "*.{json,md,yml}": [

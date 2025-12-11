@@ -41,7 +41,7 @@ npm run test:e2e           # End-to-end (BDD scenarios)
 - ✅ **Template-based config** - envsubst for runtime configuration
 - ✅ **Quality gates** - ESLint, Prettier, Husky, Commitlint
 - ✅ **Security** - Secret scanning, npm audit, vulnerability checks
-- ✅ **Testing** - Unit (Jest), Integration, E2E (Cucumber)
+- ✅ **Testing** - Auto setup/teardown, parallel execution, Docker integration
 - ✅ **Observability** - Prometheus metrics, Loki logs, Tempo traces
 - ✅ **Git workflow** - Trunk-based development
 
@@ -151,16 +151,15 @@ npm audit                # Dependency vulnerabilities
 ### Infrastructure
 
 ```bash
-# Development
-docker compose up -d                    # Start infrastructure
-docker compose down                     # Stop infrastructure
-
-# Staging deployment
-npm run staging:deploy                  # Full deploy to staging sim
-npm run staging:logs                    # View logs
-
-# Testing
+# Test Environment
+npm run test:integration    # Uses docker-compose.test.yml (ephemeral)
 KEEP_CONTAINERS=true npm run test:integration  # Debug mode
+
+# Production Deployment
+npm run prod:build          # Build images
+npm run prod:start          # Start production stack
+npm run prod:logs           # View logs
+npm run prod:stop           # Shutdown
 ```
 
 ### Release
@@ -185,14 +184,17 @@ npm run release          # Semantic release (CI/CD)
 - **E2E Tests**: Cucumber/Gherkin scenarios (e2e/features/)
 - **Coverage Target**: 80%+ (TBD)
 
-## 🌍 Environments
+## 🌍 Environments (Simplified Strategy)
 
-| Environment | Purpose           | Config File      | Docker Compose                                  |
-| ----------- | ----------------- | ---------------- | ----------------------------------------------- |
-| Development | Local dev         | .env.development | docker-compose.yml                              |
-| Test        | CI/CD testing     | .env.test        | docker-compose.yml + docker-compose.test.yml    |
-| Staging     | Deploy simulation | .env.staging     | docker-compose.yml + docker-compose.staging.yml |
-| Production  | Live (future)     | .env.production  | TBD (Kubernetes/Docker Swarm)                   |
+**XP/Trunk-Based Development** - 2 environments only:
+
+| Environment | Purpose                  | Config File               | Docker Compose          | Lifecycle  |
+| ----------- | ------------------------ | ------------------------- | ----------------------- | ---------- |
+| Test        | Unit/Integration testing | .env.test                 | docker-compose.test.yml | Ephemeral  |
+| Production  | Live deployment          | .env.production (not git) | docker-compose.prod.yml | Persistent |
+
+**Development mode**: `npm run dev` uses localhost services (no Docker isolation)  
+**Rationale**: See [ADR-0004](docs/architecture/decisions/0004-simplified-environment-strategy.md)
 
 ## 🤝 Contributing
 

@@ -1,7 +1,7 @@
 {
   "$schema": "./features.schema.json",
   "version": "1.5.0",
-  "lastUpdated": "2025-12-10T15:53:22.328Z",
+  "lastUpdated": "2025-12-11T14:28:53.548Z",
   "project": {
     "name": "tech-citizen-sw-gateway",
     "repository": "github.com/awesomecit/tech-citizen-sw-gateway"
@@ -9,7 +9,7 @@
   "release": {
     "current": "1.5.0",
     "nextSuggested": "1.6.0",
-    "lastCommit": "511af26",
+    "lastCommit": "e65c7e9",
     "unreleased": {
       "feat": 1,
       "fix": 0,
@@ -113,6 +113,14 @@
           "subject": "implement US-040 enhanced session management",
           "timestamp": "2025-12-10T13:36:40.000Z",
           "userStory": "US-040"
+        },
+        {
+          "hash": "e65c7e9",
+          "type": "test",
+          "scope": "auth",
+          "subject": "add configurable Keycloak integration tests",
+          "timestamp": "2025-12-10T15:53:22.000Z",
+          "userStory": null
         }
       ],
       "userStories": {
@@ -509,6 +517,14 @@
           "subject": "implement US-040 enhanced session management",
           "timestamp": "2025-12-10T13:36:40.000Z",
           "userStory": "US-040"
+        },
+        {
+          "hash": "e65c7e9",
+          "type": "test",
+          "scope": "auth",
+          "subject": "add configurable Keycloak integration tests",
+          "timestamp": "2025-12-10T15:53:22.000Z",
+          "userStory": null
         }
       ]
     }
