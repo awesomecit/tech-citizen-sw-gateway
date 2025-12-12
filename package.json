@@ -90,7 +90,7 @@
   },
   "lint-staged": {
     "*.{ts,js}": [
-      "eslint --fix --ignore-pattern 'packages/test-helpers/**' --ignore-pattern '.tap/**'",
+      "eslint --fix --ignore-pattern '.tap/**'",
       "prettier --write"
     ],
     "*.{json,md,yml}": [

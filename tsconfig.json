@@ -16,7 +16,6 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@tech-citizen/test-helpers": ["./packages/test-helpers/src"],
       "@tech-citizen/auth": ["./packages/auth/src"],
       "@tech-citizen/cache": ["./packages/cache/src"],
       "@tech-citizen/events": ["./packages/events/src"],
