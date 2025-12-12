@@ -1,62 +1,49 @@
-// jest.integration.config.js
-module.exports = {
-  displayName: 'Integration Tests',
-  testEnvironment: 'node',
+// jest.integration.config.cjs - Integration tests with real infrastructure
+// Extends jest.preset.cjs for shared configuration (DRY principle)
+const preset = require('./jest.preset.cjs');
 
-  // Sequential execution to avoid DB conflicts
+module.exports = {
+  ...preset,
+
+  // Display name to identify test suite
+  displayName: 'Integration Tests',
+
+  // Sequential execution to avoid resource conflicts (Docker, ports, DB)
   maxWorkers: 1,
 
-  // Reasonable timeout for DB operations
-  testTimeout: 30000,
-
-  // Detect issues, don't hide them
-  detectOpenHandles: true,
-  forceExit: false, // Fail if cleanup is incomplete
+  // Longer timeout for container startup and network operations
+  testTimeout: 120000, // 2 minutes (was 30s, increased for Keycloak/Redis startup)
 
   // Pattern dei file di test di integrazione
   testMatch: [
     '<rootDir>/packages/**/test/**/*.integration.test.ts',
+    '<rootDir>/packages/**/test/**/*.integration.spec.ts',
     '<rootDir>/services/**/test/**/*.integration.test.ts',
+    '<rootDir>/services/**/test/**/*.integration.spec.ts',
   ],
 
-  // Moduli da trasformare con TypeScript
-  preset: 'ts-jest',
+  // Setup files commented out - will be created in US-051 (Testcontainers helpers)
+  // setupFilesAfterEnv: ['<rootDir>/test/setup/integration-setup.ts'],
 
-  // ESM support (same as jest.config.cjs)
-  extensionsToTreatAsEsm: ['.ts'],
-  transform: {
-    '^.+\\.ts$': [
-      'ts-jest',
-      {
-        useESM: true,
-        tsconfig: {
-          module: 'ESNext',
-          moduleResolution: 'node',
-        },
-      },
-    ],
-  },
+  // Global setup/teardown commented out - will be created in US-051
+  // globalSetup: '<rootDir>/test/setup/global-setup.ts',
+  // globalTeardown: '<rootDir>/test/setup/global-teardown.ts',
 
-  // Setup files commented out - create later if needed
-  // setupFilesAfterEnv: ['<rootDir>/test/setup.integration.ts'],
-
-  // Global setup e teardown commented out - create later if needed
-  // globalSetup: '<rootDir>/test/globalSetup.integration.ts',
-  // globalTeardown: '<rootDir>/test/globalTeardown.integration.ts',
-
-  // Mapping dei moduli per import relativi
+  // Module aliases (extend preset, add workspace-specific)
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1', // Map .js imports to .ts
+    ...preset.moduleNameMapper,
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@test/(.*)$': '<rootDir>/test/$1',
-    '^@tech-citizen/test-helpers$': '<rootDir>/packages/test-helpers/src/index.ts',
+    '^@tech-citizen/test-helpers$':
+      '<rootDir>/packages/test-helpers/src/index.ts',
     '^@tech-citizen/auth$': '<rootDir>/packages/auth/src/index.ts',
     '^@tech-citizen/cache$': '<rootDir>/packages/cache/src/index.ts',
     '^@tech-citizen/events$': '<rootDir>/packages/events/src/index.ts',
-    '^@tech-citizen/telemetry$': '<rootDir>/packages/telemetry/src/index.ts',
+    '^@tech-citizen/telemetry$':
+      '<rootDir>/packages/telemetry/src/index.ts',
   },
 
-  // Coverage per test integration
+  // Coverage for integration tests (separate from unit coverage)
   collectCoverage: true,
   collectCoverageFrom: [
     'packages/*/src/**/*.ts',
@@ -68,13 +55,12 @@ module.exports = {
   coverageDirectory: 'coverage/integration',
   coverageReporters: ['text', 'lcov', 'html'],
 
-  // Ignora i moduli node_modules tranne testcontainers e get-port (ESM), trasforma workspace packages
+  // Transform workspace packages and Testcontainers (ESM modules)
   transformIgnorePatterns: [
     'node_modules/(?!(testcontainers|get-port)/)',
-    '!<rootDir>/packages/', // Transform workspace packages
   ],
 
-  // Environment variables per test
+  // Environment variables for test execution
   testEnvironmentOptions: {
     NODE_ENV: 'test',
   },
