@@ -79,9 +79,23 @@ export class ComposeGatewayUseCase {
         return; // Should never happen, but safety check
       }
 
+      const duration = context.getElapsedTime();
+
+      // Structured logging for future Loki export
+      request.log.info(
+        {
+          requestId: context.requestId,
+          method: context.method,
+          url: context.url,
+          statusCode: reply.statusCode,
+          duration,
+          userId: (request as { user?: { sub?: string } }).user?.sub,
+        },
+        'HTTP request completed',
+      );
+
       // Only record if metrics collector is enabled
       if (this.deps.metricsCollector.isEnabled()) {
-        const duration = context.getElapsedTime();
         this.deps.metricsCollector.recordRequest(
           context,
           reply.statusCode,

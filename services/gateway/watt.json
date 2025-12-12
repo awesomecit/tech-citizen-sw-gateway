@@ -4,7 +4,15 @@
     "hostname": "{PLT_SERVER_HOSTNAME}",
     "port": "{PORT}",
     "logger": {
-      "level": "info"
+      "level": "{LOG_LEVEL}",
+      "transport": {
+        "target": "pino-pretty",
+        "options": {
+          "translateTime": "HH:MM:ss Z",
+          "ignore": "pid,hostname",
+          "colorize": true
+        }
+      }
     }
   },
   "plugins": {
