@@ -23,7 +23,6 @@
     "integration"
   ],
   "dependencies": {
-    "@jest/globals": "^29.7.0",
     "dockerode": "^4.0.2",
     "get-port": "^7.1.0"
   },
