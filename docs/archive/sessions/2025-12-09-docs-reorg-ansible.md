@@ -74,13 +74,13 @@ docs/
 
 **Metrics**:
 
-| Metric         | Before | After | Delta |
-| -------------- | -----: | ----: | ----: |
-| Total files    |     27 |    20 |    -7 |
-| Files in root  |     13 |     5 |    -8 |
-| Duplications   |      4 |     0 |    -4 |
-| Findability    |    3/5 |   5/5 |    +2 |
-| Onboarding time|  ~60m  | ~15m  |  -75% |
+| Metric          | Before | After | Delta |
+| --------------- | -----: | ----: | ----: |
+| Total files     |     27 |    20 |    -7 |
+| Files in root   |     13 |     5 |    -8 |
+| Duplications    |      4 |     0 |    -4 |
+| Findability     |    3/5 |   5/5 |    +2 |
+| Onboarding time |   ~60m |  ~15m |  -75% |
 
 ---
 
