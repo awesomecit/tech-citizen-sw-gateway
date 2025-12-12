@@ -8,6 +8,7 @@ import {
 } from 'prom-client';
 import { randomUUID } from 'crypto';
 import auth from '@tech-citizen/auth';
+import { loadConfig, type GatewayConfig } from './config.js';
 
 const authPlugin = auth.default || auth;
 
@@ -65,26 +66,47 @@ function setupHooks(app: FastifyInstance): void {
   });
 }
 
-export async function plugin(app: FastifyInstance): Promise<void> {
+export interface PluginOptions {
+  config?: Partial<GatewayConfig>;
+}
+
+export async function plugin(
+  app: FastifyInstance,
+  opts: PluginOptions = {},
+): Promise<void> {
+  // Load configuration (opts.config overrides env vars)
+  const config = loadConfig(opts.config);
+
   await app.register(sensible);
   setupHooks(app);
 
-  // Register authentication plugin (Keycloak OIDC + JWT)
-  await app.register(authPlugin, {
-    keycloakUrl: process.env.KEYCLOAK_URL || 'http://localhost:8090',
-    realm: process.env.KEYCLOAK_REALM || 'healthcare-domain',
-    clientId: process.env.KEYCLOAK_CLIENT_ID || 'gateway-client',
-    clientSecret:
-      process.env.KEYCLOAK_CLIENT_SECRET ||
-      'gateway-client-secret-change-in-production',
-    redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
-    enableRoutes: true,
-  });
+  // Feature: Authentication (Keycloak OIDC + JWT + Redis sessions)
+  if (config.features.auth) {
+    await app.register(authPlugin, {
+      keycloakUrl: config.keycloakUrl!,
+      realm: config.realm || 'healthcare-domain',
+      clientId: config.clientId || 'gateway-client',
+      clientSecret: config.clientSecret || 'gateway-client-secret-change-in-production',
+      redisUrl: `redis://${config.redis?.host}:${config.redis?.port}`,
+      enableRoutes: true,
+    });
+  } else {
+    // Auth disabled: mock authenticate decorator
+    if (!app.hasDecorator('authenticate')) {
+      app.decorate('authenticate', async () => {
+        // No-op when auth feature disabled
+      });
+    }
+  }
 
   // Routes
   registerHealthRoute(app);
   registerProtectedRoute(app);
-  registerMetricsRoute(app);
+  
+  // Feature: Telemetry (Prometheus metrics)
+  if (config.features.telemetry) {
+    registerMetricsRoute(app);
+  }
 }
 
 function registerHealthRoute(app: FastifyInstance): void {

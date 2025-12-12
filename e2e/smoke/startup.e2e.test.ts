@@ -1,0 +1,143 @@
+/**
+ * Smoke Test: Gateway Startup con Platformatic Watt
+ *
+ * Verifica che il gateway si avvii correttamente in modalità production
+ * con Platformatic Watt (non solo Fastify standalone).
+ *
+ * Questo test previene regressioni come:
+ * - Signal handler conflicts (SIGTERM/SIGINT)
+ * - Shutdown timeout loops
+ * - Plugin registration failures in Watt context
+ */
+
+import { spawn, ChildProcess } from 'child_process';
+import { setTimeout } from 'timers/promises';
+
+describe('Smoke Test: Platformatic Watt Startup', () => {
+  let wattProcess: ChildProcess;
+  const STARTUP_TIMEOUT = 15000; // 15s per startup
+  const HEALTH_CHECK_URL = 'http://localhost:3042/health';
+
+  afterEach(async () => {
+    if (wattProcess && wattProcess.pid) {
+      // Remove all listeners to prevent memory leaks
+      wattProcess.stdout?.removeAllListeners();
+      wattProcess.stderr?.removeAllListeners();
+      wattProcess.removeAllListeners();
+
+      try {
+        // Kill entire process group (negative PID kills all children)
+        // This is necessary because 'npm run dev' spawns child processes
+        process.kill(-wattProcess.pid, 'SIGTERM');
+        await setTimeout(2000); // Grace period for graceful shutdown
+
+        // Force kill if still running
+        try {
+          process.kill(-wattProcess.pid, 'SIGKILL');
+        } catch {
+          // Process already dead, ignore
+        }
+      } catch (error) {
+        // Process already dead or not in process group
+        wattProcess.kill('SIGKILL');
+      }
+
+      // Ensure cleanup
+      await setTimeout(500);
+    }
+  });
+
+  it('should start without crash loop', async () => {
+    let stdout = '';
+    let stderr = '';
+    let crashed = false;
+
+    wattProcess = spawn('npm', ['run', 'dev'], {
+      cwd: process.cwd(),
+      env: { ...process.env, NODE_ENV: 'test' },
+      detached: true,
+    });
+
+    wattProcess.stdout?.on('data', data => {
+      const output = data.toString();
+      stdout += output;
+      process.stdout.write(output); // Show in real-time
+    });
+
+    wattProcess.stderr?.on('data', data => {
+      const output = data.toString();
+      stderr += output;
+      process.stderr.write(output); // Show in real-time
+    });
+
+    wattProcess.on('exit', code => {
+      if (code !== 0 && code !== null) {
+        crashed = true;
+      }
+    });
+
+    // Wait for startup
+    await setTimeout(STARTUP_TIMEOUT);
+
+    // Verify no crash loop
+    expect(crashed).toBe(false);
+    expect(stdout).toContain('Auth plugin registered');
+    expect(stdout).toContain('Platformatic is now listening');
+    expect(stderr).not.toContain('Graceful shutdown timeout');
+    expect(stderr).not.toContain('unexpectedly exited');
+  }, 20000);
+
+  it('should respond to health check', async () => {
+    wattProcess = spawn('npm', ['run', 'dev'], {
+      cwd: process.cwd(),
+      env: { ...process.env, NODE_ENV: 'test' },
+      detached: true,
+    });
+
+    // Wait for startup
+    await setTimeout(STARTUP_TIMEOUT);
+
+    // Health check
+    const response = await fetch(HEALTH_CHECK_URL);
+    expect(response.ok).toBe(true);
+
+    const data = await response.json();
+    expect(data).toMatchObject({
+      status: 'ok',
+      service: 'api-gateway',
+    });
+  }, 20000);
+
+  it('should gracefully shutdown on SIGTERM', async () => {
+    let exitCode: number | null = null;
+
+    wattProcess = spawn('npm', ['run', 'dev'], {
+      cwd: process.cwd(),
+      env: { ...process.env, NODE_ENV: 'test' },
+      stdio: 'pipe',
+      detached: true,
+    });
+
+    // Capture exit code
+    wattProcess.on('exit', code => {
+      exitCode = code;
+    });
+
+    // Wait for startup
+    await setTimeout(STARTUP_TIMEOUT);
+
+    // Send SIGTERM
+    wattProcess.kill('SIGTERM');
+
+    // Wait for process to exit (max 5s)
+    let waited = 0;
+    while (exitCode === null && waited < 5000) {
+      await setTimeout(100);
+      waited += 100;
+    }
+
+    // Verify graceful shutdown (exit code 0, null, or 143 from SIGTERM are acceptable)
+    // Exit code 1 would indicate a crash
+    expect(exitCode).not.toBe(1);
+  }, 25000);
+});
