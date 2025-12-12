@@ -1,4 +1,4 @@
-# [EPIC-014] US-050: Jest Integration Config Creation
+# [EPIC-008] US-057: Jest Integration Config Creation
 
 **Data**: 2025-12-12  
 **Durata effettiva**: 10 minuti  
@@ -41,7 +41,7 @@ Feature: Jest Integration Config
 
 ## Pre-requisiti
 
-- [x] jest.preset.cjs exists (US-050 completed)
+- [x] jest.preset.cjs exists (US-057 completed)
 - [x] Root jest.config.cjs extends preset
 - [ ] Verify jest.integration.config.cjs doesn't exist yet
 - [ ] Check package.json for test:integration script
@@ -93,11 +93,11 @@ module.exports = {
   // Run serially to avoid resource contention (Docker, ports, etc.)
   maxWorkers: 1,
 
-  // Global setup/teardown for Testcontainers (to be created in US-051)
+  // Global setup/teardown for Testcontainers (to be created in US-058)
   // globalSetup: '<rootDir>/test/setup/global-setup.ts',
   // globalTeardown: '<rootDir>/test/setup/global-teardown.ts',
 
-  // Setup file for each test suite (to be created in US-051)
+  // Setup file for each test suite (to be created in US-058)
   // setupFilesAfterEnv: ['<rootDir>/test/setup/integration-setup.ts'],
 
   // Coverage for integration tests (optional, usually combined with unit)
@@ -153,7 +153,7 @@ feat(test): add jest integration config extending preset
 - Created jest.integration.config.cjs extending jest.preset.cjs
 - Integration-specific settings: 120s timeout, maxWorkers:1, serial execution
 - testMatch pattern: *.integration.spec.ts in packages/services
-- Global setup/teardown commented (US-051: Testcontainers)
+- Global setup/teardown commented (US-058: Testcontainers)
 - Maintains existing test:integration:infra script (bash wrapper)
 
 Verified:
@@ -161,9 +161,9 @@ Verified:
 ✅ No test duplication with unit config
 ✅ Pattern matches integration test convention
 
-Next: Create Testcontainers helpers (US-051)
+Next: Create Testcontainers helpers (US-058)
 
-Refs: EPIC-014, US-050
+Refs: EPIC-008, US-057
 ```
 
 ## Lessons Learned
@@ -176,11 +176,11 @@ Refs: EPIC-014, US-050
 
 ## Next Steps
 
-- [ ] Create test/setup/global-setup.ts (US-051)
-- [ ] Create test/setup/global-teardown.ts (US-051)
-- [ ] Uncomment globalSetup/teardown when US-051 complete
+- [ ] Create test/setup/global-setup.ts (US-058)
+- [ ] Create test/setup/global-teardown.ts (US-058)
+- [ ] Uncomment globalSetup/teardown when US-058 complete
 
 ---
 
 **Completed**: N/A  
-**Next Scenario**: [Testcontainers helpers (US-051)](./2025-12-12-EPIC014-US051-container-manager.md)
+**Next Scenario**: [Testcontainers helpers (US-058)](./2025-12-12-EPIC014-US051-container-manager.md)

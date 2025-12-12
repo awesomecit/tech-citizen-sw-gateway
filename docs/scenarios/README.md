@@ -113,7 +113,7 @@ feat(test): add jest preset for shared config
 - Root jest.config.cjs extends preset
 - Removed duplicate config in packages
 
-Refs: EPIC-014, US-050
+Refs: EPIC-008, US-057
 \```
 
 ## Lessons Learned
@@ -135,30 +135,30 @@ Refs: EPIC-014, US-050
 
 ## Indice Scenari
 
-### EPIC-014: Test Architecture Reset
+### EPIC-008: Test Architecture Reset
 
-#### US-050: Jest Configuration Consolidation
+#### US-057: Jest Configuration Consolidation
 
 - [ ] `2025-12-12-EPIC014-US050-jest-preset-creation.md` - Creare jest.preset.cjs
 - [ ] `2025-12-12-EPIC014-US050-root-config-update.md` - Aggiornare jest.config.cjs root
 - [ ] `2025-12-12-EPIC014-US050-integration-config.md` - Creare jest.integration.config.cjs
 - [ ] `2025-12-12-EPIC014-US050-package-migration.md` - Migrare config package/auth
 
-#### US-051: Test Helpers Refactoring
+#### US-058: Test Helpers Refactoring
 
 - [ ] `2025-12-12-EPIC014-US051-container-manager.md` - ContainerManager per Testcontainers
 - [ ] `2025-12-12-EPIC014-US051-redis-mock.md` - In-memory Redis mock
 - [ ] `2025-12-12-EPIC014-US051-port-allocator.md` - Random port allocation
 - [ ] `2025-12-12-EPIC014-US051-test-app-builder.md` - Fastify test instance builder
 
-#### US-052: Package Auth Test Migration
+#### US-059: Package Auth Test Migration
 
 - [ ] `2025-12-12-EPIC014-US052-directory-structure.md` - Creare unit/integration/fixtures
 - [ ] `2025-12-12-EPIC014-US052-unit-migration.md` - Migrare test unitari
 - [ ] `2025-12-12-EPIC014-US052-integration-migration.md` - Migrare test integration
 - [ ] `2025-12-12-EPIC014-US052-fixtures-creation.md` - Creare fixtures riutilizzabili
 
-#### US-053: E2E Test Setup with Cucumber
+#### US-060: E2E Test Setup with Cucumber
 
 - [ ] `2025-12-12-EPIC014-US053-cucumber-install.md` - Installare @cucumber/cucumber
 - [ ] `2025-12-12-EPIC014-US053-cucumber-config.md` - Configurare cucumber.cjs
@@ -166,21 +166,21 @@ Refs: EPIC-014, US-050
 - [ ] `2025-12-12-EPIC014-US053-feature-migration.md` - Migrare feature esistenti
 - [ ] `2025-12-12-EPIC014-US053-step-definitions.md` - Creare step definitions
 
-### EPIC-015: Woodpecker CI Setup
+### EPIC-009: Woodpecker CI Setup
 
-#### US-054: Woodpecker Server Setup
+#### US-061: Woodpecker Server Setup
 
 - [ ] `2025-12-12-EPIC015-US054-docker-compose.md` - docker-compose.woodpecker.yml
 - [ ] `2025-12-12-EPIC015-US054-oauth-config.md` - Configurare GitHub OAuth
 - [ ] `2025-12-12-EPIC015-US054-caddy-integration.md` - Aggiungere a Caddy reverse proxy
 
-#### US-055: CI Pipeline Definition
+#### US-062: CI Pipeline Definition
 
 - [ ] `2025-12-12-EPIC015-US055-pipeline-yaml.md` - Creare .woodpecker.yml
 - [ ] `2025-12-12-EPIC015-US055-services-config.md` - Configurare services (Keycloak, Redis)
 - [ ] `2025-12-12-EPIC015-US055-secrets-setup.md` - Configurare secrets
 
-#### US-056: Ansible Integration for Deploy
+#### US-063: Ansible Integration for Deploy
 
 - [ ] `2025-12-12-EPIC015-US056-deploy-step.md` - Deploy step in pipeline
 - [ ] `2025-12-12-EPIC015-US056-ssh-secrets.md` - SSH secrets configuration

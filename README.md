@@ -1,8 +1,9 @@
 # Tech Citizen Software Gateway
 
-API Gateway suite per healthcare software con Platformatic Watt, Docker multi-environment, observability stack completo.
+API Gateway suite per software general purpose.
+Stack Platformatic Watt, Docker multi-environment, observability stack completo.
 
-[![Tests](https://img.shields.io/badge/tests-20%2F20-success)]()
+[![Tests](https://img.shields.io/badge/tests-success)]()
 [![Coverage](https://img.shields.io/badge/coverage-TBD-blue)]()
 [![Security](https://img.shields.io/badge/vulnerabilities-0-success)]()
 [![License](https://img.shields.io/badge/license-MIT-blue)]()
@@ -21,28 +22,30 @@ npm run dev
 npm run build && npm start
 
 # Tests
-npm test                    # Unit tests
-npm run test:integration    # Integration (requires Docker)
-npm run test:e2e           # End-to-end (BDD scenarios)
+npm run test                # All tests (requires infrastructor up)
+npm run test:unit           # Unit
+npm run test:integration    # Integration (requires infrastructor up)
+npm run test:e2e            # End-to-end (requires infrastructor up, BDD scenarios)
 ```
 
 **Endpoints:**
 
-- 🏥 Gateway: http://localhost:3042/health
-- 📊 Prometheus: http://localhost:19090
-- 📈 Grafana: http://localhost:3000
+- 🏥 Gateway: <http://localhost:GATEWAY_POORT/health>
+- 📊 Prometheus: <http://localhost:PROMETEUS_PORT>
+- 📈 Grafana: <http://localhost:GRAFANA_PORT>
 
 ## 📋 Features
 
 - ✅ **Platformatic Watt 3.x** - Service mesh orchestration
-- ✅ **Multi-environment** - Development, test, staging with .env isolation
-- ✅ **Docker Compose** - Full infrastructure (Caddy, Prometheus, Grafana, RabbitMQ, Redis)
-- ✅ **Deployment simulation** - Cloudflare + Hetzner emulation
+- ✅ **Multi-environment** - Isolated (TODO: definire patterns)
+- ✅ **Docker Compose** - Full infrastructure
+- ✅ **Deployment simulation** - Cloudflare + Hetzner emulation + Maintenece guidelines
 - ✅ **Template-based config** - envsubst for runtime configuration
-- ✅ **Quality gates** - ESLint, Prettier, Husky, Commitlint
+- ✅ **Quality gates** - ESLint, Prettier, Husky, Commitlint, Sonarjs
 - ✅ **Security** - Secret scanning, npm audit, vulnerability checks
-- ✅ **Testing** - Auto setup/teardown, parallel execution, Docker integration
+- ✅ **Testing** - (TODO: in corso di refactoring)
 - ✅ **Observability** - Prometheus metrics, Loki logs, Tempo traces
+- TODO: manca monitoring
 - ✅ **Git workflow** - Trunk-based development
 
 ## 🏗️ Architecture
@@ -69,10 +72,7 @@ tech-citizen-sw-gateway/
 │   ├── loki/                       # Log aggregation
 │   └── rabbitmq/                   # Message broker
 ├── scripts/
-│   ├── deploy-staging.sh           # Automated deployment
-│   ├── check-secrets.cjs           # Pre-commit security
-│   ├── analyze-complexity.js       # Code quality metrics
-│   └── auto-release.js             # Semantic versioning
+│   ├TODO: rifedinire in corso di refactoring
 ├── docs/
 │   ├── INFRASTRUCTURE.md           # Docker, deploy, IaC
 │   ├── DEVELOPMENT.md              # Testing, config, tooling
@@ -130,14 +130,12 @@ npm run build            # TypeScript compilation + Watt build
 ### Testing
 
 ```bash
-npm test                 # Unit tests
-npm run test:watch       # Watch mode
-npm run test:integration # Integration (requires .env.test + Docker)
-npm run test:e2e         # End-to-end BDD scenarios
-npm run test:cov         # Coverage report
+TODO: riportare gli stessi di su
 ```
 
 ### Quality & Security
+
+TODO: verificare che siano quelli usati
 
 ```bash
 npm run lint             # ESLint check
@@ -147,6 +145,8 @@ npm run analyze          # Complexity analysis
 npm run security:check   # Secrets scanning
 npm audit                # Dependency vulnerabilities
 ```
+
+TODO: la parte dettagliata del testing non nel README ma in un file ad hoc qui solo strategia adottata e comandi rapidi per tutto il flusso di testing
 
 ### Infrastructure
 
@@ -162,7 +162,7 @@ npm run prod:logs           # View logs
 npm run prod:stop           # Shutdown
 ```
 
-### Release
+### Release TODO: verificare
 
 ```bash
 npm run release:suggest  # Preview version bump
@@ -171,7 +171,7 @@ npm run release          # Semantic release (CI/CD)
 
 ## 🔐 Security
 
-- ✅ **0 vulnerabilities** (npm audit)
+- ✅ **vulnerabilities** (npm audit)
 - ✅ **Secret scanning** in pre-commit hooks
 - ✅ **Environment isolation** (.env files in .gitignore)
 - ✅ **Conventional commits** enforced

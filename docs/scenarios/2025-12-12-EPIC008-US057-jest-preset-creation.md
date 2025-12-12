@@ -1,4 +1,4 @@
-# [EPIC-014] US-050: Jest Preset Creation
+# [EPIC-008] US-057: Jest Preset Creation
 
 **Data**: 2025-12-12  
 **Durata effettiva**: 15 minuti  
@@ -223,7 +223,7 @@ feat(test): add jest preset for shared configuration
 
 Next: Create jest.integration.config.cjs extending preset
 
-Refs: EPIC-014, US-050
+Refs: EPIC-008, US-057
 Closes: #50 (if issue exists)
 ```
 
@@ -240,7 +240,7 @@ Closes: #50 (if issue exists)
 
 - [ ] Creare `jest.integration.config.cjs` estendendo preset (prossimo scenario)
 - [ ] Aggiornare `packages/auth/jest.config.cjs` per usare preset
-- [ ] Documentare pattern in `docs/development/TESTING.md` (dopo US-050 completo)
+- [ ] Documentare pattern in `docs/development/TESTING.md` (dopo US-057 completo)
 
 ---
 

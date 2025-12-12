@@ -94,7 +94,7 @@ feat(test): add jest preset for shared config
 - Created jest.preset.cjs with TypeScript + ESM support
 - Root jest.config.cjs extends preset
 
-Refs: EPIC-014, US-050
+Refs: EPIC-008, US-057
 ```
 
 ## Lessons Learned
