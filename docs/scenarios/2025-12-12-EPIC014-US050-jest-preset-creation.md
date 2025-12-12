@@ -1,9 +1,9 @@
 # [EPIC-014] US-050: Jest Preset Creation
 
 **Data**: 2025-12-12  
-**Durata stimata**: 1 ora  
-**Status**: 🔴 Not Started  
-**Commit SHA**: N/A
+**Durata effettiva**: 15 minuti  
+**Status**: 🟢 Done  
+**Commit SHA**: (pending)
 
 ---
 
@@ -206,9 +206,9 @@ npm run test:unit
 
 ## Problemi Incontrati
 
-- [ ] **ESM vs CommonJS**: Se errore `Cannot use import statement`, verificare `extensionsToTreatAsEsm`
-- [ ] **TypeScript paths**: Se alias non risolti, aggiungere `moduleNameMapper` specifico
-- [ ] **Transform timeout**: Se test lenti, aumentare `testTimeout`
+- [x] **Meno config del previsto**: Solo 3 file invece di 5 (jest.integration.config.cjs non esisteva ancora)
+- [x] **Transform duplicato**: Root config aveva `transform` dentro `preset`, rimosso per usare preset
+- [x] **Coverage config custom**: Root ha soglie coverage specifiche per packages, conservate fuori dal preset (giusto!)
 
 ## Commit Message
 
@@ -233,6 +233,8 @@ Closes: #50 (if issue exists)
 - **ESM in Jest richiede**: `extensionsToTreatAsEsm` + `transform` con `useESM: true`
 - **Coverage paths**: Usare `<rootDir>` per path assoluti, evita problemi con workspace
 - **YAGNI**: Non aggiungere `setupFilesAfterEnv` o custom reporters se non serve ora
+- **Preset pattern**: Configurazione base in preset, overrides e workspace-specific (aliases, thresholds) in root config
+- **Test inheritance**: `testPathIgnorePatterns` si estende con spread: `...preset.testPathIgnorePatterns`
 
 ## Next Steps
 

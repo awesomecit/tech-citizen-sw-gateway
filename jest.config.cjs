@@ -1,19 +1,16 @@
-// jest.config.js
+// jest.config.cjs - Root config for unit tests only
+// Extends jest.preset.cjs for shared configuration (DRY principle)
 const path = require('path');
+const preset = require('./jest.preset.cjs');
 
 module.exports = {
+  ...preset,
+
+  // Display name to identify test suite
   displayName: 'Unit Tests',
-  testEnvironment: 'node',
 
-  // PARALLEL execution for fast feedback (unit tests are isolated)
-  maxWorkers: '50%',
-
-  // Fast timeout - unit tests should be <1s, max 5s
+  // Faster timeout for unit tests (override preset's 10s)
   testTimeout: 5000,
-
-  // Detect issues, don't hide them
-  detectOpenHandles: true,
-  forceExit: false, // Fail if handles are open (indicates a problem)
 
   // Pattern dei file di test - SOLO unit tests (no integration/e2e)
   testMatch: [
@@ -25,7 +22,7 @@ module.exports = {
 
   // Escludi integration e e2e tests dagli unit tests
   testPathIgnorePatterns: [
-    '/node_modules/',
+    ...preset.testPathIgnorePatterns,
     '/reference/',
     '\\.integration\\.spec\\.ts$',
     '\\.integration\\.test\\.ts$',
@@ -37,13 +34,9 @@ module.exports = {
     'e2e-login\\.test\\.ts$', // E2E test requiring full stack
   ],
 
-  // Moduli da trasformare con TypeScript
-  preset: 'ts-jest',
-
-  // ESM support
-  extensionsToTreatAsEsm: ['.ts'],
+  // Module aliases (workspace-specific, not in preset)
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
+    ...preset.moduleNameMapper,
     '^@tech-citizen/test-helpers$': '<rootDir>/packages/test-helpers/src/index.ts',
     '^@tech-citizen/auth$': '<rootDir>/packages/auth/src/index.ts',
     '^@tech-citizen/cache$': '<rootDir>/packages/cache/src/index.ts',
