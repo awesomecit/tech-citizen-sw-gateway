@@ -3,7 +3,7 @@
 **Data**: 2025-12-12  
 **Durata effettiva**: 15 minuti  
 **Status**: 🟢 Done  
-**Commit SHA**: (pending)
+**Commit SHA**: 94c21ef
 
 ---
 
@@ -244,5 +244,6 @@ Closes: #50 (if issue exists)
 
 ---
 
-**Completed**: N/A  
+**Completed**: 2025-12-12 23:59 UTC  
+**Commit**: 94c21ef  
 **Next Scenario**: [jest.integration.config.cjs creation](./2025-12-12-EPIC014-US050-integration-config.md)
