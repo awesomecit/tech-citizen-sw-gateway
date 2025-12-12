@@ -1,7 +1,7 @@
 {
   "$schema": "./features.schema.json",
   "version": "1.7.0",
-  "lastUpdated": "2025-12-12T11:24:40.170Z",
+  "lastUpdated": "2025-12-12T12:21:43.001Z",
   "project": {
     "name": "tech-citizen-sw-gateway",
     "repository": "github.com/awesomecit/tech-citizen-sw-gateway"
@@ -9,9 +9,9 @@
   "release": {
     "current": "1.7.0",
     "nextSuggested": "1.8.0",
-    "lastCommit": "6331653",
+    "lastCommit": "a32b07a",
     "unreleased": {
-      "feat": 4,
+      "feat": 5,
       "fix": 3,
       "breaking": 0
     }
@@ -300,6 +300,14 @@
           "subject": "caddy ports 80/443 for Let's Encrypt SSL",
           "timestamp": "2025-12-11T23:27:42.000Z",
           "userStory": null
+        },
+        {
+          "hash": "a32b07a",
+          "type": "feat",
+          "scope": "infra",
+          "subject": "multi-environment ansible deployment (test/prod isolation)",
+          "timestamp": "2025-12-12T11:24:50.000Z",
+          "userStory": null
         }
       ]
     },
@@ -409,6 +417,14 @@
           "scope": "infra",
           "subject": "caddy ports 80/443 for Let's Encrypt SSL",
           "timestamp": "2025-12-11T23:27:42.000Z",
+          "userStory": null
+        },
+        {
+          "hash": "a32b07a",
+          "type": "feat",
+          "scope": "infra",
+          "subject": "multi-environment ansible deployment (test/prod isolation)",
+          "timestamp": "2025-12-12T11:24:50.000Z",
           "userStory": null
         }
       ],
