@@ -1,7 +1,7 @@
 {
   "$schema": "./features.schema.json",
   "version": "1.7.0",
-  "lastUpdated": "2025-12-12T13:51:20.712Z",
+  "lastUpdated": "2025-12-12T14:05:35.971Z",
   "project": {
     "name": "tech-citizen-sw-gateway",
     "repository": "github.com/awesomecit/tech-citizen-sw-gateway"
@@ -9,9 +9,9 @@
   "release": {
     "current": "1.7.0",
     "nextSuggested": "1.8.0",
-    "lastCommit": "f0976ba",
+    "lastCommit": "a56923b",
     "unreleased": {
-      "feat": 1,
+      "feat": 2,
       "fix": 0,
       "breaking": 0
     }
@@ -128,6 +128,14 @@
           "scope": "auth",
           "subject": "implement hexagonal architecture with tap and testcontainers",
           "timestamp": "2025-12-12T13:24:50.000Z",
+          "userStory": null
+        },
+        {
+          "hash": "9699a55",
+          "type": "feat",
+          "scope": "auth",
+          "subject": "add identity provider adapters and refresh session use case",
+          "timestamp": "2025-12-12T13:51:20.000Z",
           "userStory": null
         }
       ],
@@ -604,6 +612,14 @@
           "scope": "auth",
           "subject": "implement hexagonal architecture with tap and testcontainers",
           "timestamp": "2025-12-12T13:24:50.000Z",
+          "userStory": null
+        },
+        {
+          "hash": "9699a55",
+          "type": "feat",
+          "scope": "auth",
+          "subject": "add identity provider adapters and refresh session use case",
+          "timestamp": "2025-12-12T13:51:20.000Z",
           "userStory": null
         }
       ]

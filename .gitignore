@@ -27,3 +27,4 @@ ansible/staging.env
 watt.json
 services/gateway/watt.json
 *.tsbuildinfo
+.tap/
