@@ -1,14 +1,20 @@
 {
   "name": "@tech-citizen/auth",
   "version": "0.1.0",
+  "type": "module",
   "description": "Reusable authentication plugin for Platformatic/Fastify services",
   "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
-    "build": "tsc",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "build": "tsc --build",
+    "test": "tap 'test/**/*.test.ts' --disable-coverage"
   },
   "keywords": [
     "fastify",
@@ -35,15 +41,12 @@
     "ioredis": "^5.8.2"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.19.2",
     "fast-jwt": "^6.1.0",
     "fastify": "^5.2.0",
     "ioredis-mock": "^8.9.0",
-    "jest": "^29.7.0",
     "jsonwebtoken": "^9.0.3",
-    "ts-jest": "^29.2.5",
     "typescript": "^5.7.2"
   }
 }

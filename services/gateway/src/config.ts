@@ -20,6 +20,8 @@ export interface GatewayConfig {
   redis?: {
     host: string;
     port: number;
+    password?: string;
+    db?: number;
   };
 }
 
@@ -41,16 +43,33 @@ export function loadConfig(options?: Partial<GatewayConfig>): GatewayConfig {
   return config;
 }
 
-function loadFeatureFlags(optionsFeatures?: Partial<FeatureFlags>): FeatureFlags {
+function loadFeatureFlags(
+  optionsFeatures?: Partial<FeatureFlags>,
+): FeatureFlags {
   return {
-    auth: parseBoolEnv('GATEWAY_FEATURE_AUTH', optionsFeatures?.auth ?? DEFAULT_FEATURES.auth),
-    cache: parseBoolEnv('GATEWAY_FEATURE_CACHE', optionsFeatures?.cache ?? DEFAULT_FEATURES.cache),
-    telemetry: parseBoolEnv('GATEWAY_FEATURE_TELEMETRY', optionsFeatures?.telemetry ?? DEFAULT_FEATURES.telemetry),
-    rateLimit: parseBoolEnv('GATEWAY_FEATURE_RATE_LIMIT', optionsFeatures?.rateLimit ?? DEFAULT_FEATURES.rateLimit),
+    auth: parseBoolEnv(
+      'GATEWAY_FEATURE_AUTH',
+      optionsFeatures?.auth ?? DEFAULT_FEATURES.auth,
+    ),
+    cache: parseBoolEnv(
+      'GATEWAY_FEATURE_CACHE',
+      optionsFeatures?.cache ?? DEFAULT_FEATURES.cache,
+    ),
+    telemetry: parseBoolEnv(
+      'GATEWAY_FEATURE_TELEMETRY',
+      optionsFeatures?.telemetry ?? DEFAULT_FEATURES.telemetry,
+    ),
+    rateLimit: parseBoolEnv(
+      'GATEWAY_FEATURE_RATE_LIMIT',
+      optionsFeatures?.rateLimit ?? DEFAULT_FEATURES.rateLimit,
+    ),
   };
 }
 
-function buildConfig(options: Partial<GatewayConfig> | undefined, features: FeatureFlags): GatewayConfig {
+function buildConfig(
+  options: Partial<GatewayConfig> | undefined,
+  features: FeatureFlags,
+): GatewayConfig {
   return {
     features,
     keycloakUrl: options?.keycloakUrl ?? process.env.KEYCLOAK_URL,

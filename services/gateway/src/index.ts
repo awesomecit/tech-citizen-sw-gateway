@@ -7,10 +7,9 @@ import {
   Histogram,
 } from 'prom-client';
 import { randomUUID } from 'crypto';
-import auth from '@tech-citizen/auth';
+import authPlugin from '@tech-citizen/auth';
 import { loadConfig, type GatewayConfig } from './config.js';
-
-const authPlugin = auth.default || auth;
+import { registerAuthRoutes } from './routes/auth.js';
 
 interface HealthResponse {
   status: 'ok' | 'degraded' | 'error';
@@ -82,12 +81,22 @@ export async function plugin(
 
   // Feature: Authentication (Keycloak OIDC + JWT + Redis sessions)
   if (config.features.auth) {
+    app.log.info(
+      {
+        keycloakUrl: config.keycloakUrl,
+        realm: config.realm,
+        redis: config.redis,
+      },
+      'Registering auth plugin with Keycloak',
+    );
+
     await app.register(authPlugin, {
       keycloakUrl: config.keycloakUrl!,
       realm: config.realm || 'healthcare-domain',
       clientId: config.clientId || 'gateway-client',
-      clientSecret: config.clientSecret || 'gateway-client-secret-change-in-production',
-      redisUrl: `redis://${config.redis?.host}:${config.redis?.port}`,
+      clientSecret:
+        config.clientSecret || 'gateway-client-secret-change-in-production',
+      redis: config.redis,
       enableRoutes: true,
     });
   } else {
@@ -102,7 +111,8 @@ export async function plugin(
   // Routes
   registerHealthRoute(app);
   registerProtectedRoute(app);
-  
+  await registerAuthRoutes(app); // E2E test endpoints
+
   // Feature: Telemetry (Prometheus metrics)
   if (config.features.telemetry) {
     registerMetricsRoute(app);

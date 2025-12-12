@@ -8,7 +8,7 @@ import fastifyPlugin from 'fastify-plugin';
 import fastifyOauth2 from '@fastify/oauth2';
 import fastifyCookie from '@fastify/cookie';
 import fastifySession from '@fastify/session';
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { randomUUID } from 'crypto';
 
 export interface KeycloakPluginOptions {
@@ -48,12 +48,41 @@ declare module 'fastify' {
   }
 }
 
+// Create Redis session store configuration
+function createSessionStore(redis: Redis, sessionTTL: number) {
+  return {
+    set: (sid: string, session: any, cb: (err?: Error) => void) => {
+      redis
+        .setex(`session:${sid}`, sessionTTL, JSON.stringify(session))
+        .then(() => cb())
+        .catch(cb);
+    },
+    get: (sid: string, cb: (err: Error | null, session?: any) => void) => {
+      redis
+        .get(`session:${sid}`)
+        .then((data: string | null) => cb(null, data ? JSON.parse(data) : null))
+        .catch(cb);
+    },
+    destroy: (sid: string, cb: (err?: Error) => void) => {
+      redis
+        .del(`session:${sid}`)
+        .then(() => cb())
+        .catch(cb);
+    },
+  };
+}
+
 // Helper: Setup Redis store for sessions
 async function setupRedisStore(
   app: FastifyInstance,
   options: KeycloakPluginOptions,
 ): Promise<Redis> {
   const { redis: redisConfig, sessionTTL = 3600 } = options;
+
+  app.log.info(
+    { redis: { host: redisConfig.host, port: redisConfig.port } },
+    'setupRedisStore: Creating Redis client',
+  );
 
   const redis = new Redis({
     host: redisConfig.host,
@@ -63,8 +92,11 @@ async function setupRedisStore(
     lazyConnect: true,
   });
 
+  app.log.info('setupRedisStore: Connecting to Redis...');
   await redis.connect();
+  app.log.info('setupRedisStore: Redis connected successfully');
 
+  app.log.info('setupRedisStore: About to register fastify-session...');
   await app.register(fastifySession, {
     secret:
       process.env.SESSION_SECRET || 'change-me-in-production-min-32-chars',
@@ -73,26 +105,7 @@ async function setupRedisStore(
       httpOnly: true,
       maxAge: sessionTTL * 1000,
     },
-    store: {
-      set: (sid: string, session: any, cb: (err?: Error) => void) => {
-        redis
-          .setex(`session:${sid}`, sessionTTL, JSON.stringify(session))
-          .then(() => cb())
-          .catch(cb);
-      },
-      get: (sid: string, cb: (err: Error | null, session?: any) => void) => {
-        redis
-          .get(`session:${sid}`)
-          .then(data => cb(null, data ? JSON.parse(data) : null))
-          .catch(cb);
-      },
-      destroy: (sid: string, cb: (err?: Error) => void) => {
-        redis
-          .del(`session:${sid}`)
-          .then(() => cb())
-          .catch(cb);
-      },
-    },
+    store: createSessionStore(redis, sessionTTL),
   });
 
   return redis;
@@ -253,6 +266,11 @@ const keycloakPluginImpl: FastifyPluginAsync<KeycloakPluginOptions> = async (
   app: FastifyInstance,
   options: KeycloakPluginOptions,
 ) => {
+  app.log.info(
+    { redis: options.redis },
+    'keycloakPluginImpl: Starting Keycloak plugin registration',
+  );
+
   await app.register(fastifyCookie);
 
   const redis = await setupRedisStore(app, options);

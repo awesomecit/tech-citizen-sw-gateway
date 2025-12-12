@@ -5,10 +5,10 @@
  * with support for parallel execution and Docker container management.
  */
 
-export { createTestSuite, waitForService } from './test-suite';
-export { PortAllocator, portAllocator } from './port-allocator';
-export { DockerManager } from './docker-manager';
-export { EnvironmentChecker } from './environment-checker';
+export { createTestSuite, waitForService } from './test-suite.js';
+export { PortAllocator, portAllocator } from './port-allocator.js';
+export { DockerManager } from './docker-manager.js';
+export { EnvironmentChecker } from './environment-checker.js';
 export {
   startInfra,
   stopInfra,
@@ -16,10 +16,9 @@ export {
   SERVICE_URLS,
   type InfraService,
   type InfraLauncherOptions,
-} from './infra-launcher';
+} from './infra-launcher.js';
 
-export type {
-  TestEnvironmentConfig,
-  TestContext,
-  TestSuiteOptions,
-} from './types';
+// Testcontainers helpers
+export * from './testcontainers/index.js';
+
+export type { TestEnvironmentConfig, TestContext } from './types.js';

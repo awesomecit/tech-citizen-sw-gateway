@@ -23,6 +23,6 @@
       "@tech-citizen/telemetry": ["./packages/telemetry/src"]
     }
   },
-  "include": ["services/**/*.ts", "packages/**/*.ts"],
+  "include": ["services/**/*.ts", "packages/**/*.ts", "e2e/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

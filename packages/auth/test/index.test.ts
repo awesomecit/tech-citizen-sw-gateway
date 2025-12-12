@@ -8,8 +8,8 @@
  */
 import { test } from 'tap';
 import Fastify from 'fastify';
-import authPlugin from '../src/index';
-import type { AuthPluginOptions } from '../src/index';
+import authPlugin from '../src/index.js';
+import type { AuthPluginOptions } from '../src/index.js';
 
 const VALID_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAthHhTTyNpneD5lSC908q
@@ -21,16 +21,20 @@ LOH4Gf5b6dOPkwIdxv40Wg00kwwwInfYeBvUhdTeLpLef5l8xSmlQ7yK4IJCA2OL
 FQIDAQAB
 -----END PUBLIC KEY-----`;
 
-test('US-037: Auth Package Structure - TypeScript resolves import from @tech-citizen/auth', (t) => {
+test('US-037: Auth Package Structure - TypeScript resolves import from @tech-citizen/auth', t => {
   t.ok(authPlugin, 'authPlugin is defined');
   t.equal(typeof authPlugin, 'function', 'authPlugin is a function');
   t.end();
 });
 
-test('US-037: Auth Package Structure - plugin has correct metadata', (t) => {
+test('US-037: Auth Package Structure - plugin has correct metadata', t => {
   // fastify-plugin wraps the function and adds metadata via symbols
   const pluginAny = authPlugin as any;
-  t.equal(pluginAny[Symbol.for('skip-override')], true, 'skip-override symbol is true');
+  t.equal(
+    pluginAny[Symbol.for('skip-override')],
+    true,
+    'skip-override symbol is true',
+  );
   const meta = pluginAny[Symbol.for('plugin-meta')];
   t.ok(meta, 'plugin-meta symbol exists');
   t.equal(meta.name, '@tech-citizen/auth', 'plugin name is correct');
@@ -38,20 +42,24 @@ test('US-037: Auth Package Structure - plugin has correct metadata', (t) => {
   t.end();
 });
 
-test('US-037: Auth Package Structure - plugin exports AuthPluginOptions type', (t) => {
+test('US-037: Auth Package Structure - plugin exports AuthPluginOptions type', t => {
   const opts: AuthPluginOptions = {
     keycloakUrl: 'http://keycloak:8080',
     realm: 'test-realm',
     clientId: 'test-client',
   };
 
-  t.equal(opts.keycloakUrl, 'http://keycloak:8080', 'keycloakUrl is set correctly');
+  t.equal(
+    opts.keycloakUrl,
+    'http://keycloak:8080',
+    'keycloakUrl is set correctly',
+  );
   t.equal(opts.realm, 'test-realm', 'realm is set correctly');
   t.equal(opts.clientId, 'test-client', 'clientId is set correctly');
   t.end();
 });
 
-test('US-037: Auth Package Structure - throws error if keycloakUrl is missing', async (t) => {
+test('US-037: Auth Package Structure - throws error if keycloakUrl is missing', async t => {
   const fastify = Fastify({ logger: false });
 
   try {
@@ -62,13 +70,17 @@ test('US-037: Auth Package Structure - throws error if keycloakUrl is missing', 
     t.fail('Should have thrown error');
   } catch (err) {
     t.ok(err, 'Error was thrown');
-    t.match((err as Error).message, /keycloakUrl/, 'Error message mentions keycloakUrl');
+    t.match(
+      (err as Error).message,
+      /keycloakUrl/,
+      'Error message mentions keycloakUrl',
+    );
   } finally {
     await fastify.close();
   }
 });
 
-test('US-037: Auth Package Structure - throws error if realm is missing', async (t) => {
+test('US-037: Auth Package Structure - throws error if realm is missing', async t => {
   const fastify = Fastify({ logger: false });
 
   try {
@@ -85,7 +97,7 @@ test('US-037: Auth Package Structure - throws error if realm is missing', async 
   }
 });
 
-test('US-037: Auth Package Structure - throws error if clientId is missing', async (t) => {
+test('US-037: Auth Package Structure - throws error if clientId is missing', async t => {
   const fastify = Fastify({ logger: false });
 
   try {
@@ -96,13 +108,17 @@ test('US-037: Auth Package Structure - throws error if clientId is missing', asy
     t.fail('Should have thrown error');
   } catch (err) {
     t.ok(err, 'Error was thrown');
-    t.match((err as Error).message, /clientId/, 'Error message mentions clientId');
+    t.match(
+      (err as Error).message,
+      /clientId/,
+      'Error message mentions clientId',
+    );
   } finally {
     await fastify.close();
   }
 });
 
-test('US-037: Auth Package Structure - registers successfully with all required options', async (t) => {
+test('US-037: Auth Package Structure - registers successfully with all required options', async t => {
   const fastify = Fastify({ logger: false });
 
   try {
