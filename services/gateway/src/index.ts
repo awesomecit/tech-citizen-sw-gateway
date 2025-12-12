@@ -1,15 +1,12 @@
 import { type FastifyInstance } from 'fastify';
-import sensible from '@fastify/sensible';
-import {
-  register,
-  collectDefaultMetrics,
-  Counter,
-  Histogram,
-} from 'prom-client';
-import { randomUUID } from 'crypto';
-import authPlugin from '@tech-citizen/auth';
 import { loadConfig, type GatewayConfig } from './config.js';
 import { registerAuthRoutes } from './routes/auth.js';
+import { FeatureManagerService } from './domain/services/feature-manager.service.js';
+import { ComposeGatewayUseCase } from './application/use-cases/compose-gateway.use-case.js';
+import { KeycloakAuthAdapter } from './infrastructure/adapters/keycloak-auth.adapter.js';
+import { NoopAuthAdapter } from './infrastructure/adapters/noop-auth.adapter.js';
+import { PrometheusMetricsAdapter } from './infrastructure/adapters/prometheus-metrics.adapter.js';
+import { NoopMetricsAdapter } from './infrastructure/adapters/noop-metrics.adapter.js';
 
 interface HealthResponse {
   status: 'ok' | 'degraded' | 'error';
@@ -22,47 +19,37 @@ interface HelloResponse {
   message: string;
 }
 
-// Prometheus metrics (initialized at module level)
-collectDefaultMetrics({ prefix: 'gateway_' });
+/**
+ * Create auth adapter based on feature flags
+ */
+function createAuthAdapter(config: GatewayConfig) {
+  const featureManager = new FeatureManagerService();
 
-const httpRequestDuration = new Histogram({
-  name: 'http_request_duration_ms',
-  help: 'Duration of HTTP requests in milliseconds',
-  labelNames: ['method', 'route', 'status'],
-  buckets: [10, 50, 100, 300, 500, 1000, 3000, 5000],
-});
+  if (featureManager.shouldEnableAuth(config.features, config.keycloakUrl)) {
+    return new KeycloakAuthAdapter({
+      keycloakUrl: config.keycloakUrl!,
+      realm: config.realm || 'healthcare-domain',
+      clientId: config.clientId || 'gateway-client',
+      clientSecret:
+        config.clientSecret || 'gateway-client-secret-change-in-production',
+      redis: config.redis,
+    });
+  }
 
-const httpRequestsTotal = new Counter({
-  name: 'http_requests_total',
-  help: 'Total number of HTTP requests',
-  labelNames: ['method', 'route', 'status'],
-});
+  return new NoopAuthAdapter();
+}
 
-// Setup hooks for metrics and correlation ID
-function setupHooks(app: FastifyInstance): void {
-  // Correlation ID + start timer
-  app.addHook('onRequest', async (request, reply) => {
-    const requestId =
-      (request.headers['x-request-id'] as string) || randomUUID();
-    request.log = request.log.child({ requestId });
-    reply.header('X-Request-ID', requestId);
-    (request as unknown as { startTime: number }).startTime = Date.now();
-  });
+/**
+ * Create metrics adapter based on feature flags
+ */
+function createMetricsAdapter(config: GatewayConfig) {
+  const featureManager = new FeatureManagerService();
 
-  // Record metrics
-  app.addHook('onResponse', async (request, reply) => {
-    const duration =
-      Date.now() - (request as unknown as { startTime: number }).startTime;
-    const route = request.routeOptions?.url || request.url;
-    const status = reply.statusCode.toString();
-    httpRequestDuration.labels(request.method, route, status).observe(duration);
-    httpRequestsTotal.labels(request.method, route, status).inc();
-  });
+  if (featureManager.shouldEnableTelemetry(config.features)) {
+    return new PrometheusMetricsAdapter();
+  }
 
-  // Cleanup resources
-  app.addHook('onClose', async instance => {
-    instance.log.info('Cleaning up resources...');
-  });
+  return new NoopMetricsAdapter();
 }
 
 export interface PluginOptions {
@@ -76,47 +63,40 @@ export async function plugin(
   // Load configuration (opts.config overrides env vars)
   const config = loadConfig(opts.config);
 
-  await app.register(sensible);
-  setupHooks(app);
+  // Create adapters based on feature flags (Hexagonal Architecture)
+  const authAdapter = createAuthAdapter(config);
+  const metricsAdapter = createMetricsAdapter(config);
 
-  // Feature: Authentication (Keycloak OIDC + JWT + Redis sessions)
-  if (config.features.auth) {
-    app.log.info(
-      {
-        keycloakUrl: config.keycloakUrl,
-        realm: config.realm,
-        redis: config.redis,
-      },
-      'Registering auth plugin with Keycloak',
-    );
+  // Log enabled features
+  const featureManager = new FeatureManagerService();
+  const enabledFeatures = featureManager.getEnabledFeatures(
+    config.features,
+    config.keycloakUrl,
+    config.redis?.host,
+  );
 
-    await app.register(authPlugin, {
-      keycloakUrl: config.keycloakUrl!,
-      realm: config.realm || 'healthcare-domain',
-      clientId: config.clientId || 'gateway-client',
-      clientSecret:
-        config.clientSecret || 'gateway-client-secret-change-in-production',
-      redis: config.redis,
-      enableRoutes: true,
-    });
-  } else {
-    // Auth disabled: mock authenticate decorator
-    if (!app.hasDecorator('authenticate')) {
-      app.decorate('authenticate', async () => {
-        // No-op when auth feature disabled
-      });
-    }
-  }
+  app.log.info(
+    {
+      features: enabledFeatures,
+      minimalMode: featureManager.isMinimalMode(config.features),
+      authProvider: authAdapter.getProviderName(),
+      metricsCollector: metricsAdapter.getCollectorName(),
+    },
+    'Gateway starting with configuration',
+  );
 
-  // Routes
+  // Compose gateway using Use Case (orchestration)
+  const composeGateway = new ComposeGatewayUseCase({
+    authProvider: authAdapter,
+    metricsCollector: metricsAdapter,
+  });
+
+  await composeGateway.execute(app);
+
+  // Register application routes
   registerHealthRoute(app);
   registerProtectedRoute(app);
   await registerAuthRoutes(app); // E2E test endpoints
-
-  // Feature: Telemetry (Prometheus metrics)
-  if (config.features.telemetry) {
-    registerMetricsRoute(app);
-  }
 }
 
 function registerHealthRoute(app: FastifyInstance): void {
@@ -145,13 +125,6 @@ function registerProtectedRoute(app: FastifyInstance): void {
       };
     },
   );
-}
-
-function registerMetricsRoute(app: FastifyInstance): void {
-  app.get('/metrics', async (_request, reply) => {
-    reply.header('Content-Type', register.contentType);
-    return register.metrics();
-  });
 }
 
 export default plugin;

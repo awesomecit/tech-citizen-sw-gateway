@@ -5,7 +5,10 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "packages/*",
+    "packages/auth",
+    "packages/cache",
+    "packages/events",
+    "packages/telemetry",
     "services/*"
   ],
   "engines": {
