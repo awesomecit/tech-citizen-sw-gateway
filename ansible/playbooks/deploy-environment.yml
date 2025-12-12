@@ -1,0 +1,69 @@
+---
+# Master Orchestrator Playbook
+# Purpose: Run all deployment steps in sequence
+# Usage: ansible-playbook deploy-environment.yml -e "environment=test|production"
+
+- name: Deploy Gateway - Full Stack
+  hosts: all
+  gather_facts: no
+
+  pre_tasks:
+    - name: Validate environment variable
+      fail:
+        msg: "Environment must be set to 'test', 'staging', or 'production'"
+      when: deploy_env not in ['test', 'staging', 'production']
+      run_once: yes
+
+    - name: Print deployment banner
+      debug:
+        msg: |
+          ================================================
+          GATEWAY DEPLOYMENT - {{ deploy_env | upper }}
+          ================================================
+          Target: {{ inventory_hostname }}
+          Date: {{ lookup('pipe', 'date +%Y-%m-%d\ %H:%M:%S') }}
+          ================================================
+      run_once: yes
+
+- name: Step 1 - Prepare Server
+  import_playbook: 01-prepare-server.yml
+
+- name: Step 2 - Check Dependencies
+  import_playbook: 02-check-dependencies.yml
+
+- name: Step 3 - Prepare Directories
+  import_playbook: 03-prepare-directories.yml
+
+- name: Step 4 - Deploy Files
+  import_playbook: 04-deploy-files.yml
+
+- name: Step 5 - Start Containers
+  import_playbook: 05-start-containers.yml
+
+- name: Step 6 - Health Check
+  import_playbook: 06-health-check.yml
+
+- name: Deployment Complete
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Print success message
+      debug:
+        msg: |
+          ================================================
+          ✓ DEPLOYMENT SUCCESSFUL - {{ deploy_env | upper }}
+          ================================================
+
+          Next steps:
+          {% if deploy_env == 'test' %}
+          - Run tests: bash scripts/run-remote-tests.sh
+          - View logs: ssh root@{{ inventory_hostname }} "docker logs gateway-test-caddy"
+          - Access Grafana: http://{{ inventory_hostname }}:3000
+          {% elif deploy_env == 'production' %}
+          - Configure DNS records (if not done)
+          - Verify SSL: curl https://www.tech-citizen.me
+          - Access Grafana: https://grafana.tech-citizen.me
+          - Run security audit: bash scripts/ansible-production.sh security-audit
+          {% endif %}
+          ================================================
+      run_once: yes

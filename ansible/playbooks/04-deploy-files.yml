@@ -1,0 +1,86 @@
+---
+# Playbook 4: Deploy Configuration Files
+# Purpose: Copy docker-compose.yml, .env, and infrastructure configs
+# Idempotent: Updates only changed files
+
+- name: Deploy Configuration Files
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  pre_tasks:
+    - name: Set environment from group_vars or default
+      set_fact:
+        deploy_env: "{{ deploy_env | default('production') }}"
+
+    - name: Set deployment paths
+      set_fact:
+        deployment_root: "{{ '/opt/gateway' if deploy_env == 'production' else '/opt/gateway-' + deploy_env }}"
+        infrastructure_dir: "{{ '/opt/gateway/infrastructure' if deploy_env == 'production' else '/opt/gateway-' + deploy_env + '/infrastructure' }}"
+
+    - name: Print deployment banner
+      debug:
+        msg: |
+          ================================================
+          Deploy Files - {{ deploy_env | upper }}
+          ================================================
+          Target: {{ deployment_root }}
+          ================================================
+
+  tasks:
+    # Copy docker-compose.yml
+    - name: Copy docker-compose.yml
+      template:
+        src: '{{ playbook_dir }}/../../docker-compose.yml'
+        dest: '{{ deployment_root }}/docker-compose.yml'
+        mode: '0644'
+      register: docker_compose_copied
+
+    # Copy .env file (environment-specific)
+    - name: Copy .env file
+      template:
+        src: '{{ playbook_dir }}/../../.env.{{ deploy_env }}'
+        dest: '{{ deployment_root }}/.env'
+        mode: '0600'
+      register: env_file_copied
+      when: lookup('fileglob', playbook_dir + '/../../.env.' + deploy_env, errors='ignore')
+
+    - name: Copy default .env if environment-specific not found
+      template:
+        src: '{{ playbook_dir }}/../../.env'
+        dest: '{{ deployment_root }}/.env'
+        mode: '0600'
+      register: env_default_copied
+      when: not lookup('fileglob', playbook_dir + '/../../.env.' + deploy_env, errors='ignore')
+
+    # Synchronize infrastructure directory
+    - name: Synchronize infrastructure configurations
+      synchronize:
+        src: '{{ playbook_dir }}/../../infrastructure/'
+        dest: '{{ infrastructure_dir }}/'
+        delete: no
+        recursive: yes
+        rsync_opts:
+          - '--exclude=.gitkeep'
+          - '--exclude=*.example'
+      delegate_to: localhost
+      become: no
+      register: infrastructure_synced
+
+    # Create container name prefix file
+    - name: Create container name prefix
+      copy:
+        dest: '{{ deployment_root }}/.container-prefix'
+        content: "{{ 'gateway' if deploy_env == 'production' else 'gateway-' + deploy_env }}"
+        mode: '0644'
+
+    - name: Print deployment summary
+      debug:
+        msg: |
+          ✓ Files deployed
+
+          docker-compose.yml: {{ 'updated' if docker_compose_copied.changed else 'unchanged' }}
+          .env: {{ 'updated' if (env_file_copied.changed | default(false)) or (env_default_copied.changed | default(false)) else 'unchanged' }}
+          infrastructure/: {{ 'updated' if infrastructure_synced.changed else 'unchanged' }}
+
+          Container prefix: {{ 'gateway' if deploy_env == 'production' else 'gateway-' + deploy_env }}

@@ -1,0 +1,105 @@
+---
+# Playbook 6: Health Check
+# Purpose: Verify all services are healthy
+# Idempotent: Read-only checks
+
+- name: Health Check - Verify Deployment
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  pre_tasks:
+    - name: Set environment from group_vars or default
+      set_fact:
+        deploy_env: "{{ deploy_env | default('production') }}"
+
+    - name: Set deployment paths
+      set_fact:
+        deployment_root: "{{ '/opt/gateway' if deploy_env == 'production' else '/opt/gateway-' + deploy_env }}"
+
+    - name: Read container prefix
+      slurp:
+        src: '{{ deployment_root }}/.container-prefix'
+      register: container_prefix_file
+
+    - name: Set container prefix
+      set_fact:
+        container_prefix: '{{ container_prefix_file.content | b64decode | trim }}'
+
+    - name: Print health check banner
+      debug:
+        msg: |
+          ================================================
+          Health Check - {{ deploy_env | upper }}
+          ================================================
+          Containers: {{ container_prefix }}-*
+          ================================================
+
+  tasks:
+    # Check container health
+    - name: Get container health status
+      shell: |
+        docker ps --filter "name={{ container_prefix }}" --format "{%raw%}{{.Names}}: {{.Status}}{%endraw%}" | grep -E '(healthy|Up)'
+      register: container_health
+      changed_when: false
+      failed_when: false
+
+    - name: Check Caddy health
+      uri:
+        url: 'http://localhost/health'
+        status_code: [200, 301, 308]
+        follow_redirects: none
+      register: caddy_health
+      failed_when: false
+      changed_when: false
+
+    - name: Check Prometheus health
+      uri:
+        url: 'http://localhost:19090/-/healthy'
+        status_code: 200
+      register: prometheus_health
+      failed_when: false
+      changed_when: false
+
+    - name: Check Grafana health
+      uri:
+        url: 'http://localhost:3000/api/health'
+        status_code: 200
+      register: grafana_health
+      failed_when: false
+      changed_when: false
+
+    # Count healthy services
+    - name: Count healthy containers
+      set_fact:
+        total_containers: '{{ container_health.stdout_lines | length }}'
+        healthy_containers: "{{ container_health.stdout_lines | select('search', 'healthy|Up') | list | length }}"
+
+    - name: Determine overall health
+      set_fact:
+        deployment_healthy: '{{ (caddy_health.status in [200, 301, 308]) and (prometheus_health.status == 200) and (grafana_health.status == 200) and (healthy_containers | int == total_containers | int) }}'
+
+    - name: Print health check results
+      debug:
+        msg: |
+          ================================================
+          Health Check Results - {{ deploy_env | upper }}
+          ================================================
+
+          Containers: {{ healthy_containers }}/{{ total_containers }} healthy
+          {% for line in container_health.stdout_lines %}
+          {{ line }}
+          {% endfor %}
+
+          Service Endpoints:
+          - Caddy: {{ 'OK (' + (caddy_health.status | string) + ')' if caddy_health.status in [200, 301, 308] else 'FAIL' }}
+          - Prometheus: {{ 'OK' if prometheus_health.status == 200 else 'FAIL' }}
+          - Grafana: {{ 'OK' if grafana_health.status == 200 else 'FAIL' }}
+
+          Overall Status: {{ '✓ HEALTHY' if deployment_healthy else '✗ UNHEALTHY' }}
+          ================================================
+
+    - name: Fail if deployment is unhealthy
+      fail:
+        msg: 'Deployment health check failed. See results above.'
+      when: not deployment_healthy

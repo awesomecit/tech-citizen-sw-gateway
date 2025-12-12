@@ -6,7 +6,7 @@ services:
   # Reverse Proxy + TLS Termination
   caddy:
     image: caddy:2-alpine
-    container_name: gateway-caddy
+    # container_name removed - COMPOSE_PROJECT_NAME handles prefixing (gateway-*, gateway-test-*, gateway-staging-*)
     restart: unless-stopped
     env_file:
       - .env
@@ -30,7 +30,7 @@ services:
   # Metrics Collection
   prometheus:
     image: prom/prometheus:v2.54.1
-    container_name: gateway-prometheus
+    # container_name removed - COMPOSE_PROJECT_NAME handles prefixing
     restart: unless-stopped
     env_file:
       - .env
@@ -56,7 +56,7 @@ services:
   # Metrics Visualization
   grafana:
     image: grafana/grafana:11.3.1
-    container_name: gateway-grafana
+    # container_name removed - COMPOSE_PROJECT_NAME handles prefixing
     restart: unless-stopped
     env_file:
       - .env
@@ -85,9 +85,7 @@ services:
 networks:
   gateway-network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.28.0.0/16
+    # No fixed subnet - let Docker assign dynamically to avoid conflicts with multiple environments
 
 volumes:
   caddy-data:

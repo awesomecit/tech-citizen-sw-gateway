@@ -1,0 +1,41 @@
+---
+# Test Environment Variables
+# Used when: ansible-playbook deploy-environment.yml -e "environment=test"
+
+environment: test
+deployment_target: test
+
+# Paths
+deployment_root: /opt/gateway-test
+infrastructure_dir: '{{ deployment_root }}/infrastructure'
+
+# Container naming
+container_prefix: gateway-test
+compose_project_name: gateway-test
+
+# Service Ports (offset from production)
+caddy_http_port: 8080
+caddy_https_port: 8443
+caddy_admin_port: 2019
+prometheus_port: 19091
+grafana_port: 3001
+
+# Domains (no SSL in test, use IP)
+domain: '{{ ansible_host }}'
+gateway_domain: '{{ ansible_host }}:8080'
+grafana_domain: '{{ ansible_host }}:3001'
+prometheus_domain: '{{ ansible_host }}:19091'
+
+# SSL/TLS (use Let's Encrypt staging)
+ssl_staging: true
+ssl_email: 'test@tech-citizen.me'
+
+# Security (relaxed for testing)
+firewall_enabled: true
+fail2ban_enabled: false
+
+# Logging
+log_level: debug
+
+# Backup
+backup_enabled: false

@@ -1,0 +1,122 @@
+---
+# Playbook 1: Prepare Server
+# Purpose: Security hardening, firewall, fail2ban
+# Idempotent: Safe to run multiple times
+
+- name: Prepare Server - Security & Firewall
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  pre_tasks:
+    - name: Set environment from group_vars or default
+      set_fact:
+        deploy_env: "{{ deploy_env | default('production') }}"
+
+    - name: Print server preparation banner
+      debug:
+        msg: |
+          ================================================
+          Server Preparation - {{ deploy_env | upper }}
+          ================================================
+          Target: {{ inventory_hostname }}
+          OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
+          ================================================
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install base security packages
+      apt:
+        name:
+          - ufw
+          - fail2ban
+          - unattended-upgrades
+          - apt-listchanges
+          - ca-certificates
+          - curl
+          - gnupg
+          - software-properties-common
+        state: present
+
+    - name: Configure UFW - Allow SSH (critical first)
+      ufw:
+        rule: allow
+        port: '22'
+        proto: tcp
+        comment: 'SSH'
+
+    - name: Configure UFW - Allow HTTP
+      ufw:
+        rule: allow
+        port: '80'
+        proto: tcp
+        comment: 'HTTP'
+
+    - name: Configure UFW - Allow HTTPS
+      ufw:
+        rule: allow
+        port: '443'
+        proto: tcp
+        comment: 'HTTPS'
+
+    - name: Configure UFW - Allow Grafana (temporary for testing)
+      ufw:
+        rule: allow
+        port: '3000'
+        proto: tcp
+        comment: 'Grafana'
+      when: deploy_env in ['test', 'staging']
+
+    - name: Configure UFW - Allow Prometheus (temporary for testing)
+      ufw:
+        rule: allow
+        port: '19090'
+        proto: tcp
+        comment: 'Prometheus'
+      when: deploy_env in ['test', 'staging']
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+        policy: deny
+
+    - name: Start and enable fail2ban
+      systemd:
+        name: fail2ban
+        state: started
+        enabled: yes
+
+    - name: Configure unattended-upgrades
+      copy:
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        content: |
+          Unattended-Upgrade::Allowed-Origins {
+              "${distro_id}:${distro_codename}-security";
+          };
+          Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+          Unattended-Upgrade::Remove-Unused-Dependencies "true";
+          Unattended-Upgrade::Automatic-Reboot "false";
+        mode: '0644'
+
+    - name: Print completion message
+      debug:
+        msg: |
+          ✓ Server prepared successfully
+
+          Security:
+          - UFW firewall enabled
+          - fail2ban protecting SSH
+          - Unattended security updates enabled
+
+          Allowed ports:
+          - 22 (SSH)
+          - 80 (HTTP)
+          - 443 (HTTPS)
+          {% if deploy_env in ['test', 'staging'] %}
+          - 3000 (Grafana - testing only)
+          - 19090 (Prometheus - testing only)
+          {% endif %}

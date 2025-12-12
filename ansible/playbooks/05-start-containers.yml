@@ -1,0 +1,77 @@
+---
+# Playbook 5: Start Docker Containers
+# Purpose: Start/restart containers with docker compose
+# Idempotent: Only restarts changed containers
+
+- name: Start Docker Containers
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  pre_tasks:
+    - name: Set environment from group_vars or default
+      set_fact:
+        deploy_env: "{{ deploy_env | default('production') }}"
+
+    - name: Set deployment paths
+      set_fact:
+        deployment_root: "{{ '/opt/gateway' if deploy_env == 'production' else '/opt/gateway-' + deploy_env }}"
+
+    - name: Read container prefix
+      slurp:
+        src: '{{ deployment_root }}/.container-prefix'
+      register: container_prefix_file
+
+    - name: Set container prefix
+      set_fact:
+        container_prefix: '{{ container_prefix_file.content | b64decode | trim }}'
+
+    - name: Print container startup banner
+      debug:
+        msg: |
+          ================================================
+          Start Containers - {{ deploy_env | upper }}
+          ================================================
+          Directory: {{ deployment_root }}
+          Prefix: {{ container_prefix }}
+          ================================================
+
+  tasks:
+    - name: Pull latest Docker images
+      command: docker compose pull
+      args:
+        chdir: '{{ deployment_root }}'
+      register: docker_pull
+      changed_when: "'Pulling' in docker_pull.stdout or 'Downloaded' in docker_pull.stdout"
+
+    - name: Start containers with docker compose
+      command: docker compose up -d --remove-orphans
+      args:
+        chdir: '{{ deployment_root }}'
+      environment:
+        COMPOSE_PROJECT_NAME: '{{ container_prefix }}'
+      register: docker_up
+
+    - name: Wait for containers to be ready (30 seconds)
+      pause:
+        seconds: 30
+
+    - name: Get container status
+      command: docker ps --filter "name={{ container_prefix }}" --format "table {%raw%}{{.Names}}\t{{.Status}}\t{{.Ports}}{%endraw%}"
+      register: container_status
+      changed_when: false
+
+    - name: Print container status
+      debug:
+        msg: '{{ container_status.stdout_lines }}'
+
+    - name: Print completion message
+      debug:
+        msg: |
+          ✓ Containers started
+
+          Environment: {{ deploy_env }}
+          Project: {{ container_prefix }}
+
+          Running containers:
+          {{ container_status.stdout }}
