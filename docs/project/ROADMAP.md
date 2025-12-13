@@ -30,22 +30,36 @@
 
 ---
 
-### Epic 2: Observability Stack ⏸️ BLOCKED
+### Epic 2: Observability Stack (Gateway Admin Hub) 🔄 IN PROGRESS
 
-**Duration**: Sprint 2-3 (2 weeks)  
-**Status**: Blocked by Epic 1
+**Duration**: Sprint 3 (1 week: 2025-12-13 → 2025-12-20)  
+**Status**: 0% complete (0/8 user stories)
 
 **Deliverables**:
 
-- Prometheus alerting (P95 > 300ms, error rate > 5%)
-- Structured logging with correlation IDs
-- Basic Grafana alerts
+- **L1 - Metrics Layer** (US-008 to US-010):
+  - Prometheus scraping gateway `/metrics`
+  - Grafana datasource auto-provisioning
+  - Admin Hub dashboard (request rate, latency P50/P95/P99, error rate)
+- **L2 - Full Observability** (US-011, US-012, US-015):
+  - Loki + Promtail log aggregation (retention 7 giorni)
+  - Tempo + OTEL Collector distributed tracing (retention 48h)
+  - Logs & Traces dashboard con correlazione funzionante
+- **L3 - Infrastructure Monitoring** (US-013, US-014):
+  - Node Exporter (host metrics: CPU, RAM, disk, network)
+  - cAdvisor (container metrics per service)
+  - Infrastructure dashboard con resource monitoring
 
 **Success Metrics**:
 
-- Alerts fire within 1 minute of SLA breach
-- All logs include traceId for distributed tracing
-- Mean Time To Detect (MTTD) < 2 minutes
+- ✅ Prometheus scrapes gateway metrics (interval 15s)
+- ✅ Grafana dashboards auto-loaded: Admin Hub, Infrastructure, Logs & Traces
+- ✅ Log-trace correlation: click log → jump to trace in Grafana
+- ✅ Resource usage: L1 < 700MB, L2 < 2GB, L3 < 2.5GB RAM
+- ✅ E2E tests pass (8/8 test files in e2e/observability/)
+- ✅ Video demo correlation (90s)
+
+**Reference**: docs/project/EPIC-002-OBSERVABILITY-STACK.md
 
 ---
 

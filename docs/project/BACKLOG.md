@@ -114,32 +114,73 @@
 
 ---
 
-#### EPIC-002: Observability Stack ⏸️ BLOCKED
+#### EPIC-002: Observability Stack 🔄 IN PROGRESS
 
-**Goal**: Production-grade logging and tracing
+**Goal**: Gateway Admin Hub - Progressive observability stack (L1→L2→L3)
 
-**Status**: Not started (blocked by Epic-001 completion)
+**Status**: 0/8 user stories (Sprint 3: 2025-12-13 → 2025-12-20)
+
+**Reference**: docs/project/EPIC-002-OBSERVABILITY-STACK.md, EPIC001.md (ADR-003)
 
 **User Stories**:
 
-- [ ] US-008: As a SRE, I want Prometheus alerts so I'm notified of SLA violations
-  - Task: Configure Alertmanager + alert rules (P95 > 300ms)
-  - Acceptance: Test alert fires when latency breaches threshold
-  - Estimate: 3h
-  - Dependency: US-003 (Prometheus setup)
-
-- [ ] US-009: As a Developer, I want structured logs so I can debug production issues
-  - Task: Configure Fastify logger with pino, add correlation IDs
-  - Acceptance: Logs include traceId, method, url, statusCode, duration
+- [ ] US-008: As a SRE, I want Prometheus scraping gateway metrics so I can monitor SLA
+  - Task: Configure prometheus.yml with job gateway, create E2E test
+  - Acceptance: Prometheus UI shows gateway target UP, metrics available
   - Estimate: 2h
+  - **Level**: L1 (Metrics Layer)
 
-- [ ] US-010: As a SRE, I want log aggregation so I can search across services
-  - Task: Add Loki to docker-compose.yml when use case identified
-  - Acceptance: YAGNI - defer until multi-service scenario
+- [ ] US-009: As a DevOps, I want Grafana auto-configured with Prometheus datasource
+  - Task: Create provisioning/datasources/prometheus.yml, test PromQL query
+  - Acceptance: Grafana shows Prometheus datasource green, query works
+  - Estimate: 2h
+  - Dependency: US-008
+  - **Level**: L1 (Metrics Layer)
+
+- [ ] US-010: As a SRE, I want Grafana "Admin Hub" dashboard with gateway metrics
+  - Task: Create dashboard JSON with 4 panels (rate, latency, errors, uptime)
+  - Acceptance: Dashboard auto-loaded, all panels show data
+  - Estimate: 3h
+  - Dependency: US-009
+  - **Level**: L1 (Metrics Layer)
+
+- [ ] US-011: As a DevOps, I want Loki to aggregate gateway container logs
+  - Task: Create docker-compose.observability.yml with Loki + Promtail
+  - Acceptance: LogQL query returns gateway logs, Grafana datasource green
   - Estimate: 4h
-  - **DEFERRED** (ADR-0001 minimal infrastructure)
+  - Dependency: ADR-004 (structured logging)
+  - **Level**: L2 (Logging Layer)
 
-**Epic Estimate**: 9h (5h active + 4h deferred)
+- [ ] US-012: As a Developer, I want distributed tracing with Tempo
+  - Task: Add Tempo + OTEL Collector, instrument gateway with OTEL SDK
+  - Acceptance: Trace search works, log-trace correlation functional
+  - Estimate: 5h
+  - Dependency: US-011
+  - **Level**: L2 (Tracing Layer)
+
+- [ ] US-013: As a SRE, I want Node Exporter and cAdvisor for infra metrics
+  - Task: Add Node Exporter + cAdvisor to compose, configure Prometheus scraping
+  - Acceptance: Host and container metrics available in Prometheus
+  - Estimate: 2h
+  - **Level**: L3 (Infrastructure Monitoring)
+
+- [ ] US-014: As a SRE, I want "Infrastructure" dashboard with host and container metrics
+  - Task: Create dashboard JSON with CPU/RAM/disk/network panels
+  - Acceptance: Dashboard shows host + container metrics
+  - Estimate: 3h
+  - Dependency: US-013
+  - **Level**: L3 (Infrastructure Monitoring)
+
+- [ ] US-015: As a Developer, I want "Logs & Traces" dashboard for debugging
+  - Task: Create dashboard with log stream, trace search, correlation
+  - Acceptance: Click log → jump to trace works, video demo
+  - Estimate: 4h
+  - Dependency: US-011, US-012
+  - **Level**: L2 (Debugging)
+
+**Epic Estimate**: 25h total (L1: 7h, L2: 13h, L3: 5h)
+
+**Resource Targets**: L1 < 700MB RAM, L2 < 2GB RAM, L3 < 2.5GB RAM
 
 ---
 
