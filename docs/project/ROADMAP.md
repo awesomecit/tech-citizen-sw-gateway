@@ -10,6 +10,36 @@
 
 **Goal**: Minimal viable infrastructure + security baseline
 
+### Epic 0: Observability Stack Simplification 🔴 CRITICAL (Blocks Epic 2)
+
+**Duration**: Sprint 2 (3 giorni: 2025-12-13 → 2025-12-16)  
+**Status**: 0% complete (planning done, 6 task atomici)
+
+**Deliverables**:
+
+- ✅ US-000 Planning: Documento refactoring con 6 task atomici (DONE 2025-12-13)
+- ⏳ Task 1: Inventario codice da rimuovere (packages/telemetry, ports, adapters metriche) - 30min
+- ⏳ Task 2: Abilitare metriche/telemetry built-in via watt.json config - 1h
+- ⏳ Task 3: Aggiornare Prometheus scrape config per porta 9090 built-in - 30min
+- ⏳ Task 4: Rimuovere 800 LOC custom (telemetry package, ports, adapters) - 2h
+- ⏳ Task 5: Aggiornare test suite (rimuovere test adapter, aggiungere E2E built-in) - 2h
+- ⏳ Task 6: Aggiornare docs (README, VISION, archiviare ADR-004, creare ADR-007) - 1h
+
+**Success Metrics**:
+
+- Metriche Prometheus funzionanti via endpoint built-in `/metrics` porta 9090
+- Traces OpenTelemetry arrivano a Tempo (se configurato)
+- Logging strutturato JSON queryabile in Loki
+- -800 LOC custom code (60% reduction)
+- Test suite green (coverage >= 75%)
+- Documentazione aggiornata (nessun riferimento a codice rimosso)
+
+**Principle**: **Configuration over Code** - Non scrivere codice che il framework già fornisce (YAGNI, KISS, DRY)
+
+**References**: EPIC000.md, US-000-REFACTOR-OBSERVABILITY-FRAMEWORK-FIRST.md, ADR-007 (da creare)
+
+---
+
 ### Epic 1: Infrastructure Foundation ✅ 60% COMPLETE
 
 **Duration**: Sprint 1-2 (2 weeks)  

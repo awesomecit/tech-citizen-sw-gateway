@@ -10,6 +10,36 @@
 
 ## Backlog Prioritization
 
+### Priority 0: Critical Refactoring (Blocks EPIC-002)
+
+#### EPIC-000: Observability Stack Simplification 🔄 IN PROGRESS
+
+**Goal**: Refactor observability da custom code a Platformatic built-in (Configuration over Code)
+
+**Status**: 0% complete (planning done, 6 task da completare)
+
+**Principle**: YAGNI, KISS, DRY - Non scrivere codice che il framework già fornisce
+
+**User Stories**:
+
+- [ ] US-000: As a Developer, I want observability via framework config so I reduce custom code by 800 LOC
+  - Task 1: Inventario codice da rimuovere e validazione prerequisiti (30min)
+  - Task 2: Abilitare metriche/telemetry built-in in watt.json (1h)
+  - Task 3: Aggiornare Prometheus per scrappare porta 9090 built-in (30min)
+  - Task 4: Rimuovere packages/telemetry, ports, adapters metriche custom (2h)
+  - Task 5: Aggiornare test suite (rimuovere test adapter, aggiungere E2E built-in) (2h)
+  - Task 6: Aggiornare docs (README, VISION, archiviare ADR-004, creare ADR-007) (1h)
+  - Acceptance: Metriche/traces/logs funzionanti via config, -800 LOC, test pass, docs updated
+  - Estimate: 7h (+ 1h buffer)
+  - **IN PROGRESS** (Sprint 2, 2025-12-13)
+  - Reference: US-000-REFACTOR-OBSERVABILITY-FRAMEWORK-FIRST.md, EPIC000.md
+
+**Epic Estimate**: 7h total / 0h done / 7h remaining
+
+**Blocks**: EPIC-002 (observability stack) - deve completare prima di US-008
+
+---
+
 ### Priority 1: Foundation (Sprint 1 - Current)
 
 #### EPIC-001: Infrastructure Foundation ✅ IN PROGRESS
